@@ -22,14 +22,14 @@ def seeded(session):
 
 def test_overview_and_distribution(seeded):
     o = st.overview(seeded)
-    assert o["total_events"] > 40 and o["total_alerts"] >= 6 and o["critical_alerts"] >= 1 and o["sources"] == 5
+    assert o["total_events"] > 40 and o["total_alerts"] >= 6 and o["critical_alerts"] >= 1 and o["sources"] == 6
     assert sum(x["count"] for x in st.alert_severity_distribution(seeded)) == o["total_alerts"]
 
 
 def test_rule_stats_include_all_rules(seeded):
     rs = st.rule_stats(seeded)
-    assert [r["rule_id"] for r in rs] == [f"HZ-00{i}" for i in range(1, 7)]
-    assert all(r["alerts"] >= 1 for r in rs)
+    assert [r["rule_id"] for r in rs] == [f"HZ-00{i}" for i in range(1, 8)]
+    assert all(r["alerts"] >= 1 for r in rs if r["rule_id"] != "HZ-007")  # HZ-007 needs a trained model
 
 
 def test_top_lists_and_timeseries(seeded):

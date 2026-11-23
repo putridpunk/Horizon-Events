@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 from app.detection.engine import DetectionEngine
+from app.detection.registry import DEFAULT_RULES
 from app.detection.rules import (AccountLockouts, PrivilegeEscalation, RepeatedLoginFailures, ServiceFailures,
-                                 UnknownUsers, UnusualLoginHours, DEFAULT_RULES)
+                                 UnknownUsers, UnusualLoginHours)
 from app.domain import EventType, Severity
 from tests.conftest import make_event
 

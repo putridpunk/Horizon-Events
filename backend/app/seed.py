@@ -14,6 +14,7 @@ from app.services.ingestion import import_logs
 SAMPLES = [
     ("linux_auth.log", "linux_auth"), ("linux_syslog.log", "linux_syslog"),
     ("windows_events.xml", "windows"), ("app.log", "application"), ("custom.json", "json"),
+    ("slow_spray.log", "linux_auth"),
 ]
 
 

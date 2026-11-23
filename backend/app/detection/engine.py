@@ -1,7 +1,8 @@
 """Rule-based detection engine. Independent of the web layer and the database."""
 from __future__ import annotations
 
-from app.detection.rules import EventHistory, Rule, build_rule
+from app.detection.registry import build_rule
+from app.detection.rules import EventHistory, Rule
 from app.domain import Detection, Event
 
 

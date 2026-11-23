@@ -201,18 +201,3 @@ class AccountLockouts(Rule):
             if e.event_type in self.event_types:
                 groups[(e.source_ip, e.username)].append(e)
         return [self._detection(evs, ip=ip, user=user) for (ip, user), evs in groups.items()]
-
-
-RULE_CLASSES: dict[str, type[Rule]] = {c.id: c for c in (
-    RepeatedLoginFailures, UnusualLoginHours, UnknownUsers, PrivilegeEscalation, ServiceFailures, AccountLockouts)}
-
-DEFAULT_RULES: list[dict] = [
-    {"id": c.id, "name": c.name, "description": c.description, "severity": c.severity.value,
-     "event_types": [t.value for t in c.event_types], "params": dict(c.default_params), "enabled": True}
-    for c in RULE_CLASSES.values()]
-
-
-def build_rule(defn: dict) -> Rule | None:
-    """Build a Rule from a stored definition (dict with id, severity, params). None if unknown."""
-    cls = RULE_CLASSES.get(defn["id"])
-    return cls(severity=defn.get("severity"), params=defn.get("params")) if cls else None
