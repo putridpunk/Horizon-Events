@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.config import get_settings
-from app.database import incident_models  # noqa: F401  (registers the incident tables)
+from app.database import collector_models, incident_models  # noqa: F401  (register their tables)
 from app.database.models import Base
 
 

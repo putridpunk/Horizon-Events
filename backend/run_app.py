@@ -62,6 +62,7 @@ def _run(data: Path) -> int:
     os.environ.setdefault("DATABASE_URL", f"sqlite:///{(data / 'horizon.db').as_posix()}")
     os.environ.setdefault("HORIZON_MODEL_PATH", str(data / "horizon_model.joblib"))
     os.environ.setdefault("HORIZON_WATCH_DIR", str(data / "watch"))
+    os.environ.setdefault("HORIZON_SYSTEM_LOGS", "1")  # collect this machine's own logs
     secret = make_secret()
     os.environ["HORIZON_SESSION_SECRET"] = secret
 

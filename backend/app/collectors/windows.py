@@ -23,13 +23,20 @@ def _xml_events(text: str) -> Iterator[dict | None]:
         return
     for ev in [e for e in root.iter() if _local(e.tag) == "Event"]:
         flat: dict = {}
+        unnamed = 0
         for el in ev.iter():
             name = _local(el.tag)
             if name == "TimeCreated":
                 flat["TimeCreated"] = el.get("SystemTime")
-            elif name == "Data" and el.get("Name"):
-                flat[el.get("Name")] = (el.text or "").strip()
-            elif name in ("EventID", "Computer") and el.text:
+            elif name == "Provider" and el.get("Name"):
+                flat["Provider"] = el.get("Name")
+            elif name == "Data":
+                if el.get("Name"):
+                    flat[el.get("Name")] = (el.text or "").strip()
+                else:  # some events (e.g. application crashes) have positional, unnamed values
+                    flat[f"Data{unnamed}"] = (el.text or "").strip()
+                    unnamed += 1
+            elif name in ("EventID", "Computer", "EventRecordID", "Channel") and el.text:
                 flat[name] = el.text.strip()
         yield parse_windows_record(flat)
 

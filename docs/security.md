@@ -18,6 +18,13 @@ Horizon Events is a **local analysis tool**. It stores security logs and exposes
 
 The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Origin` header (curl, scripts) are not browser-driven and are allowed.
 
+## System log collection
+
+- Only a fixed list of event IDs is read, from three Windows channels (or fixed Linux log files). Nothing is sent anywhere.
+- Reading the Security log needs the user's own approval: the app only *asks Windows* to add the user to Event Log Readers, shows exactly what will happen first, and Windows shows its own permission prompt. The command is built from the user's SID (no names are pasted into a command line) and run by Windows, not by the app.
+- Windows tools are started by full path from the system folder, without a shell or console window.
+- Collected events contain what Windows records: account names, host names and IP addresses. They are stored unencrypted in the local database, like all other data.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

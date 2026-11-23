@@ -38,4 +38,10 @@ export const event = (over = {}) => ({
   raw: "Nov 23 14:20:31 web01 sshd[1]: Failed password for admin", metadata: {}, ...over,
 });
 
+export const collector = (over = {}) => ({
+  id: "windows-system", name: "Windows System log", description: "Services that crash or stop unexpectedly.",
+  platform: "windows", enabled: false, access: "ready", state: "off", events_read: 0, last_activity: null,
+  last_error: null, ...over,
+});
+
 export const emptyOverview = { total_events: 0, total_alerts: 0, open_alerts: 0, critical_alerts: 0, high_alerts: 0, sources: 0 };

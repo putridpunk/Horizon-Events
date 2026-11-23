@@ -116,7 +116,24 @@ powershell -File scripts\build-exe.ps1
 
 For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
 
-## Live monitoring
+## Collecting this computer's own logs
+
+In the desktop app, Horizon Events reads the machine's own event logs, so you never attach files. A first-run screen explains what is read and lets you choose; everything stays on this computer.
+
+| Source | What is collected | Permission |
+| --- | --- | --- |
+| Windows Security log | failed and successful sign-ins (interactive, unlock, remote and cached), account lockouts, new accounts, changes to privileged groups | one-time setup, see below |
+| Windows System log | services that crash or stop unexpectedly | none |
+| Windows Application log | applications that crash | none |
+| Linux `auth.log` / `secure`, `syslog` / `messages` | same detections as imported Linux logs | read access to the file |
+
+Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 11, 4740, 4720, 4728, 4732, 4756; System 7031, 7034; Application 1000). Noisy events such as service logons are deliberately skipped. Collection starts from "now"; the setup screen can also read the last 24 hours. Closing the window stops collection.
+
+**Security log access.** Windows protects this log. The **Enable access** button asks Windows (through its normal permission prompt) to add your account to the built-in *Event Log Readers* group. Nothing changes unless you approve it, and you can remove yourself from the group at any time. Windows only applies a new group membership after you sign out and back in once; until then the Security source shows *Waiting for sign-out* and the System and Application logs keep working. The **Data sources** page shows every source, its state, how many events it has read and the last error.
+
+Windows must be auditing the events for them to exist: sign-in auditing is on by default, other categories may need to be enabled in the local security policy.
+
+## Live monitoring (watch folder, advanced)
 
 Set `HORIZON_WATCH_DIR` (the executable defaults to `%LOCALAPPDATA%\HorizonEvents\watch`; Docker mounts `./watch`) and Horizon Events ingests new log lines continuously. The **subfolder name selects the parser**:
 

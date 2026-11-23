@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.api import alerts, events, imports, incidents, intel, mitre, ml, reports, rules, statistics, watcher
+from app.api import (alerts, collectors, events, imports, incidents, intel, mitre, ml, reports, rules,
+                     statistics, watcher)
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
@@ -15,6 +16,8 @@ from app.desktop import SessionGuard
 from app.security import LocalRequestGuard
 from app.incidents.manager import IncidentManager
 from app.services.ingestion import ensure_default_rules
+from app.system.manager import CollectorManager
+from app.system.registry import build_collectors
 from app.watcher.service import WatchService
 
 
@@ -30,11 +33,18 @@ async def lifespan(app: FastAPI):
     if watch_dir:  # live monitoring is opt-in: only when a watch folder is configured
         app.state.watcher = WatchService(Path(watch_dir), lambda: Session(get_engine(), expire_on_commit=False))
         app.state.watcher.start()
+    app.state.collectors = None
+    if os.environ.get("HORIZON_SYSTEM_LOGS") == "1":  # the desktop app turns this on; server mode stays off
+        app.state.collectors = CollectorManager(
+            build_collectors(), lambda: Session(get_engine(), expire_on_commit=False))
+        app.state.collectors.start()
     try:
         yield
     finally:
         if app.state.watcher:
             app.state.watcher.stop()
+        if app.state.collectors:
+            app.state.collectors.stop()
 
 
 app = FastAPI(title="Horizon Events", version="0.1.0", lifespan=lifespan)
@@ -42,7 +52,8 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
                    allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
-for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents):
+for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
+               collectors):
     app.include_router(module.router)
 
 

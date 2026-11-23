@@ -76,3 +76,10 @@ export const updateIncident = (id, body) => request(`/incidents/${id}`, json("PA
 export const addIncidentNote = (id, text) => request(`/incidents/${id}/notes`, json("POST", { text }));
 export const removeIncidentAlert = (id, alertId) => request(`/incidents/${id}/alerts/${alertId}`, { method: "DELETE" });
 export const mergeIncident = (id, into) => request(`/incidents/${id}/merge`, json("POST", { into }));
+
+export const getCollectors = () => request("/collectors");
+export const updateCollector = (id, body) => request(`/collectors/${id}`, json("PATCH", body));
+export const checkCollector = (id) => request(`/collectors/${id}/check`, { method: "POST" });
+export const enableSecurityAccess = () => request("/collectors/security/enable-access", { method: "POST" });
+export const getSetup = () => request("/setup");
+export const completeSetup = () => request("/setup/complete", { method: "POST" });

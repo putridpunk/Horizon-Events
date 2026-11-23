@@ -102,7 +102,19 @@ _WIN_MAP = {
     "4624": "authentication_success", "4625": "authentication_failure", "4740": "account_lockout",
     "4672": "privilege_escalation", "4728": "privilege_escalation", "4732": "privilege_escalation",
     "4756": "privilege_escalation", "7031": "service_failure", "7034": "service_failure",
+    "1000": "service_failure",
 }
+
+# Short, language-independent descriptions for the events the live collector reads.
+_WIN_TEXT = {
+    "4624": "Successful logon", "4625": "Failed logon", "4740": "Account locked out",
+    "4720": "User account created", "4728": "Member added to a global security group",
+    "4732": "Member added to a local security group", "4756": "Member added to a universal security group",
+    "7031": "Service terminated unexpectedly", "7034": "Service terminated unexpectedly",
+    "1000": "Application crashed",
+}
+# For these events TargetUserName is the group; the account of interest is who made the change.
+_SUBJECT_FIRST = {"4728", "4732", "4756"}
 
 
 def parse_windows_record(rec: dict) -> dict | None:
@@ -114,7 +126,10 @@ def parse_windows_record(rec: dict) -> dict | None:
     if not eid or ts is None:
         return None
     hint = _WIN_MAP.get(eid, "generic")
-    user = r.get("targetusername") or r.get("subjectusername") or r.get("username") or None
+    if eid in _SUBJECT_FIRST:
+        user = r.get("subjectusername") or r.get("targetusername") or None
+    else:
+        user = r.get("targetusername") or r.get("subjectusername") or r.get("username") or None
     if user in ("-", ""):
         user = None
     ip = r.get("ipaddress") or r.get("sourceip") or None
@@ -124,12 +139,12 @@ def parse_windows_record(rec: dict) -> dict | None:
         hint = "unknown_user"
     out = {
         "timestamp": ts, "host": r.get("computer"), "process": "windows", "event_hint": hint,
-        "message": str(r.get("message") or f"Windows event {eid}"),
+        "message": str(r.get("message") or (f"{_WIN_TEXT[eid]} ({eid})" if eid in _WIN_TEXT else f"Windows event {eid}")),
         "raw": " ".join(f"{k}={v}" for k, v in rec.items()),
         "username": user, "source_ip": ip,
     }
     if hint == "service_failure":
-        out["service"] = r.get("servicename") or r.get("param1")
+        out["service"] = r.get("servicename") or r.get("param1") or r.get("data0")
     return out
 
 
