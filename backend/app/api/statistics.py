@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_session
+from app.mitre import tactic_coverage, technique_counts
 from app.services import statistics as st
 
 router = APIRouter(prefix="/api/statistics", tags=["statistics"])
@@ -41,3 +42,9 @@ def severity(session: Session = Depends(get_session)):
 @router.get("/rules")
 def rules(session: Session = Depends(get_session)):
     return st.rule_stats(session)
+
+
+@router.get("/mitre")
+def mitre(session: Session = Depends(get_session)):
+    by_rule = st.alerts_by_rule(session)
+    return {"tactics": tactic_coverage(by_rule), "techniques": technique_counts(by_rule)}
