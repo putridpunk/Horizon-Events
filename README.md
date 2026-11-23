@@ -178,3 +178,7 @@ The API has no login, so Horizon Events is built to be used from the machine it 
 ## Roadmap
 
 Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Incident management (alerts grouped into incidents; see below). Milestone 5 is complete.
+
+## Licence
+
+Released under the [MIT Licence](LICENSE). The sample logs are synthetic. Threat feed data downloaded at runtime stays under its providers' terms (abuse.ch Feodo Tracker is CC0; Spamhaus DROP has its own terms of use).
