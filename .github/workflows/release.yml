@@ -1,0 +1,58 @@
+name: Release
+
+# Pushing a tag such as v1.0.0 builds the Windows app and installer and publishes them as a GitHub release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Build Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Backend tests
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-desktop.txt -r requirements-build.txt
+          .\.venv\Scripts\python.exe -m pytest -q backend
+      - name: Frontend tests and build
+        shell: pwsh
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Build executable
+        shell: pwsh
+        run: .\scripts\build-exe.ps1
+      - name: Build installer
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          .\scripts\build-installer.ps1 -Version ("${{ github.ref_name }}".TrimStart("v"))
+      - name: Checksums
+        shell: pwsh
+        run: |
+          Get-FileHash dist\HorizonEvents-Setup.exe, dist\HorizonEvents.exe -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path $_.Path -Leaf)" } | Set-Content dist\SHA256SUMS.txt
+          Get-Content dist\SHA256SUMS.txt
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" dist\HorizonEvents-Setup.exe dist\HorizonEvents.exe dist\SHA256SUMS.txt `
+            --title "Horizon Events ${{ github.ref_name }}" --generate-notes

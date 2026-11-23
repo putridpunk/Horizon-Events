@@ -1,7 +1,9 @@
 ; Inno Setup script: builds dist\HorizonEvents-Setup.exe from dist\HorizonEvents.exe.
 ; Per-user install by default (no administrator rights), with an optional all-users install.
 #define AppName "Horizon Events"
-#define AppVersion "1.0.0"
+#ifndef AppVersion
+  #define AppVersion "1.0.0"
+#endif
 #define AppExe "HorizonEvents.exe"
 
 [Setup]
