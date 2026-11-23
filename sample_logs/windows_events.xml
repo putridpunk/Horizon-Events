@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Events>
+  <Event><System><EventID>4624</EventID><TimeCreated SystemTime="2026-11-23T09:05:00.000Z"/><Computer>WS-FIN-01</Computer></System>
+    <EventData><Data Name="TargetUserName">jsmith</Data><Data Name="IpAddress">10.0.0.77</Data></EventData></Event>
+  <Event><System><EventID>4625</EventID><TimeCreated SystemTime="2026-11-23T11:10:01.000Z"/><Computer>WS-FIN-01</Computer></System>
+    <EventData><Data Name="TargetUserName">jsmith</Data><Data Name="IpAddress">10.0.0.99</Data></EventData></Event>
+  <Event><System><EventID>4625</EventID><TimeCreated SystemTime="2026-11-23T11:10:09.000Z"/><Computer>WS-FIN-01</Computer></System>
+    <EventData><Data Name="TargetUserName">jsmith</Data><Data Name="IpAddress">10.0.0.99</Data></EventData></Event>
+  <Event><System><EventID>4625</EventID><TimeCreated SystemTime="2026-11-23T11:10:17.000Z"/><Computer>WS-FIN-01</Computer></System>
+    <EventData><Data Name="TargetUserName">jsmith</Data><Data Name="IpAddress">10.0.0.99</Data></EventData></Event>
+  <Event><System><EventID>4740</EventID><TimeCreated SystemTime="2026-11-23T11:10:30.000Z"/><Computer>DC-01</Computer></System>
+    <EventData><Data Name="TargetUserName">jsmith</Data></EventData></Event>
+  <Event><System><EventID>4728</EventID><TimeCreated SystemTime="2026-11-23T13:41:00.000Z"/><Computer>DC-01</Computer></System>
+    <EventData><Data Name="SubjectUserName">tmp_contractor</Data></EventData></Event>
+  <Event><System><EventID>7031</EventID><TimeCreated SystemTime="2026-11-23T13:50:00.000Z"/><Computer>WS-FIN-01</Computer></System>
+    <EventData><Data Name="ServiceName">Spooler</Data></EventData></Event>
+</Events>

@@ -1,0 +1,7 @@
+Nov 23 08:00:01 web01 systemd[1]: Started nginx.service.
+Nov 23 16:00:00 web01 systemd[1]: nginx.service: Failed with result 'exit-code'.
+Nov 23 16:02:10 web01 systemd[1]: nginx.service: Failed with result 'exit-code'.
+Nov 23 16:04:30 web01 systemd[1]: nginx.service: Failed with result 'exit-code'.
+Nov 23 16:07:00 web01 systemd[1]: nginx.service: Failed with result 'exit-code'.
+Nov 23 16:08:00 web01 systemd[1]: Started nginx.service.
+Nov 23 16:30:00 web01 CRON[4411]: (root) CMD (/usr/local/bin/backup.sh)
