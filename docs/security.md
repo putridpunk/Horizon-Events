@@ -14,6 +14,8 @@ Horizon Events is a **local analysis tool**. It stores security logs and exposes
 | Feed downloads | Feed URLs are constants (https only), responses are size-capped, matching is local so no log IP leaves the machine, and nothing is downloaded unless you click Refresh. |
 | Watch folder | Only direct, regular (non-symlink) files in the known source subfolders are read. |
 
+**Desktop app.** The Windows executable adds a per-launch session secret. Each launch generates a random secret (`secrets.token_urlsafe(32)`) that only the app's own window receives, in its first request. The server turns it into an `HttpOnly`, `SameSite=Strict` cookie, redirects to the same address without the secret, and answers **401** to every other request, including pages, static files and the API. A browser tab, another program, or a malicious page therefore cannot use the server even though it can reach the port. The server listens on `127.0.0.1` on a random port, the secret is never written to the log (the access log is off), and a lock file keeps a second copy from starting. This is why the desktop app needs no accounts. Server mode (Docker, `uvicorn`) does not use the secret and relies on the Host and Origin checks above.
+
 The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Origin` header (curl, scripts) are not browser-driven and are allowed.
 
 ## What is not protected

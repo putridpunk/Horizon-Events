@@ -91,17 +91,30 @@ docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
 
 The override starts PostgreSQL 16 (not published to the host) and points the backend at it; set `POSTGRES_PASSWORD` for anything beyond local use. The whole test suite also runs against PostgreSQL: set `HORIZON_TEST_DATABASE_URL` to a throwaway database (the schema is recreated for every test) and run `python -m pytest`. CI runs the suite on both databases.
 
-## Windows executable
+## Windows desktop app
 
-`dist\HorizonEvents.exe` is a single-file build that runs the API and dashboard on `http://127.0.0.1:8000` (or a free port if that one is taken) and opens your browser. On first run it imports the sample logs; data lives in `%LOCALAPPDATA%\HorizonEvents\horizon.db`. Set `HORIZON_SEED=false` to start empty. Close the console window to stop it.
+`dist\HorizonEvents.exe` is a single-file desktop application. It opens **its own window** (using the Microsoft Edge WebView2 runtime that ships with Windows 10 and 11) rather than a browser tab, so there is nothing to sign in to. Closing the window quits the app. Only one copy runs at a time: starting it again brings the open window to the front.
 
-To rebuild it (needs the frontend built and the `.venv` set up):
+- **Local only.** The server listens on `127.0.0.1` on a random port, and every launch creates a one-time secret that only the app's own window receives. No other browser tab or program can use the API. See [docs/security.md](docs/security.md).
+- **Your data** lives in `%LOCALAPPDATA%\HorizonEvents` (database, model, watch folder and `desktop.log`). The app starts empty. To explore with the bundled sample logs, set the environment variable `HORIZON_SEED=true` before the first launch.
+- If the window cannot open, the app tells you and links to the WebView2 runtime; it never falls back to a browser tab.
+
+Run it from source (needs `requirements-desktop.txt` and a built frontend):
+
+```powershell
+pip install -r requirements.txt -r requirements-desktop.txt
+cd frontend; npm install; npm run build; cd ..
+python backend\run_app.py
+```
+
+Rebuild the executable (also needs `requirements-build.txt`):
 
 ```powershell
 pip install -r requirements-build.txt
-cd frontend; npm install; npm run build; cd ..
 powershell -File scripts\build-exe.ps1
 ```
+
+For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
 
 ## Live monitoring
 

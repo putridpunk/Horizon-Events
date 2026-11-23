@@ -3,6 +3,7 @@ from datetime import datetime
 
 # The API refuses unknown Host headers; Starlette's test client uses 'testserver'. Set before the app is imported.
 os.environ.setdefault("HORIZON_ALLOWED_HOSTS", "testserver")
+os.environ.pop("HORIZON_SESSION_SECRET", None)  # the desktop guard stays off unless a test turns it on
 
 import pytest
 from sqlalchemy.orm import Session

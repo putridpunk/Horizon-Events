@@ -11,6 +11,7 @@ from app.api import alerts, events, imports, incidents, intel, mitre, ml, report
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
+from app.desktop import SessionGuard
 from app.security import LocalRequestGuard
 from app.incidents.manager import IncidentManager
 from app.services.ingestion import ensure_default_rules
@@ -39,7 +40,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Horizon Events", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origins),
                    allow_methods=["*"], allow_headers=["*"])
-app.add_middleware(LocalRequestGuard)  # added last = outermost: checks Host and Origin before anything else
+app.add_middleware(LocalRequestGuard)  # checks Host and Origin
+app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents):
     app.include_router(module.router)
 
