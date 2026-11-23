@@ -7,6 +7,7 @@ services:
       DATABASE_URL: sqlite:////data/horizon.db
       SEED_ON_START: "${SEED_ON_START:-true}"
       HORIZON_WATCH_DIR: /watch
+      HORIZON_ALLOWED_HOSTS: ${HORIZON_ALLOWED_HOSTS:-}
     volumes:
       - horizon-data:/data
       - ./watch:/watch
@@ -16,7 +17,9 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "8080:80"
+      # Localhost only: the API has no login. Set HORIZON_BIND=0.0.0.0 (and HORIZON_ALLOWED_HOSTS) only behind
+      # something that adds authentication. See docs/security.md.
+      - "${HORIZON_BIND:-127.0.0.1}:8080:80"
     depends_on:
       - backend
 

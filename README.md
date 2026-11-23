@@ -135,6 +135,10 @@ npm test
 
 They cover the API client and polling hook, the alert and incident drawers (status workflows, notes, merging, error messages), the list pages and their filters, the live-monitoring, threat-feed and anomaly-model cards, report date handling, and the empty-database screens. The Chart.js charts are stubbed because jsdom has no canvas.
 
+## Security
+
+The API has no login, so Horizon Events is built to be used from the machine it runs on: the executable and the Docker setup listen on `127.0.0.1` only, and the server refuses requests with an unknown `Host` (DNS rebinding) or a foreign `Origin` on state-changing calls (cross-site forgery). Read [docs/security.md](docs/security.md) for what is and is not protected and how to expose it safely behind an authenticating proxy (`HORIZON_BIND`, `HORIZON_ALLOWED_HOSTS`).
+
 ## Limitations
 
 - Syslog lines carry no year or timezone; Horizon Events assumes the current year and treats times as UTC.
