@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.database.models import AlertHistoryRow, AlertRow, DetectionRuleRow, EventRow
 from app.domain import AlertStatus, Severity
+from app.mitre import techniques_for_rule
 
 
 class AlertUpdate(BaseModel):
@@ -32,6 +33,7 @@ def alert_out(r: AlertRow) -> dict:
         "severity": r.severity, "status": r.status, "description": r.description, "source_ip": r.source_ip,
         "username": r.username, "occurrences": r.occurrences, "window_minutes": r.window_minutes,
         "created_at": r.created_at.isoformat(), "last_seen": r.last_seen.isoformat(),
+        "techniques": techniques_for_rule(r.rule_id),
     }
 
 
@@ -41,4 +43,5 @@ def history_out(h: AlertHistoryRow) -> dict:
 
 def rule_out(r: DetectionRuleRow) -> dict:
     return {"id": r.id, "name": r.name, "description": r.description, "severity": r.severity,
-            "event_types": r.event_types, "params": r.params, "enabled": r.enabled}
+            "event_types": r.event_types, "params": r.params, "enabled": r.enabled,
+            "techniques": techniques_for_rule(r.id)}

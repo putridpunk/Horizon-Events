@@ -96,4 +96,4 @@ The suite covers the parsers, collectors, rules, alert manager, repositories, in
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). Still planned: MITRE ATT&CK mapping, continuous log tailing, threat-intelligence enrichment and incident grouping.
+Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Still planned: continuous log tailing, threat-intelligence enrichment and incident grouping.

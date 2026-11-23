@@ -107,3 +107,45 @@ def test_report_formats(client):
         assert r.status_code == 200 and r.headers["content-type"].startswith(ctype)
     assert client.get("/api/reports", params={"format": "pdf"}).status_code == 422
     assert client.get("/api/reports", params={"start": "2026-12-01", "end": "2026-11-01"}).status_code == 422
+
+
+def test_alert_includes_techniques(client):
+    upload(client, "linux_auth.log", "linux_auth")
+    hz1 = client.get("/api/alerts", params={"rule_id": "HZ-001"}).json()["items"][0]
+    assert "T1110" in {t["id"] for t in hz1["techniques"]}
+    detail = client.get(f"/api/alerts/{hz1['id']}").json()
+    assert detail["techniques"][0]["url"].startswith("https://attack.mitre.org/techniques/")
+
+
+def test_rules_include_techniques_and_mitre_endpoint(client):
+    rules = client.get("/api/rules").json()
+    assert all(r["techniques"] for r in rules)
+    ids = {t["id"] for t in client.get("/api/mitre/techniques").json()}
+    assert {"T1110", "T1110.003", "T1489"} <= ids
+
+
+def test_statistics_mitre_empty_db(client):
+    d = client.get("/api/statistics/mitre").json()
+    assert len(d["tactics"]) == 7 and all(t["alerts"] == 0 for t in d["tactics"])
+    assert all(t["alerts"] == 0 for t in d["techniques"])
+
+
+def test_statistics_mitre_after_import(client):
+    upload(client, "linux_auth.log", "linux_auth")
+    tactics = {t["tactic"]: t["alerts"] for t in client.get("/api/statistics/mitre").json()["tactics"]}
+    assert tactics["Credential Access"] >= 1
+
+
+def test_report_includes_techniques(client):
+    upload(client, "linux_auth.log", "linux_auth")
+    assert any(t["alerts"] for t in client.get("/api/reports", params={"format": "json"}).json()["techniques"])
+    assert "technique," in client.get("/api/reports", params={"format": "csv"}).text
+    assert "MITRE ATT&amp;CK" in client.get("/api/reports", params={"format": "html"}).text
+
+
+def test_report_html_escapes_technique_names(client, monkeypatch):
+    import app.mitre as mitre
+    monkeypatch.setitem(mitre.TECHNIQUES, "T1110", ("<script>x</script>", ("Credential Access",)))
+    upload(client, "linux_auth.log", "linux_auth")
+    html = client.get("/api/reports", params={"format": "html"}).text
+    assert "<script>x</script>" not in html and "&lt;script&gt;x&lt;/script&gt;" in html

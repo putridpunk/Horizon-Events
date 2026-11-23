@@ -1,8 +1,9 @@
 import usePolling from "../services/usePolling.js";
-import { getEventTypes, getRuleStats, getSeverity, getSourceIps, getTimeseries } from "../services/api.js";
+import { getEventTypes, getMitreStats, getRuleStats, getSeverity, getSourceIps, getTimeseries } from "../services/api.js";
 import { fmtTime } from "../services/constants.js";
 import { EmptyState, ErrorBanner, PageHeader } from "../components/common.jsx";
 import ModelCard from "../components/ModelCard.jsx";
+import MitrePanel from "../components/MitrePanel.jsx";
 import { EventsOverTime, HorizontalBars, SeverityDoughnut } from "../charts/charts.jsx";
 
 function Panel({ title, empty, children }) {
@@ -16,10 +17,10 @@ function Panel({ title, empty, children }) {
 
 export default function Analytics() {
   const { data, error } = usePolling(async () => {
-    const [series, types, ips, severity, rules] = await Promise.all([
-      getTimeseries({ bucket: "hour" }), getEventTypes(), getSourceIps(), getSeverity(), getRuleStats(),
+    const [series, types, ips, severity, rules, mitre] = await Promise.all([
+      getTimeseries({ bucket: "hour" }), getEventTypes(), getSourceIps(), getSeverity(), getRuleStats(), getMitreStats(),
     ]);
-    return { series, types, ips, severity, rules };
+    return { series, types, ips, severity, rules, mitre };
   }, [], 15000);
 
   const d = data;
@@ -34,6 +35,7 @@ export default function Analytics() {
         <Panel title="Most frequent event types" empty={!d?.types.length}>{d && <HorizontalBars items={d.types} />}</Panel>
         <Panel title="Most common source IPs" empty={!d?.ips.length}>{d && <HorizontalBars items={d.ips} color="#ff9248" />}</Panel>
       </div>
+      <MitrePanel stats={d?.mitre} />
       <ModelCard />
       <section className="card" style={{ marginTop: 16 }}>
         <h2>Detection rule statistics</h2>

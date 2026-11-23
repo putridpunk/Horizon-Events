@@ -67,6 +67,15 @@ def alert_severity_distribution(session: Session, start=None, end=None) -> list[
     return [{"severity": s, "count": counts.get(s, 0)} for s in ("critical", "high", "medium", "low")]
 
 
+def alerts_by_rule(session: Session, start=None, end=None) -> dict[str, int]:
+    stmt = select(AlertRow.rule_id, func.count())
+    if start:
+        stmt = stmt.where(AlertRow.last_seen >= start)
+    if end:
+        stmt = stmt.where(AlertRow.last_seen <= end)
+    return dict(session.execute(stmt.group_by(AlertRow.rule_id)).all())
+
+
 def rule_stats(session: Session, start=None, end=None) -> list[dict]:
     out = []
     for rule in session.scalars(select(DetectionRuleRow).order_by(DetectionRuleRow.id)):

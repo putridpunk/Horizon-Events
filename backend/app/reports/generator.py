@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.database.models import AlertRow, EventRow
 from app.domain import utcnow
+from app.mitre import technique_counts
 from app.services import statistics as stats
 
 FORMATS = {"json": "application/json", "csv": "text/csv", "html": "text/html"}
@@ -34,6 +35,7 @@ def build_report(session: Session, start: datetime, end: datetime) -> dict:
         "top_event_types": stats.top_event_types(session, 10, start, end),
         "severity_distribution": stats.alert_severity_distribution(session, start, end),
         "rule_stats": stats.rule_stats(session, start, end),
+        "techniques": technique_counts(stats.alerts_by_rule(session, start, end)),
         "daily_activity": [{"date": d, "events": ev_days.get(d, 0), "alerts": al_days.get(d, 0)}
                            for d in sorted(set(ev_days) | set(al_days))],
     }
@@ -65,6 +67,8 @@ def _csv(r: dict) -> str:
         w.writerow(["alert_severity", x["severity"], x["count"]])
     for x in r["rule_stats"]:
         w.writerow(["rule", f'{x["rule_id"]} {x["name"]}', x["alerts"]])
+    for x in r["techniques"]:
+        w.writerow(["technique", f'{x["id"]} {x["name"]}', x["alerts"]])
     for x in r["daily_activity"]:
         w.writerow(["daily_events", x["date"], x["events"]])
         w.writerow(["daily_alerts", x["date"], x["alerts"]])
@@ -83,6 +87,8 @@ def _html(r: dict) -> str:
         ("Alert severity", _table(["Severity", "Alerts"], [[x["severity"], x["count"]] for x in r["severity_distribution"]])),
         ("Detection rules", _table(["Rule", "Name", "Alerts", "Last triggered"],
                                    [[x["rule_id"], x["name"], x["alerts"], x["last_triggered"] or "-"] for x in r["rule_stats"]])),
+        ("MITRE ATT&CK techniques", _table(["Technique", "Name", "Tactics", "Alerts"],
+                                           [[x["id"], x["name"], ", ".join(x["tactics"]), x["alerts"]] for x in r["techniques"]])),
         ("Daily activity", _table(["Date", "Events", "Alerts"],
                                   [[x["date"], x["events"], x["alerts"]] for x in r["daily_activity"]])),
     ]
