@@ -6,8 +6,10 @@ services:
     environment:
       DATABASE_URL: sqlite:////data/horizon.db
       SEED_ON_START: "${SEED_ON_START:-true}"
+      HORIZON_WATCH_DIR: /watch
     volumes:
       - horizon-data:/data
+      - ./watch:/watch
 
   frontend:
     build:

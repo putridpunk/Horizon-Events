@@ -62,3 +62,7 @@ export const getModelStatus = () => request("/ml/status");
 export const trainModel = (source) => request("/ml/train", json("POST", { source }));
 
 export const getMitreStats = () => request("/statistics/mitre");
+
+export const getWatcherStatus = () => request("/watcher/status");
+export const pauseWatcher = () => request("/watcher/pause", { method: "POST" });
+export const resumeWatcher = () => request("/watcher/resume", { method: "POST" });

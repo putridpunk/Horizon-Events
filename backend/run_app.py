@@ -36,6 +36,7 @@ def main() -> None:
     db_file = _data_dir() / "horizon.db"
     os.environ.setdefault("DATABASE_URL", f"sqlite:///{db_file.as_posix()}")
     os.environ.setdefault("HORIZON_MODEL_PATH", str(_data_dir() / "horizon_model.joblib"))
+    os.environ.setdefault("HORIZON_WATCH_DIR", str(_data_dir() / "watch"))
 
     import uvicorn
     from sqlalchemy import func, select
@@ -61,7 +62,10 @@ def main() -> None:
 
     port = _free_port()
     url = f"http://127.0.0.1:{port}"
-    print(f"Horizon Events running at {url}\nData: {db_file}\nPress Ctrl+C or close this window to stop.")
+    watch = os.environ["HORIZON_WATCH_DIR"]
+    print(f"Horizon Events running at {url}\nData: {db_file}")
+    print(f"Live monitoring folder: {watch}\n  (append log lines to files in its subfolders, e.g. linux_auth\\auth.log)")
+    print("Press Ctrl+C or close this window to stop.")
     threading.Timer(1.5, lambda: webbrowser.open(url)).start()
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")
 

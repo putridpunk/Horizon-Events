@@ -17,6 +17,8 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/ml/train` | Body `{source: "synthetic" \| "database"}`. 422 when the database has too little data. |
 | GET | `/api/mitre/techniques` | The built-in ATT&CK technique table. |
 | GET | `/api/statistics/mitre` | `{tactics, techniques}`: alert counts per tactic and technique. Alerts and rules also carry a `techniques` list. |
+| GET | `/api/watcher/status` | Live monitoring state: `enabled`, `running`, `paused`, `directory`, per-file counters. `{enabled: false}` when no watch folder is configured. |
+| POST | `/api/watcher/pause`, `/api/watcher/resume` | Pause or resume ingestion (409 when not enabled). |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

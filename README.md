@@ -62,6 +62,18 @@ cd frontend; npm install; npm run build; cd ..
 powershell -File scripts\build-exe.ps1
 ```
 
+## Live monitoring
+
+Set `HORIZON_WATCH_DIR` (the executable defaults to `%LOCALAPPDATA%\HorizonEvents\watch`; Docker mounts `./watch`) and Horizon Events ingests new log lines continuously. The **subfolder name selects the parser**:
+
+```
+watch/
+  linux_auth/auth.log      linux_syslog/syslog.log     application/app.log
+  windows/events.jsonl     json/custom.jsonl
+```
+
+Append lines (for example with `Add-Content` or a log shipper) and events, alerts and the dashboard update within a few seconds. Only complete lines are read, files that shrink are re-read from the start, and re-reading a file never creates duplicate events. Limits: only line-oriented files can be tailed (Windows logs as JSON Lines; XML, CSV and JSON arrays are imported manually), only direct children of the known subfolders are read, and symlinks are ignored. The Overview page has a Live monitoring card with Pause and Resume.
+
 ## What the sample data demonstrates
 
 `sample_logs/` tells a small story across sources:
@@ -96,4 +108,4 @@ The suite covers the parsers, collectors, rules, alert manager, repositories, in
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Still planned: continuous log tailing, threat-intelligence enrichment and incident grouping.
+Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Still planned: threat-intelligence enrichment and incident grouping.

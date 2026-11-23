@@ -6,6 +6,7 @@ import { EmptyState, ErrorBanner, PageHeader, SeverityBadge, StatCard, StatusBad
 import { EventsOverTime } from "../charts/charts.jsx";
 import ImportButton from "../components/ImportButton.jsx";
 import AlertDrawer from "../components/AlertDrawer.jsx";
+import LiveCard from "../components/LiveCard.jsx";
 
 export default function Overview() {
   const [selected, setSelected] = useState(null);
@@ -58,6 +59,7 @@ export default function Overview() {
           )}
         </section>
       </div>
+      <LiveCard />
       {selected && <AlertDrawer alertId={selected} onClose={() => setSelected(null)} onChanged={refresh} />}
     </>
   );
