@@ -27,6 +27,11 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/incidents/{id}/notes` | Body `{text}`. |
 | POST / DELETE | `/api/incidents/{id}/alerts`, `/api/incidents/{id}/alerts/{alert_id}` | Move an alert into an incident (body `{alert_id}`) or remove it (it will not be regrouped automatically). |
 | POST | `/api/incidents/{id}/merge` | Body `{into}`; the source is closed. 422 for self-merge or a resolved target. |
+| GET | `/api/collectors` | System log sources: `id, name, description, platform, enabled, access, state, events_read, last_activity, last_error`. `enabled: false` when system log collection is off (server mode). |
+| PATCH | `/api/collectors/{id}` | Body `{enabled?, backfill_hours?}` (0 to 168). 404 unknown, 409 when collection is off. |
+| POST | `/api/collectors/{id}/check` | Re-check access to one source. |
+| POST | `/api/collectors/security/enable-access` | Asks Windows (through its own permission prompt) to add the current user to Event Log Readers. Returns `{requested, access}`. 409 off Windows. |
+| GET / POST | `/api/setup`, `/api/setup/complete` | First-run setup state. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

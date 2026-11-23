@@ -5,6 +5,7 @@ const LINKS = [
   ["/events", "Events"],
   ["/alerts", "Alerts"],
   ["/incidents", "Incidents"],
+  ["/sources", "Data sources"],
   ["/analytics", "Analytics"],
   ["/reports", "Reports"],
 ];
