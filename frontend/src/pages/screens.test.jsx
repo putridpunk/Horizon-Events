@@ -23,20 +23,24 @@ describe("empty database", () => {
   it("Overview shows zeros and helpful empty states", async () => {
     mockApiDefaults();
     render(<Overview />);
-    expect(await screen.findByText(/No events yet/)).toBeInTheDocument();
+    // The empty-state text is also shown while loading, so wait for the loaded zeros first.
+    await waitFor(() => expect(screen.getAllByText("0")).toHaveLength(4));
+    expect(screen.getByText(/No events yet/)).toBeInTheDocument();
     expect(screen.getByText(/No alerts. Nothing suspicious/)).toBeInTheDocument();
-    expect(screen.getAllByText("0")).toHaveLength(4);
     expect(screen.queryByText(/Could not load data/)).not.toBeInTheDocument();
   });
 
   it("Analytics shows an empty state in every panel without crashing", async () => {
     mockApiDefaults();
     render(<Analytics />);
-    expect(await screen.findByText(/Rule statistics appear after the first import/)).toBeInTheDocument();
-    expect(screen.getByText(/No feeds loaded yet/)).toBeInTheDocument();
-    expect(screen.getByText(/No model trained yet/)).toBeInTheDocument();
+    // Each panel loads independently; wait for the ones whose text only appears once data has arrived.
+    expect(await screen.findByText(/No model trained yet/)).toBeInTheDocument();
+    expect(await screen.findByText(/No feeds loaded yet/)).toBeInTheDocument();
+    await waitFor(() => expect(api.getRuleStats).toHaveBeenCalled());
+    expect(screen.getByText(/Rule statistics appear after the first import/)).toBeInTheDocument();
     expect(screen.getAllByText("Nothing to show yet.").length).toBeGreaterThanOrEqual(4);
     expect(screen.queryByText(/chart:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Could not load data/)).not.toBeInTheDocument();
   });
 
   it("Reports asks for a period before showing anything", async () => {
