@@ -6,7 +6,6 @@ messages) decide the access state.
 """
 from __future__ import annotations
 
-import subprocess
 import sys
 from dataclasses import dataclass
 from typing import Callable
@@ -18,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.database.collector_models import CollectorSettingRow
 from app.services.ingestion import import_logs
 from app.system.base import NEEDS_PERMISSION, READY, UNAVAILABLE, Collector
+from app.system.winutil import run_command, system_tool
 
 BATCH_SIZE = 200
 EXIT_ACCESS_DENIED = 5
@@ -52,13 +52,9 @@ CHANNELS: dict[str, ChannelSpec] = {
 
 
 def run_wevtutil(args: list[str], timeout: float = 20.0) -> tuple[int, str]:
-    """Run `wevtutil` and return (exit code, stdout). Raises TimeoutError, or OSError if it cannot start."""
-    flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW: no console flash in the app
-    try:
-        done = subprocess.run(["wevtutil", *args], capture_output=True, timeout=timeout, creationflags=flags)
-    except subprocess.TimeoutExpired as exc:
-        raise TimeoutError("wevtutil timed out") from exc
-    return done.returncode, done.stdout.decode("utf-8", errors="replace")
+    """Run `wevtutil` (by full path) and return (exit code, stdout). Raises TimeoutError, or OSError if it
+    cannot start."""
+    return run_command([system_tool("wevtutil.exe"), *args], timeout)
 
 
 def build_query(spec: ChannelSpec, after_id: int | None, backfill_ms: int | None = None) -> str:
