@@ -1,16 +1,21 @@
-MIT License
+MIT License (modified)
 
-Copyright (c) 2026 putridpunk
+Copyright (c) 2026 putridpunk (https://github.com/putridpunk)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+to use, copy, modify, and merge copies of the Software, subject to the
+following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
+
+Additional restriction: no person may distribute, publish, sublicense, or sell
+or resell the Software (or any copy, modification or derivative work of it), or
+use it to generate income or any other commercial benefit, without first
+obtaining written permission from the copyright holder. Permission can be
+requested through https://github.com/putridpunk.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

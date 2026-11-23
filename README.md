@@ -181,4 +181,4 @@ Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest 
 
 ## Licence
 
-Released under the [MIT Licence](LICENSE). The sample logs are synthetic. Threat feed data downloaded at runtime stays under its providers' terms (abuse.ch Feodo Tracker is CC0; Spamhaus DROP has its own terms of use).
+Released under the [MIT Licence, modified](LICENSE): you may not distribute, resell or earn income from this software without first getting permission from [putridpunk](https://github.com/putridpunk). The sample logs are synthetic. Threat feed data downloaded at runtime stays under its providers' terms (abuse.ch Feodo Tracker is CC0; Spamhaus DROP has its own terms of use).
