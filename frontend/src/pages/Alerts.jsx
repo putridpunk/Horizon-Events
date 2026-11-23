@@ -5,6 +5,7 @@ import { SEVERITIES, STATUSES, fmtTime } from "../services/constants.js";
 import { EmptyState, ErrorBanner, PageHeader, Pager, SeverityBadge, StatusBadge } from "../components/common.jsx";
 import AlertDrawer from "../components/AlertDrawer.jsx";
 import TechniqueBadges from "../components/TechniqueBadges.jsx";
+import IntelBadge from "../components/IntelBadge.jsx";
 
 const LIMIT = 20;
 
@@ -39,7 +40,7 @@ export default function Alerts() {
                       <td className="mono">{a.alert_id}</td>
                       <td><SeverityBadge value={a.severity} /></td>
                       <td>{a.rule_name}<div className="muted">{a.rule_id}</div><TechniqueBadges techniques={a.techniques} /></td>
-                      <td className="mono">{a.source_ip || "-"}</td>
+                      <td className="mono">{a.source_ip || "-"}<IntelBadge intel={a.intel} /></td>
                       <td>{a.username || "-"}</td>
                       <td>{a.occurrences}</td>
                       <td><StatusBadge value={a.status} /></td>

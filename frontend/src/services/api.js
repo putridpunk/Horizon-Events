@@ -66,3 +66,6 @@ export const getMitreStats = () => request("/statistics/mitre");
 export const getWatcherStatus = () => request("/watcher/status");
 export const pauseWatcher = () => request("/watcher/pause", { method: "POST" });
 export const resumeWatcher = () => request("/watcher/resume", { method: "POST" });
+
+export const getIntelStatus = () => request("/intel/status");
+export const refreshIntel = () => request("/intel/refresh", json("POST", {}));

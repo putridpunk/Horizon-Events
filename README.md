@@ -74,6 +74,15 @@ watch/
 
 Append lines (for example with `Add-Content` or a log shipper) and events, alerts and the dashboard update within a few seconds. Only complete lines are read, files that shrink are re-read from the start, and re-reading a file never creates duplicate events. Limits: only line-oriented files can be tailed (Windows logs as JSON Lines; XML, CSV and JSON arrays are imported manually), only direct children of the known subfolders are read, and symlinks are ignored. The Overview page has a Live monitoring card with Pause and Resume.
 
+## Threat intelligence
+
+Alerts show a **Known malicious** badge when their source IP is on a threat feed. Matching happens locally against downloaded lists, so no IP from your logs is ever sent anywhere. The only network action is the **Refresh feeds** button on the Analytics page, which downloads:
+
+- [abuse.ch Feodo Tracker](https://feodotracker.abuse.ch/blocklist/) botnet C2 IPs (CC0), and
+- [Spamhaus DROP](https://www.spamhaus.org/drop/) netblocks (free use under Spamhaus's terms; fetched at most once an hour, which the app enforces).
+
+Private and loopback addresses are never checked. A small **synthetic demo feed** (clearly labelled, covering the reserved test addresses used in `sample_logs/`) is loaded with the sample data so the badge shows offline; it is not real intelligence. Per-IP lookup services such as AbuseIPDB are not used because they would send your log data to a third party.
+
 ## What the sample data demonstrates
 
 `sample_logs/` tells a small story across sources:
@@ -108,4 +117,4 @@ The suite covers the parsers, collectors, rules, alert manager, repositories, in
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Still planned: threat-intelligence enrichment and incident grouping.
+Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Still planned: incident grouping.

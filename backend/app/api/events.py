@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.schemas import event_out
 from app.database.connection import get_session
 from app.database.repositories import EventRepository
+from app.intel.service import enrich
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -24,4 +25,4 @@ def get_event(event_id: int, session: Session = Depends(get_session)):
     row = EventRepository(session).get(event_id)
     if row is None:
         raise HTTPException(404, "Event not found")
-    return event_out(row)
+    return {**event_out(row), "intel": enrich(session, row.source_ip)}

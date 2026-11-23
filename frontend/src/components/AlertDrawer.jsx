@@ -4,6 +4,7 @@ import { getAlert, updateAlert } from "../services/api.js";
 import { fmtTime } from "../services/constants.js";
 import { ErrorBanner, SeverityBadge, StatusBadge } from "./common.jsx";
 import TechniqueBadges from "./TechniqueBadges.jsx";
+import IntelBadge from "./IntelBadge.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -59,7 +60,7 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
               This alert flags suspicious activity for investigation. It is not a confirmed breach.
             </p>
             <dl className="kv">
-              <dt>Source IP</dt><dd className="mono">{alert.source_ip || "-"}</dd>
+              <dt>Source IP</dt><dd className="mono">{alert.source_ip || "-"}<IntelBadge intel={alert.intel} /></dd>
               <dt>Target account</dt><dd>{alert.username || "-"}</dd>
               <dt>Occurrences</dt><dd>{alert.occurrences}</dd>
               <dt>Detection window</dt><dd>{alert.window_minutes ? `${alert.window_minutes} minutes` : "-"}</dd>
