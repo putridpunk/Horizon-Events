@@ -50,6 +50,18 @@ npm install
 npm run dev                   # http://localhost:5173, proxies /api to localhost:8000
 ```
 
+## Windows executable
+
+`dist\HorizonEvents.exe` is a single-file build that runs the API and dashboard on `http://127.0.0.1:8000` (or a free port if that one is taken) and opens your browser. On first run it imports the sample logs; data lives in `%LOCALAPPDATA%\HorizonEvents\horizon.db`. Set `HORIZON_SEED=false` to start empty. Close the console window to stop it.
+
+To rebuild it (needs the frontend built and the `.venv` set up):
+
+```powershell
+pip install -r requirements-build.txt
+cd frontend; npm install; npm run build; cd ..
+powershell -File scripts\build-exe.ps1
+```
+
 ## What the sample data demonstrates
 
 `sample_logs/` tells a small story across sources:
