@@ -47,6 +47,7 @@ class Event:
     host: str | None = None
     service: str | None = None
     metadata: dict = field(default_factory=dict)
+    id: int | None = None  # set once persisted
 
     def fingerprint(self) -> str:
         data = f"{self.source}|{self.timestamp.isoformat()}|{self.raw}"
@@ -65,3 +66,9 @@ class Detection:
     occurrences: int
     window_minutes: int | None
     key: str
+
+
+def utcnow() -> datetime:
+    """Naive UTC 'now' (the app stores naive UTC timestamps)."""
+    from datetime import timezone
+    return datetime.now(timezone.utc).replace(tzinfo=None)
