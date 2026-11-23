@@ -4,9 +4,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_engine, init_db
+from app.database.models import EventRow
 from app.services.ingestion import import_logs
 
 SAMPLES = [
@@ -29,8 +31,12 @@ def seed(session: Session, directory: Path | None = None, now=None) -> list[dict
 
 def main() -> None:
     init_db()
-    directory = Path(sys.argv[1]) if len(sys.argv) > 1 else None
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    directory = Path(args[0]) if args else None
     with Session(get_engine(), expire_on_commit=False) as session:
+        if "--if-empty" in sys.argv and session.scalar(select(func.count(EventRow.id))):
+            print("Database already has events; skipping seed.")
+            return
         for (name, _), res in zip(SAMPLES, seed(session, directory)):
             print(f"{name}: {res}")
 
