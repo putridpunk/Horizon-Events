@@ -11,10 +11,17 @@ export default function Reports() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
 
+  // A cleared date input gives "" and an invalid Date; guard it instead of crashing the page.
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const validRange = Boolean(start && end) && !Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())
+    && startDate <= endDate;
+
   // The end date is inclusive: send the start of the following day.
-  const endExclusive = () => new Date(new Date(end).getTime() + 86400000).toISOString().slice(0, 10);
+  const endExclusive = () => new Date(endDate.getTime() + 86400000).toISOString().slice(0, 10);
 
   async function preview() {
+    if (!validRange) return;
     setError(null);
     try { setReport(await getReport(start, endExclusive())); } catch (e) { setError(e.message); }
   }
@@ -26,11 +33,14 @@ export default function Reports() {
       <div className="toolbar">
         <label>From <input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></label>
         <label>To <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></label>
-        <button className="primary" onClick={preview}>Generate</button>
-        {["json", "csv", "html"].map((f) => (
+        <button className="primary" onClick={preview} disabled={!validRange}>Generate</button>
+        {["json", "csv", "html"].map((f) => validRange ? (
           <a key={f} href={reportUrl(start, endExclusive(), f)}><button>Download {f.toUpperCase()}</button></a>
+        ) : (
+          <button key={f} disabled>Download {f.toUpperCase()}</button>
         ))}
       </div>
+      {!validRange && <p className="muted">Choose a valid date range (the start must not be after the end).</p>}
       {report ? (
         <>
           <div className="grid cols-4" style={{ marginBottom: 16 }}>

@@ -126,6 +126,15 @@ python -m pytest
 
 The suite covers the parsers, collectors, rules, alert manager, repositories, ingestion, statistics, reports and the API.
 
+Frontend tests use [Vitest](https://vitest.dev) and React Testing Library with the API mocked:
+
+```bash
+cd frontend
+npm test
+```
+
+They cover the API client and polling hook, the alert and incident drawers (status workflows, notes, merging, error messages), the list pages and their filters, the live-monitoring, threat-feed and anomaly-model cards, report date handling, and the empty-database screens. The Chart.js charts are stubbed because jsdom has no canvas.
+
 ## Limitations
 
 - Syslog lines carry no year or timezone; Horizon Events assumes the current year and treats times as UTC.
