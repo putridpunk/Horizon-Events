@@ -1,0 +1,27 @@
+# Run Horizon Events on PostgreSQL instead of SQLite:
+#   docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+# The database is not published to the host. Set POSTGRES_PASSWORD for anything beyond local use.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: horizon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-horizon}
+      POSTGRES_DB: horizon
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U horizon -d horizon"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    environment:
+      DATABASE_URL: postgresql+psycopg://horizon:${POSTGRES_PASSWORD:-horizon}@postgres:5432/horizon
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

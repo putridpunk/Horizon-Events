@@ -2,6 +2,8 @@
 
 **Security Information and Event Management** · *Turning security events into actionable intelligence.*
 
+[![CI](https://github.com/putridpunk/Horizon-Events/actions/workflows/ci.yml/badge.svg)](https://github.com/putridpunk/Horizon-Events/actions/workflows/ci.yml)
+
 Horizon Events is a lightweight SIEM. It imports logs from Linux and Windows systems and applications, normalises them into one event format, runs configurable detection rules, raises alerts with a full status history, and presents everything in a dark, interactive dashboard. Reports export to JSON, CSV and HTML.
 
 Built with Python, FastAPI, SQLAlchemy (SQLite), React, Chart.js and Docker. All bundled data is synthetic.
@@ -49,6 +51,16 @@ cd frontend
 npm install
 npm run dev                   # http://localhost:5173, proxies /api to localhost:8000
 ```
+
+## PostgreSQL
+
+SQLite is the default. To run on PostgreSQL, either set `DATABASE_URL=postgresql+psycopg://user:password@host:5432/dbname` for a local run, or use the compose override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.postgres.yml up --build
+```
+
+The override starts PostgreSQL 16 (not published to the host) and points the backend at it; set `POSTGRES_PASSWORD` for anything beyond local use. The whole test suite also runs against PostgreSQL: set `HORIZON_TEST_DATABASE_URL` to a throwaway database (the schema is recreated for every test) and run `python -m pytest`. CI runs the suite on both databases.
 
 ## Windows executable
 
