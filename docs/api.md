@@ -21,6 +21,12 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/watcher/pause`, `/api/watcher/resume` | Pause or resume ingestion (409 when not enabled). |
 | GET | `/api/intel/status` | Threat feeds: `id, name, source (network or demo), entries, fetched_at`. |
 | POST | `/api/intel/refresh` | Body `{feeds?: [...]}`. Downloads the public feeds (the only network action; at most once an hour per feed). 422 for an unknown feed. Alerts and event details carry an `intel` field. |
+| GET | `/api/incidents` | Filters `status, severity`; ordered by severity then last activity. |
+| GET | `/api/incidents/{id}` | Incident with alerts (including `intel`), audit history, IPs, accounts and ATT&CK techniques. |
+| PATCH | `/api/incidents/{id}` | Body `{status?, title?, note?}`; 422 for an illegal transition or empty title. |
+| POST | `/api/incidents/{id}/notes` | Body `{text}`. |
+| POST / DELETE | `/api/incidents/{id}/alerts`, `/api/incidents/{id}/alerts/{alert_id}` | Move an alert into an incident (body `{alert_id}`) or remove it (it will not be regrouped automatically). |
+| POST | `/api/incidents/{id}/merge` | Body `{into}`; the source is closed. 422 for self-merge or a resolved target. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

@@ -83,6 +83,12 @@ Alerts show a **Known malicious** badge when their source IP is on a threat feed
 
 Private and loopback addresses are never checked. A small **synthetic demo feed** (clearly labelled, covering the reserved test addresses used in `sample_logs/`) is loaded with the sample data so the badge shows offline; it is not real intelligence. Per-IP lookup services such as AbuseIPDB are not used because they would send your log data to a third party.
 
+## Incidents
+
+Related alerts are grouped into **incidents** automatically, so you investigate one story instead of many alerts. A new alert joins the lowest-numbered open incident that has an alert with the same source IP or the same account, with activity within 24 hours; otherwise it opens a new incident. Alerts with neither an IP nor an account are not grouped. Incident severity is the highest of its alerts.
+
+On the **Incidents** page you can start an investigation, resolve or reopen an incident, add notes, rename it, remove an alert (it will not be regrouped), or merge incidents. Every change is recorded in the incident's audit trail. An incident's status is separate from its alerts' statuses: resolving an incident does not resolve its alerts. An incident means "investigate these together", not that a breach is confirmed.
+
 ## What the sample data demonstrates
 
 `sample_logs/` tells a small story across sources:
@@ -117,4 +123,4 @@ The suite covers the parsers, collectors, rules, alert manager, repositories, in
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Still planned: incident grouping.
+Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Incident management (alerts grouped into incidents; see below). Milestone 5 is complete.

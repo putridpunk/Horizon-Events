@@ -58,6 +58,12 @@ export default function Reports() {
               <h2>Alert severity</h2>
               {report.severity_distribution.map((s) => <div key={s.severity} className="bar-row"><span className="name">{s.severity}</span><span>{s.count}</span></div>)}
             </section>
+            <section className="card">
+              <h2>Incidents ({report.incidents.total})</h2>
+              {Object.entries(report.incidents.by_status).map(([status, n]) => (
+                <div key={status} className="bar-row"><span className="name">{status}</span><span>{n}</span></div>
+              ))}
+            </section>
           </div>
         </>
       ) : (
