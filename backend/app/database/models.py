@@ -92,3 +92,19 @@ class AlertEventLink(Base):
     __tablename__ = "alert_events"
     alert_id: Mapped[int] = mapped_column(ForeignKey("alerts.id"), primary_key=True)
     event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), primary_key=True)
+
+
+class IntelFeedRow(Base):
+    __tablename__ = "intel_feeds"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    name: Mapped[str] = mapped_column(String(255))
+    source: Mapped[str] = mapped_column(String(16))  # "network" or "demo"
+    fetched_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    entries: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class IntelEntryRow(Base):
+    __tablename__ = "intel_entries"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    feed_id: Mapped[str] = mapped_column(ForeignKey("intel_feeds.id"), index=True)
+    cidr: Mapped[str] = mapped_column(String(64))
