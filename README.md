@@ -8,6 +8,35 @@ Horizon Events is a lightweight SIEM. It imports logs from Linux and Windows sys
 
 Built with Python, FastAPI, SQLAlchemy (SQLite), React, Chart.js and Docker. All bundled data is synthetic.
 
+## Screenshots
+
+All data below is synthetic, produced by the bundled sample logs.
+
+**Overview**: counts, events over time, the latest alerts and live monitoring of a watch folder.
+
+![Overview dashboard](docs/screenshots/overview.png)
+
+**Alert detail**: MITRE ATT&CK techniques, the investigation workflow, history and the events behind the alert. The "Known malicious" badge comes from a threat feed, matched locally.
+
+![Alert detail drawer](docs/screenshots/alert-drawer.png)
+
+**Incident**: related alerts grouped by shared IP or account, with an audit trail.
+
+![Incident detail drawer](docs/screenshots/incident-drawer.png)
+
+**Analytics**: distributions, MITRE ATT&CK coverage, the anomaly model (HZ-007), threat feeds and per-rule statistics.
+
+![Analytics](docs/screenshots/analytics.png)
+
+<details>
+<summary>More: event feed and reports</summary>
+
+![Event monitoring](docs/screenshots/events.png)
+
+![Reports](docs/screenshots/reports.png)
+
+</details>
+
 ## Architecture
 
 ```
