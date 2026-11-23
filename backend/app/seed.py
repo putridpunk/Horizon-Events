@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.database.connection import get_engine, init_db
 from app.database.models import EventRow
+from app.ml.service import ensure_model
 from app.services.ingestion import import_logs
 
 SAMPLES = [
     ("linux_auth.log", "linux_auth"), ("linux_syslog.log", "linux_syslog"),
     ("windows_events.xml", "windows"), ("app.log", "application"), ("custom.json", "json"),
+    ("slow_spray.log", "linux_auth"),
 ]
 
 
@@ -31,6 +33,8 @@ def seed(session: Session, directory: Path | None = None, now=None) -> list[dict
 
 def main() -> None:
     init_db()
+    if ensure_model():
+        print("Trained the anomaly model on the synthetic baseline.")
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     directory = Path(args[0]) if args else None
     with Session(get_engine(), expire_on_commit=False) as session:

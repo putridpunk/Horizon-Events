@@ -57,3 +57,6 @@ export function importLogs(file, sourceType) {
 
 export const getReport = (start, end) => request(`/reports${qs({ start, end, format: "json" })}`);
 export const reportUrl = (start, end, format) => `${BASE}/reports${qs({ start, end, format })}`;
+
+export const getModelStatus = () => request("/ml/status");
+export const trainModel = (source) => request("/ml/train", json("POST", { source }));

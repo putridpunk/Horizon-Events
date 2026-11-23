@@ -114,10 +114,11 @@ class RuleRepository:
         self.s = session
 
     def seed_defaults(self, defaults: list[dict]) -> None:
-        if self.s.scalar(select(func.count()).select_from(DetectionRuleRow)):
-            return
+        """Insert default rules that are not stored yet; never touches existing (possibly edited) rules."""
+        have = set(self.s.scalars(select(DetectionRuleRow.id)))
         for d in defaults:
-            self.s.add(DetectionRuleRow(**d))
+            if d["id"] not in have:
+                self.s.add(DetectionRuleRow(**d))
         self.s.flush()
 
     def list(self) -> list[DetectionRuleRow]:

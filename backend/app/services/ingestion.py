@@ -9,7 +9,7 @@ from app.alerts.manager import AlertManager
 from app.collectors.base import collect
 from app.database.repositories import AlertRepository, EventRepository, RuleRepository, SourceRepository
 from app.detection.engine import DetectionEngine
-from app.detection.rules import DEFAULT_RULES
+from app.detection.registry import DEFAULT_RULES
 
 
 def ensure_default_rules(session: Session) -> None:

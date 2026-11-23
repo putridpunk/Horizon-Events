@@ -14,6 +14,7 @@ if (-not (Test-Path "frontend\dist\index.html")) { throw "frontend\dist not foun
   --add-data "sample_logs;sample_logs" `
   --collect-submodules uvicorn `
   --collect-submodules app `
+  --collect-submodules sklearn `
   --hidden-import multipart `
   backend\run_app.py
 

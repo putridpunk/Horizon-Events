@@ -35,6 +35,7 @@ def _free_port(preferred: int = 8000) -> int:
 def main() -> None:
     db_file = _data_dir() / "horizon.db"
     os.environ.setdefault("DATABASE_URL", f"sqlite:///{db_file.as_posix()}")
+    os.environ.setdefault("HORIZON_MODEL_PATH", str(_data_dir() / "horizon_model.joblib"))
 
     import uvicorn
     from sqlalchemy import func, select
@@ -43,10 +44,13 @@ def main() -> None:
     from app.database.connection import get_engine, init_db
     from app.database.models import EventRow
     from app.main import app
+    from app.ml.service import ensure_model
     from app.seed import seed
     from app.web import mount_frontend
 
     init_db()
+    if ensure_model():
+        print("Trained the anomaly model on the synthetic baseline.")
     samples = BUNDLE / "sample_logs"
     if samples.is_dir() and os.environ.get("HORIZON_SEED", "true").lower() == "true":
         with Session(get_engine(), expire_on_commit=False) as session:
