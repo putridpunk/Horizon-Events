@@ -116,6 +116,16 @@ pip install -r requirements-build.txt
 powershell -File scripts\build-exe.ps1
 ```
 
+### Installer
+
+`dist\HorizonEvents-Setup.exe` is a standard Windows installer. It installs for the current user (no administrator rights; an all-users install is offered in the first dialog), lets you tick **Desktop shortcut** and **Start menu shortcut** independently, and can launch the app when it finishes. Horizon Events then appears in **Settings > Apps > Installed apps** (Control Panel > Programs and Features), where **Uninstall** removes it. The uninstaller asks whether to also delete your data in `%LOCALAPPDATA%\HorizonEvents`; a silent uninstall (`unins000.exe /VERYSILENT`) keeps it.
+
+Build it after the executable (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php), `winget install JRSoftware.InnoSetup`):
+
+```powershell
+powershell -File scriptsuild-installer.ps1
+```
+
 For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
 
 ## Collecting this computer's own logs
