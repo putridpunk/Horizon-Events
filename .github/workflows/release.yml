@@ -12,6 +12,8 @@ jobs:
   windows:
     name: Build Windows installer
     runs-on: windows-latest
+    env:
+      SIGN_PFX_BASE64: ${{ secrets.SIGN_PFX_BASE64 }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -38,11 +40,25 @@ jobs:
       - name: Build executable
         shell: pwsh
         run: .\scripts\build-exe.ps1
+      - name: Sign (executable)
+        if: env.SIGN_PFX_BASE64 != ''
+        shell: pwsh
+        env:
+          SIGN_PFX_BASE64: ${{ secrets.SIGN_PFX_BASE64 }}
+          SIGN_PFX_PASSWORD: ${{ secrets.SIGN_PFX_PASSWORD }}
+        run: ./scripts/sign.ps1 dist\HorizonEvents.exe
       - name: Build installer
         shell: pwsh
         run: |
           choco install innosetup -y --no-progress
           .\scripts\build-installer.ps1 -Version ("${{ github.ref_name }}".TrimStart("v"))
+      - name: Sign (installer)
+        if: env.SIGN_PFX_BASE64 != ''
+        shell: pwsh
+        env:
+          SIGN_PFX_BASE64: ${{ secrets.SIGN_PFX_BASE64 }}
+          SIGN_PFX_PASSWORD: ${{ secrets.SIGN_PFX_PASSWORD }}
+        run: ./scripts/sign.ps1 dist\HorizonEvents-Setup.exe
       - name: Checksums
         shell: pwsh
         run: |
