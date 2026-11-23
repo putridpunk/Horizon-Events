@@ -9,3 +9,5 @@ frontend/dist/
 dist/
 build/
 *.spec
+watch/*
+!watch/.gitkeep
