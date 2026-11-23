@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.database.models import AlertRow, EventRow
 from app.domain import utcnow
+from app.intel.service import enrich
 from app.mitre import technique_counts
 from app.services import statistics as stats
 
@@ -24,12 +25,16 @@ def build_report(session: Session, start: datetime, end: datetime) -> dict:
                                                                    EventRow.timestamp <= end)))
     al_ts = list(session.scalars(select(AlertRow.last_seen).where(AlertRow.last_seen >= start,
                                                                    AlertRow.last_seen <= end)))
+    alert_ips = list(session.scalars(select(AlertRow.source_ip).where(AlertRow.last_seen >= start,
+                                                                       AlertRow.last_seen <= end)))
+    intel_matches = sum(1 for ip in alert_ips if ip and enrich(session, ip)["listed"])
     ev_days, al_days = Counter(t.date().isoformat() for t in ev_ts), Counter(t.date().isoformat() for t in al_ts)
     return {
         "period": {"start": start.isoformat(), "end": end.isoformat()},
         "generated_at": utcnow().isoformat(),
         "total_events": len(ev_ts),
         "total_alerts": len(al_ts),
+        "intel_matches": intel_matches,
         "first_event": min(ev_ts).isoformat() if ev_ts else None,
         "last_event": max(ev_ts).isoformat() if ev_ts else None,
         "top_event_types": stats.top_event_types(session, 10, start, end),
@@ -61,6 +66,7 @@ def _csv(r: dict) -> str:
     w.writerow(["summary", "period_end", r["period"]["end"]])
     w.writerow(["summary", "total_events", r["total_events"]])
     w.writerow(["summary", "total_alerts", r["total_alerts"]])
+    w.writerow(["summary", "alerts_with_known_malicious_ip", r["intel_matches"]])
     for x in r["top_event_types"]:
         w.writerow(["event_type", x["name"], x["count"]])
     for x in r["severity_distribution"]:
@@ -100,5 +106,5 @@ def _html(r: dict) -> str:
         "th,td{border:1px solid #223049;padding:.4rem .6rem;text-align:left}th{background:#111c30}</style></head><body>"
         f"<h1>Horizon Events - Security report</h1><p>Period: {escape(r['period']['start'])} to "
         f"{escape(r['period']['end'])}<br>Generated: {escape(r['generated_at'])}</p>"
-        f"<p><b>{r['total_events']}</b> events processed, <b>{r['total_alerts']}</b> alerts generated.</p>{body}"
+        f"<p><b>{r['total_events']}</b> events processed, <b>{r['total_alerts']}</b> alerts generated, <b>{r['intel_matches']}</b> from IPs on a threat feed.</p>{body}"
         "</body></html>")

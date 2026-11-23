@@ -5,12 +5,14 @@ from app.alerts.manager import AlertManager, InvalidTransition
 from app.api.schemas import AlertUpdate, alert_out, event_out, history_out
 from app.database.connection import get_session
 from app.database.repositories import AlertRepository
+from app.intel.service import enrich
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 
 
 def _detail(repo: AlertRepository, row) -> dict:
-    return {**alert_out(row), "events": [event_out(e) for e in repo.linked_events(row.id)],
+    return {**alert_out(row), "intel": enrich(repo.s, row.source_ip),
+            "events": [event_out(e) for e in repo.linked_events(row.id)],
             "history": [history_out(h) for h in repo.history(row.id)]}
 
 
@@ -19,7 +21,7 @@ def list_alerts(severity: str | None = None, status: str | None = None, rule_id:
                 limit: int = Query(50, ge=1, le=500), offset: int = Query(0, ge=0),
                 session: Session = Depends(get_session)):
     rows, total = AlertRepository(session).list(severity, status, rule_id, limit, offset)
-    return {"items": [alert_out(r) for r in rows], "total": total}
+    return {"items": [{**alert_out(r), "intel": enrich(session, r.source_ip)} for r in rows], "total": total}
 
 
 @router.get("/{alert_id}")

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.database.connection import get_engine, init_db
 from app.database.models import EventRow
+from app.intel.service import ensure_demo_feed
 from app.ml.service import ensure_model
 from app.services.ingestion import import_logs
 
@@ -41,6 +42,7 @@ def main() -> None:
         if "--if-empty" in sys.argv and session.scalar(select(func.count(EventRow.id))):
             print("Database already has events; skipping seed.")
             return
+        ensure_demo_feed(session)
         for (name, _), res in zip(SAMPLES, seed(session, directory)):
             print(f"{name}: {res}")
 

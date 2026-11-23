@@ -44,6 +44,7 @@ def main() -> None:
 
     from app.database.connection import get_engine, init_db
     from app.database.models import EventRow
+    from app.intel.service import ensure_demo_feed
     from app.main import app
     from app.ml.service import ensure_model
     from app.seed import seed
@@ -56,6 +57,7 @@ def main() -> None:
     if samples.is_dir() and os.environ.get("HORIZON_SEED", "true").lower() == "true":
         with Session(get_engine(), expire_on_commit=False) as session:
             if not session.scalar(select(func.count(EventRow.id))):
+                ensure_demo_feed(session)
                 seed(session, samples)
                 print("Imported the bundled sample logs.")
     mount_frontend(app, BUNDLE / "static")
