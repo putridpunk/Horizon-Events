@@ -19,6 +19,8 @@ Interactive documentation is served at `/docs` when the backend runs.
 | GET | `/api/statistics/mitre` | `{tactics, techniques}`: alert counts per tactic and technique. Alerts and rules also carry a `techniques` list. |
 | GET | `/api/watcher/status` | Live monitoring state: `enabled`, `running`, `paused`, `directory`, per-file counters. `{enabled: false}` when no watch folder is configured. |
 | POST | `/api/watcher/pause`, `/api/watcher/resume` | Pause or resume ingestion (409 when not enabled). |
+| GET | `/api/intel/status` | Threat feeds: `id, name, source (network or demo), entries, fetched_at`. |
+| POST | `/api/intel/refresh` | Body `{feeds?: [...]}`. Downloads the public feeds (the only network action; at most once an hour per feed). 422 for an unknown feed. Alerts and event details carry an `intel` field. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

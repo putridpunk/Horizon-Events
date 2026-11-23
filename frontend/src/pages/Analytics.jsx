@@ -4,6 +4,7 @@ import { fmtTime } from "../services/constants.js";
 import { EmptyState, ErrorBanner, PageHeader } from "../components/common.jsx";
 import ModelCard from "../components/ModelCard.jsx";
 import MitrePanel from "../components/MitrePanel.jsx";
+import IntelCard from "../components/IntelCard.jsx";
 import { EventsOverTime, HorizontalBars, SeverityDoughnut } from "../charts/charts.jsx";
 
 function Panel({ title, empty, children }) {
@@ -37,6 +38,7 @@ export default function Analytics() {
       </div>
       <MitrePanel stats={d?.mitre} />
       <ModelCard />
+      <IntelCard />
       <section className="card" style={{ marginTop: 16 }}>
         <h2>Detection rule statistics</h2>
         {d?.rules.length ? (

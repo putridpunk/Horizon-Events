@@ -35,6 +35,10 @@ api  ->  services  ->  collectors / processors / detection / alerts  ->  domain
 
 `watcher/tailer.py` reads only the complete new lines of a growing file (a pure helper). `watcher/service.py` polls the watch folder from a background thread and feeds each batch to `import_logs`, so detection and alerting are identical to a manual import. Per-file errors are recorded and retried; the loop never stops. Offsets are kept in memory, and the event fingerprint makes re-reading after a restart harmless. The service starts only when `HORIZON_WATCH_DIR` is set.
 
+## Threat intelligence
+
+`intel/feeds.py` holds the feed definitions, parsers and the local `IpMatcher` (pure Python). `intel/service.py` stores feed entries in `intel_feeds` / `intel_entries`, refreshes them only on request (https, size-capped, one hour minimum between refreshes, previous data kept on failure) and enriches IPs on read, so alerts always reflect the current feed data. Feed URLs are constants; users cannot supply URLs.
+
 ## Model file security
 
 The trained model is stored with `joblib`, which uses pickle. Horizon Events writes it to its own data folder (`HORIZON_MODEL_PATH`, default `./horizon_model.joblib`; `/data` in Docker; `%LOCALAPPDATA%\HorizonEvents` for the executable). Never point `HORIZON_MODEL_PATH` at a file you did not create: loading an untrusted pickle can run arbitrary code. A missing or unreadable file is treated as "not trained".
