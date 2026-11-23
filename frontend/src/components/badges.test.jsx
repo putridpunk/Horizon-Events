@@ -59,7 +59,7 @@ describe("common components", () => {
 
   it("SeverityBadge and EmptyState render their content", () => {
     render(<><SeverityBadge value="critical" /><EmptyState>Nothing here</EmptyState></>);
-    expect(screen.getByText("critical")).toHaveClass("badge", "critical");
+    expect(screen.getByText("Critical").closest(".badge")).toHaveClass("badge", "critical");
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
   });
 

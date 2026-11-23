@@ -7,12 +7,9 @@ export function StatCard({ label, value, tone = "" }) {
   );
 }
 
-export const SeverityBadge = ({ value }) => <span className={`badge ${value}`}>{value}</span>;
-export const StatusBadge = ({ value }) => <span className={`badge ${value}`}>{value}</span>;
-
-export function EmptyState({ children = "Nothing to show yet." }) {
-  return <div className="empty">{children}</div>;
-}
+export { default as SeverityBadge } from "./ui/SeverityBadge.jsx";
+export { default as StatusBadge } from "./ui/StatusBadge.jsx";
+export { default as EmptyState } from "./ui/EmptyState.jsx";
 
 export function ErrorBanner({ error }) {
   return error ? <div className="error">Could not load data: {error}</div> : null;
