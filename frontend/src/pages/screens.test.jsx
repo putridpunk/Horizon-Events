@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import App from "../App.jsx";
+import { routerFuture } from "../routerFuture.js";
 import ImportButton from "../components/ImportButton.jsx";
 import { alert, incident } from "../test/fixtures.js";
 import { mockApiDefaults } from "../test/mockApi.js";
@@ -155,7 +156,7 @@ describe("ImportButton", () => {
 });
 
 describe("App routing", () => {
-  const at = (path) => render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
+  const at = (path) => render(<MemoryRouter initialEntries={[path]} future={routerFuture}><App /></MemoryRouter>);
 
   it("renders every page from its route and highlights the active nav link", async () => {
     mockApiDefaults();
