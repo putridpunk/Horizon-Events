@@ -26,8 +26,8 @@ describe("empty database", () => {
     render(<Overview />);
     // The empty-state text is also shown while loading, so wait for the loaded zeros first.
     await waitFor(() => expect(screen.getAllByText("0")).toHaveLength(4));
-    expect(screen.getByText(/No events yet/)).toBeInTheDocument();
-    expect(screen.getByText(/No alerts. Nothing suspicious/)).toBeInTheDocument();
+    expect(screen.getByText("No events yet")).toBeInTheDocument();
+    expect(await screen.findByText("Nothing needs attention")).toBeInTheDocument();
     expect(screen.queryByText(/Could not load data/)).not.toBeInTheDocument();
   });
 
@@ -56,12 +56,14 @@ describe("Overview with data", () => {
     mockApiDefaults();
     vi.mocked(api.getOverview).mockResolvedValue({ total_events: 56, total_alerts: 12, open_alerts: 12, critical_alerts: 1, high_alerts: 8, sources: 6 });
     vi.mocked(api.getTimeseries).mockResolvedValue([{ t: "2026-11-23T14:00:00", count: 20 }]);
-    vi.mocked(api.listAlerts).mockResolvedValue({ items: [alert()], total: 1 });
+    vi.mocked(api.listAlerts).mockImplementation(async (p) => ({ items: p.severity === "critical" ? [alert()] : [], total: 1 }));
+    vi.mocked(api.listIncidents).mockResolvedValue({ items: [], total: 3 });
     render(<Overview />);
     expect(await screen.findByText("56")).toBeInTheDocument();
     expect(screen.getByText("chart:events-over-time")).toBeInTheDocument();
-    expect(screen.getByText("Repeated login failures")).toBeInTheDocument();
-    expect(screen.getByText(/12 open/)).toBeInTheDocument();
+    expect(await screen.findByText("Repeated login failures")).toBeInTheDocument();
+    expect(screen.getByText("Open alerts").parentElement).toHaveTextContent("12");
+    expect(screen.getByText("Open incidents").parentElement).toHaveTextContent("3");
   });
 });
 
@@ -151,7 +153,8 @@ describe("ImportButton", () => {
     vi.mocked(api.importLogs).mockRejectedValue(new Error("File exceeds the 10 MB upload limit"));
     const { container } = render(<ImportButton />);
     await user.upload(container.querySelector('input[type="file"]'), new File(["x"], "big.log"));
-    expect(await screen.findByText("File exceeds the 10 MB upload limit")).toHaveClass("error");
+    const message = await screen.findByText("File exceeds the 10 MB upload limit");
+    expect(message.closest(".import-message")).toHaveClass("error");
   });
 });
 

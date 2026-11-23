@@ -1,64 +1,46 @@
 import { useState } from "react";
 import usePolling from "../services/usePolling.js";
-import { getOverview, getTimeseries, listAlerts } from "../services/api.js";
-import { fmtTime } from "../services/constants.js";
-import { EmptyState, ErrorBanner, PageHeader, SeverityBadge, StatCard, StatusBadge } from "../components/common.jsx";
+import { getOverview, getTimeseries, listIncidents } from "../services/api.js";
+import { EmptyState, ErrorBanner, PageHeader, StatCard } from "../components/common.jsx";
 import { EventsOverTime } from "../charts/charts.jsx";
-import ImportButton from "../components/ImportButton.jsx";
 import AlertDrawer from "../components/AlertDrawer.jsx";
+import AttentionPanel from "../components/AttentionPanel.jsx";
+import IncidentDrawer from "../components/IncidentDrawer.jsx";
 
 export default function Overview() {
-  const [selected, setSelected] = useState(null);
+  const [alertId, setAlertId] = useState(null);
+  const [incidentId, setIncidentId] = useState(null);
   const stats = usePolling(getOverview, [], 10000);
   const series = usePolling(() => getTimeseries({ bucket: "hour" }), [], 10000);
-  const alerts = usePolling(() => listAlerts({ limit: 6 }), [], 10000);
+  const openIncidents = usePolling(() => listIncidents({ status: "OPEN", limit: 1 }), [], 10000);
   const o = stats.data;
-  const refresh = () => { stats.reload(); series.reload(); alerts.reload(); };
+  const refresh = () => { stats.reload(); series.reload(); openIncidents.reload(); };
 
   return (
     <>
-      <PageHeader title="Security overview" subtitle="Current state of the monitored environment">
-        <ImportButton onDone={refresh} />
-      </PageHeader>
-      <ErrorBanner error={stats.error || series.error || alerts.error} />
+      <PageHeader title="Security overview" subtitle="What is happening in the monitored environment right now" />
+      <ErrorBanner error={stats.error || series.error || openIncidents.error} />
       <div className="grid cols-4" style={{ marginBottom: 16 }}>
         <StatCard label="Events collected" value={o?.total_events} tone="accent" />
-        <StatCard label="Alerts generated" value={o?.total_alerts} />
+        <StatCard label="Open alerts" value={o?.open_alerts} />
+        <StatCard label="Open incidents" value={openIncidents.data?.total} />
         <StatCard label="Critical alerts" value={o?.critical_alerts} tone="critical" />
-        <StatCard label="High alerts" value={o?.high_alerts} tone="high" />
       </div>
       <div className="grid cols-2">
+        <AttentionPanel onOpenAlert={setAlertId} onOpenIncident={setIncidentId} />
         <section className="card">
-          <h2>Events processed over time</h2>
+          <div className="card-header"><h2>Events over time</h2></div>
           {series.data?.length ? (
             <div className="chart-box"><EventsOverTime points={series.data} /></div>
           ) : (
-            <EmptyState>No events yet. Import a log file to get started.</EmptyState>
-          )}
-        </section>
-        <section className="card">
-          <h2>Latest alerts {o ? <span className="muted">· {o.open_alerts} open</span> : null}</h2>
-          {alerts.data?.items.length ? (
-            <div className="table-wrap">
-              <table>
-                <tbody>
-                  {alerts.data.items.map((a) => (
-                    <tr key={a.id} className="clickable" onClick={() => setSelected(a.id)}>
-                      <td><SeverityBadge value={a.severity} /></td>
-                      <td>{a.rule_name}<div className="muted mono">{a.source_ip || a.username || ""}</div></td>
-                      <td><StatusBadge value={a.status} /></td>
-                      <td className="muted">{fmtTime(a.last_seen)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState>No alerts. Nothing suspicious detected yet.</EmptyState>
+            <EmptyState title="No events yet">
+              Turn on system logs under Data sources, or import a log file, and activity will appear here.
+            </EmptyState>
           )}
         </section>
       </div>
-      {selected && <AlertDrawer alertId={selected} onClose={() => setSelected(null)} onChanged={refresh} />}
+      {alertId && <AlertDrawer alertId={alertId} onClose={() => setAlertId(null)} onChanged={refresh} />}
+      {incidentId && <IncidentDrawer incidentId={incidentId} others={[]} onClose={() => setIncidentId(null)} onChanged={refresh} />}
     </>
   );
 }

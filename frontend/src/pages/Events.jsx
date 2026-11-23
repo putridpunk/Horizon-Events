@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import usePolling from "../services/usePolling.js";
 import { getEvent, listEvents } from "../services/api.js";
 import { EVENT_TYPES, SEVERITIES, SOURCES, fmtTime } from "../services/constants.js";
+import Icon from "../components/ui/Icon.jsx";
+import rowProps from "../components/ui/rowProps.js";
 import { EmptyState, ErrorBanner, PageHeader, Pager, SeverityBadge } from "../components/common.jsx";
 import EventDetail from "../components/EventDetail.jsx";
 
@@ -44,10 +46,10 @@ export default function Events() {
           <>
             <div className="table-wrap">
               <table>
-                <thead><tr><th>Time</th><th>Severity</th><th>Type</th><th>Source</th><th>User</th><th>IP</th><th>Message</th></tr></thead>
+                <thead><tr><th>Time</th><th>Severity</th><th>Type</th><th>Source</th><th>User</th><th>IP</th><th>Message</th><th aria-label="Open"></th></tr></thead>
                 <tbody>
                   {data.items.map((e) => (
-                    <tr key={e.id} className="clickable" onClick={() => open(e.id)}>
+                    <tr key={e.id} {...rowProps(() => open(e.id))}>
                       <td className="mono">{fmtTime(e.timestamp)}</td>
                       <td><SeverityBadge value={e.severity} /></td>
                       <td>{e.event_type}</td>
@@ -55,6 +57,7 @@ export default function Events() {
                       <td>{e.username || "-"}</td>
                       <td className="mono">{e.source_ip || "-"}</td>
                       <td className="muted">{e.message.slice(0, 80)}</td>
+                      <td className="chevron"><Icon name="chevron-right" /></td>
                     </tr>
                   ))}
                 </tbody>

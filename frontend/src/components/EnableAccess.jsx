@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { enableSecurityAccess } from "../services/api.js";
+import { Modal } from "./overlay.jsx";
 
 /** The one-time "let Horizon Events read the Windows Security log" step, with an explicit confirmation. */
 export default function EnableAccess({ onRequested }) {
@@ -36,25 +37,21 @@ export default function EnableAccess({ onRequested }) {
       {message && <p className="muted" role="status">{message}</p>}
       {error && <div className="error" role="alert">{error}</div>}
       {open && (
-        <div className="overlay center" onClick={() => !busy && setOpen(false)}>
-          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="enable-title"
-            onClick={(e) => e.stopPropagation()}>
-            <h2 id="enable-title">Allow Horizon Events to read the Security log?</h2>
-            <p>
-              Windows keeps sign-in activity (failed logons, account lockouts, new accounts) in a protected log.
-              To read it, your account must be a member of the built-in <strong>Event Log Readers</strong> group.
-            </p>
-            <p>
-              Choosing <strong>Continue</strong> asks Windows to add you to that group. Windows will show its own
-              permission prompt, and nothing changes unless you approve it. Afterwards, sign out of Windows and
-              back in once. You can remove yourself from the group at any time in Computer Management.
-            </p>
-            <div className="actions">
-              <button className="primary" disabled={busy} onClick={confirm}>Continue</button>
-              <button disabled={busy} onClick={() => setOpen(false)}>Cancel</button>
-            </div>
+        <Modal title="Allow Horizon Events to read the Security log?" busy={busy} onClose={() => setOpen(false)}>
+          <p>
+            Windows keeps sign-in activity (failed logons, account lockouts, new accounts) in a protected log.
+            To read it, your account must be a member of the built-in <strong>Event Log Readers</strong> group.
+          </p>
+          <p>
+            Choosing <strong>Continue</strong> asks Windows to add you to that group. Windows will show its own
+            permission prompt, and nothing changes unless you approve it. Afterwards, sign out of Windows and
+            back in once. You can remove yourself from the group at any time in Computer Management.
+          </p>
+          <div className="actions">
+            <button className="primary" disabled={busy} onClick={confirm}>Continue</button>
+            <button disabled={busy} onClick={() => setOpen(false)}>Cancel</button>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

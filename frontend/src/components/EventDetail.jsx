@@ -1,5 +1,6 @@
 import { fmtTime } from "../services/constants.js";
 import { SeverityBadge } from "./common.jsx";
+import { Modal } from "./overlay.jsx";
 
 export default function EventDetail({ event, onClose }) {
   if (!event) return null;
@@ -14,12 +15,7 @@ export default function EventDetail({ event, onClose }) {
     ["Service", event.service || "-"],
   ];
   return (
-    <div className="overlay center" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="topbar">
-          <h2>Event #{event.id}</h2>
-          <button onClick={onClose}>Close</button>
-        </div>
+    <Modal title={`Event #${event.id}`} onClose={onClose}>
         <dl className="kv">
           {rows.map(([k, v]) => (
             <div key={k} style={{ display: "contents" }}>
@@ -32,7 +28,7 @@ export default function EventDetail({ event, onClose }) {
         <p>{event.message || "-"}</p>
         <h2>Raw log</h2>
         <pre className="raw">{event.raw}</pre>
-      </div>
-    </div>
+        <div className="actions"><button onClick={onClose}>Close</button></div>
+    </Modal>
   );
 }

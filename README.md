@@ -12,9 +12,11 @@ Built with Python, FastAPI, SQLAlchemy (SQLite), React, Chart.js and Docker. All
 
 All data below is synthetic, produced by the bundled sample logs.
 
-**Overview**: counts, events over time, the latest alerts and live monitoring of a watch folder.
+**Overview**: key counts, a Needs attention list of the alerts and incidents to look at first, and events over time. Light by default, with a dark theme one click away.
 
 ![Overview dashboard](docs/screenshots/overview.png)
+
+![Overview in the dark theme](docs/screenshots/overview-dark.png)
 
 **Alert detail**: MITRE ATT&CK techniques, the investigation workflow, history and the events behind the alert. The "Known malicious" badge comes from a threat feed, matched locally.
 

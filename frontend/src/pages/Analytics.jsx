@@ -34,7 +34,7 @@ export default function Analytics() {
         <Panel title="Events over time" empty={!d?.series.length}>{d && <EventsOverTime points={d.series} />}</Panel>
         <Panel title="Alert severity distribution" empty={noAlerts}>{d && <SeverityDoughnut items={d.severity} />}</Panel>
         <Panel title="Most frequent event types" empty={!d?.types.length}>{d && <HorizontalBars items={d.types} />}</Panel>
-        <Panel title="Most common source IPs" empty={!d?.ips.length}>{d && <HorizontalBars items={d.ips} color="#ff9248" />}</Panel>
+        <Panel title="Most common source IPs" empty={!d?.ips.length}>{d && <HorizontalBars items={d.ips} tone="high" />}</Panel>
       </div>
       <MitrePanel stats={d?.mitre} />
       <ModelCard />
