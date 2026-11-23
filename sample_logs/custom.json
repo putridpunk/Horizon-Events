@@ -1,0 +1,5 @@
+[
+  {"timestamp": "2026-11-23T12:00:00", "event_type": "authentication_success", "username": "carol", "source_ip": "10.0.0.31", "host": "vpn01", "message": "VPN login"},
+  {"timestamp": "2026-11-23T12:30:00", "event_type": "service_failure", "service": "queue-worker", "host": "app02", "message": "worker crashed", "severity": "high"},
+  {"timestamp": "2026-11-23T12:31:00", "event_type": "generic", "host": "app02", "message": "worker restarted"}
+]
