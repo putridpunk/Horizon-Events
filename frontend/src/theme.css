@@ -231,3 +231,14 @@ pre.raw { background: var(--surface-2); border: 1px solid var(--border); border-
   .appbar { padding: 10px 16px; }
   .source-row { grid-template-columns: 1fr; }
 }
+
+/* ---------- skip link and import control ---------- */
+.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 60; background: var(--accent); color: var(--on-accent);
+  padding: 8px 12px; border-radius: var(--r-control); }
+.skip-link:focus { left: 8px; text-decoration: none; }
+.import { display: flex; align-items: center; gap: 8px; position: relative; }
+.import-message { position: absolute; right: 0; top: calc(100% + 8px); z-index: 10; min-width: 260px; max-width: 420px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: var(--r-control); color: var(--text); box-shadow: var(--shadow-drawer); }
+.import-message.error { background: var(--critical-bg); border-color: var(--critical); color: var(--critical); }
+.import-message .icon-button { border: 0; background: none; min-height: 24px; width: 24px; }

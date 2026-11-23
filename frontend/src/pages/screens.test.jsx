@@ -151,7 +151,8 @@ describe("ImportButton", () => {
     vi.mocked(api.importLogs).mockRejectedValue(new Error("File exceeds the 10 MB upload limit"));
     const { container } = render(<ImportButton />);
     await user.upload(container.querySelector('input[type="file"]'), new File(["x"], "big.log"));
-    expect(await screen.findByText("File exceeds the 10 MB upload limit")).toHaveClass("error");
+    const message = await screen.findByText("File exceeds the 10 MB upload limit");
+    expect(message.closest(".import-message")).toHaveClass("error");
   });
 });
 
