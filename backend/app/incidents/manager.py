@@ -4,8 +4,9 @@ from __future__ import annotations
 from datetime import timedelta
 
 from app.alerts.manager import _ALLOWED, InvalidTransition
-from app.database.models import AlertRow, IncidentRow
-from app.database.repositories import IncidentRepository
+from app.database.incident_models import IncidentRow
+from app.database.models import AlertRow
+from app.database.incident_repository import IncidentRepository
 from app.domain import SEVERITY_RANK, AlertStatus, Severity, utcnow
 
 CORRELATION_WINDOW = timedelta(hours=24)
