@@ -41,6 +41,7 @@ def _store(session: Session, feed_id: str, name: str, source: str, cidrs: list[s
     row = session.get(IntelFeedRow, feed_id) or IntelFeedRow(id=feed_id, name=name, source=source)
     row.name, row.source, row.fetched_at, row.entries = name, source, fetched_at, len(cidrs)
     session.add(row)
+    session.flush()  # the feed row must exist before its entries (foreign keys are enforced on PostgreSQL)
     session.add_all(IntelEntryRow(feed_id=feed_id, cidr=c) for c in cidrs)
     session.commit()
 

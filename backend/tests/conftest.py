@@ -1,17 +1,29 @@
+import os
 from datetime import datetime
 
 import pytest
 from sqlalchemy.orm import Session
 
 from app.database.connection import init_db, make_engine
+from app.database.models import Base
 from app.domain import Event, EventType, Severity
 
 
 @pytest.fixture
 def engine():
-    eng = make_engine("sqlite://")
+    """In-memory SQLite by default. Set HORIZON_TEST_DATABASE_URL to run the suite against another
+    database (e.g. PostgreSQL); the schema is recreated for every test."""
+    url = os.environ.get("HORIZON_TEST_DATABASE_URL")
+    if not url:
+        eng = make_engine("sqlite://")
+        init_db(eng)
+        yield eng
+        return
+    eng = make_engine(url)
+    Base.metadata.drop_all(eng)
     init_db(eng)
-    return eng
+    yield eng
+    eng.dispose()
 
 
 @pytest.fixture
