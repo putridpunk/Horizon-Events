@@ -1,7 +1,10 @@
 import { useState } from "react";
 import usePolling from "../services/usePolling.js";
 import { listIncidents } from "../services/api.js";
-import { SEVERITIES, STATUSES, fmtTime } from "../services/constants.js";
+import { SEVERITIES, STATUSES } from "../services/constants.js";
+import Icon from "../components/ui/Icon.jsx";
+import Time from "../components/ui/Time.jsx";
+import rowProps from "../components/ui/rowProps.js";
 import { EmptyState, ErrorBanner, PageHeader, Pager, SeverityBadge, StatusBadge } from "../components/common.jsx";
 import IncidentDrawer from "../components/IncidentDrawer.jsx";
 
@@ -34,16 +37,17 @@ export default function Incidents() {
           <>
             <div className="table-wrap">
               <table>
-                <thead><tr><th>ID</th><th>Severity</th><th>Title</th><th>Alerts</th><th>Status</th><th>Last activity</th></tr></thead>
+                <thead><tr><th>ID</th><th>Severity</th><th>Title</th><th>Alerts</th><th>Status</th><th>Last activity</th><th aria-label="Open"></th></tr></thead>
                 <tbody>
                   {data.items.map((i) => (
-                    <tr key={i.id} className="clickable" onClick={() => setSelected(i.id)}>
+                    <tr key={i.id} {...rowProps(() => setSelected(i.id))}>
                       <td className="mono">{i.incident_id}</td>
                       <td><SeverityBadge value={i.severity} /></td>
                       <td>{i.title}</td>
                       <td>{i.alert_count}</td>
                       <td><StatusBadge value={i.status} /></td>
-                      <td className="muted">{fmtTime(i.last_activity)}</td>
+                      <td><Time value={i.last_activity} /></td>
+                      <td className="chevron"><Icon name="chevron-right" /></td>
                     </tr>
                   ))}
                 </tbody>

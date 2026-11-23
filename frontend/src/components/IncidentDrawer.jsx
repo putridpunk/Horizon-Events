@@ -5,6 +5,7 @@ import { fmtTime } from "../services/constants.js";
 import { ErrorBanner, SeverityBadge, StatusBadge } from "./common.jsx";
 import IntelBadge from "./IntelBadge.jsx";
 import TechniqueBadges from "./TechniqueBadges.jsx";
+import { Drawer } from "./overlay.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -48,15 +49,7 @@ export default function IncidentDrawer({ incidentId, others, onClose, onChanged 
   const merge = () => run(async () => { await mergeIncident(incidentId, Number(mergeInto)); setMergeInto(""); });
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <aside className="drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="topbar">
-          <div>
-            <h2>{inc ? inc.incident_id : "Incident"}</h2>
-            {inc && <div>{inc.title}</div>}
-          </div>
-          <button onClick={onClose}>Close</button>
-        </div>
+    <Drawer title={inc ? inc.incident_id : "Incident"} subtitle={inc ? inc.title : null} onClose={onClose}>
         <ErrorBanner error={error} />
         {inc && (
           <>
@@ -139,7 +132,6 @@ export default function IncidentDrawer({ incidentId, others, onClose, onChanged 
             </ul>
           </>
         )}
-      </aside>
-    </div>
+    </Drawer>
   );
 }

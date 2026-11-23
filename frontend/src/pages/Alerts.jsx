@@ -1,7 +1,10 @@
 import { useState } from "react";
 import usePolling from "../services/usePolling.js";
 import { listAlerts } from "../services/api.js";
-import { SEVERITIES, STATUSES, fmtTime } from "../services/constants.js";
+import { SEVERITIES, STATUSES } from "../services/constants.js";
+import Icon from "../components/ui/Icon.jsx";
+import Time from "../components/ui/Time.jsx";
+import rowProps from "../components/ui/rowProps.js";
 import { EmptyState, ErrorBanner, PageHeader, Pager, SeverityBadge, StatusBadge } from "../components/common.jsx";
 import AlertDrawer from "../components/AlertDrawer.jsx";
 import TechniqueBadges from "../components/TechniqueBadges.jsx";
@@ -33,10 +36,10 @@ export default function Alerts() {
           <>
             <div className="table-wrap">
               <table>
-                <thead><tr><th>ID</th><th>Severity</th><th>Rule</th><th>Source IP</th><th>Account</th><th>Count</th><th>Status</th><th>Last activity</th></tr></thead>
+                <thead><tr><th>ID</th><th>Severity</th><th>Rule</th><th>Source IP</th><th>Account</th><th>Count</th><th>Status</th><th>Last activity</th><th aria-label="Open"></th></tr></thead>
                 <tbody>
                   {data.items.map((a) => (
-                    <tr key={a.id} className="clickable" onClick={() => setSelected(a.id)}>
+                    <tr key={a.id} {...rowProps(() => setSelected(a.id))}>
                       <td className="mono">{a.alert_id}</td>
                       <td><SeverityBadge value={a.severity} /></td>
                       <td>{a.rule_name}<div className="muted">{a.rule_id}</div><TechniqueBadges techniques={a.techniques} /></td>
@@ -44,7 +47,8 @@ export default function Alerts() {
                       <td>{a.username || "-"}</td>
                       <td>{a.occurrences}</td>
                       <td><StatusBadge value={a.status} /></td>
-                      <td className="muted">{fmtTime(a.last_seen)}</td>
+                      <td><Time value={a.last_seen} /></td>
+                      <td className="chevron"><Icon name="chevron-right" /></td>
                     </tr>
                   ))}
                 </tbody>
