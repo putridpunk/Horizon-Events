@@ -1,6 +1,9 @@
 import os
 from datetime import datetime
 
+# The API refuses unknown Host headers; Starlette's test client uses 'testserver'. Set before the app is imported.
+os.environ.setdefault("HORIZON_ALLOWED_HOSTS", "testserver")
+
 import pytest
 from sqlalchemy.orm import Session
 
