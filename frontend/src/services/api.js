@@ -69,3 +69,10 @@ export const resumeWatcher = () => request("/watcher/resume", { method: "POST" }
 
 export const getIntelStatus = () => request("/intel/status");
 export const refreshIntel = () => request("/intel/refresh", json("POST", {}));
+
+export const listIncidents = (params) => request(`/incidents${qs(params)}`);
+export const getIncident = (id) => request(`/incidents/${id}`);
+export const updateIncident = (id, body) => request(`/incidents/${id}`, json("PATCH", body));
+export const addIncidentNote = (id, text) => request(`/incidents/${id}/notes`, json("POST", { text }));
+export const removeIncidentAlert = (id, alertId) => request(`/incidents/${id}/alerts/${alertId}`, { method: "DELETE" });
+export const mergeIncident = (id, into) => request(`/incidents/${id}/merge`, json("POST", { into }));

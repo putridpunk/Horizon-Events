@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from app.alerts.manager import AlertManager
 from app.collectors.base import collect
 from app.database.repositories import AlertRepository, EventRepository, RuleRepository, SourceRepository
+from app.database.incident_repository import IncidentRepository
 from app.detection.engine import DetectionEngine
+from app.incidents.manager import IncidentManager
 from app.detection.registry import DEFAULT_RULES
 
 
@@ -32,6 +34,8 @@ def import_logs(session: Session, source_type: str, filename: str, content: byte
     detections = DetectionEngine.from_definitions(definitions).run(stored, event_repo)
     manager = AlertManager(AlertRepository(session))
     manager.process(detections)
+    touched = {a.id: a for a in manager.created + manager.updated}
+    IncidentManager(IncidentRepository(session)).correlate(list(touched.values()))
     session.commit()
     return {
         "source_id": source.id, "total": result.total, "imported": len(stored), "skipped": result.skipped,
