@@ -28,5 +28,9 @@ api  ->  services  ->  collectors / processors / detection / alerts  ->  domain
 
 - **New log source:** add a parser, a collector iterator and an entry in `collectors/base.py`.
 - **New rule:** subclass `Rule`, register it in `RULE_CLASSES`. Defaults are seeded into the `detection_rules` table automatically.
-- **ML detector:** implement `Rule.evaluate(new_events, history)`; nothing else changes.
+- **ML detector:** implement `Rule.evaluate(new_events, history)` and register it in `detection/registry.py`; nothing else changes. HZ-007 does exactly this (`detection/anomaly.py`, with feature extraction, the synthetic baseline and the model in `ml/`).
 - **PostgreSQL:** set `DATABASE_URL`; models use portable column types only.
+
+## Model file security
+
+The trained model is stored with `joblib`, which uses pickle. Horizon Events writes it to its own data folder (`HORIZON_MODEL_PATH`, default `./horizon_model.joblib`; `/data` in Docker; `%LOCALAPPDATA%\HorizonEvents` for the executable). Never point `HORIZON_MODEL_PATH` at a file you did not create: loading an untrusted pickle can run arbitrary code. A missing or unreadable file is treated as "not trained".

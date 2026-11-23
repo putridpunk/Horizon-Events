@@ -74,6 +74,7 @@ powershell -File scripts\build-exe.ps1
 | `sudo` to root by `bob`; a group change by `tmp_contractor` | HZ-004 |
 | `nginx` failing four times; the Windows Spooler service failing | HZ-005 |
 | Account lockouts on Linux (`admin`) and Windows (`jsmith`) | HZ-006 |
+| A slow password spray (3 attempts an hour, different usernames) from `198.51.100.77` | HZ-007 (ML) |
 
 You can also import your own files from the dashboard's **Import logs** button (choose the matching source type). Re-importing a file does not create duplicates.
 
@@ -95,4 +96,4 @@ The suite covers the parsers, collectors, rules, alert manager, repositories, in
 
 ## Roadmap
 
-Machine-learning anomaly detection (Isolation Forest), MITRE ATT&CK mapping, continuous log tailing, threat-intelligence enrichment and incident grouping are planned as milestone 5.
+Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). Still planned: MITRE ATT&CK mapping, continuous log tailing, threat-intelligence enrichment and incident grouping.

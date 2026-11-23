@@ -2,6 +2,7 @@ import usePolling from "../services/usePolling.js";
 import { getEventTypes, getRuleStats, getSeverity, getSourceIps, getTimeseries } from "../services/api.js";
 import { fmtTime } from "../services/constants.js";
 import { EmptyState, ErrorBanner, PageHeader } from "../components/common.jsx";
+import ModelCard from "../components/ModelCard.jsx";
 import { EventsOverTime, HorizontalBars, SeverityDoughnut } from "../charts/charts.jsx";
 
 function Panel({ title, empty, children }) {
@@ -33,6 +34,7 @@ export default function Analytics() {
         <Panel title="Most frequent event types" empty={!d?.types.length}>{d && <HorizontalBars items={d.types} />}</Panel>
         <Panel title="Most common source IPs" empty={!d?.ips.length}>{d && <HorizontalBars items={d.ips} color="#ff9248" />}</Panel>
       </div>
+      <ModelCard />
       <section className="card" style={{ marginTop: 16 }}>
         <h2>Detection rule statistics</h2>
         {d?.rules.length ? (
