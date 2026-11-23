@@ -15,6 +15,8 @@ Interactive documentation is served at `/docs` when the backend runs.
 | GET | `/api/reports` | `start`, `end`, `format=json\|csv\|html`. |
 | GET | `/api/ml/status` | Anomaly model status: `trained`, `trained_at`, `windows`, `source`, `features`. |
 | POST | `/api/ml/train` | Body `{source: "synthetic" \| "database"}`. 422 when the database has too little data. |
+| GET | `/api/mitre/techniques` | The built-in ATT&CK technique table. |
+| GET | `/api/statistics/mitre` | `{tactics, techniques}`: alert counts per tactic and technique. Alerts and rules also carry a `techniques` list. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

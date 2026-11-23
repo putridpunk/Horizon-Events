@@ -60,3 +60,5 @@ export const reportUrl = (start, end, format) => `${BASE}/reports${qs({ start, e
 
 export const getModelStatus = () => request("/ml/status");
 export const trainModel = (source) => request("/ml/train", json("POST", { source }));
+
+export const getMitreStats = () => request("/statistics/mitre");

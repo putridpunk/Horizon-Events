@@ -3,6 +3,7 @@ import usePolling from "../services/usePolling.js";
 import { getAlert, updateAlert } from "../services/api.js";
 import { fmtTime } from "../services/constants.js";
 import { ErrorBanner, SeverityBadge, StatusBadge } from "./common.jsx";
+import TechniqueBadges from "./TechniqueBadges.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -48,6 +49,12 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
               <SeverityBadge value={alert.severity} /> <StatusBadge value={alert.status} />
             </p>
             <p>{alert.description}</p>
+            {alert.techniques?.length > 0 && (
+              <>
+                <h2>MITRE ATT&amp;CK</h2>
+                <TechniqueBadges techniques={alert.techniques} />
+              </>
+            )}
             <p className="muted">
               This alert flags suspicious activity for investigation. It is not a confirmed breach.
             </p>

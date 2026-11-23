@@ -26,3 +26,19 @@ An alert means *suspicious activity worth investigating*, not a confirmed breach
 - **Training:** `POST /api/ml/train` (`synthetic` or `database`), `python -m app.ml.train --source synthetic|database`, or the card on the Analytics page. The synthetic baseline is 21 days of generated normal activity (workstations, a few shared gateways, occasional forgotten passwords). Training on your own data needs at least 50 per-IP hourly windows.
 - **Demo:** `sample_logs/slow_spray.log` is a password spray of three attempts per hour with different usernames from `198.51.100.77`. No threshold rule fires on it, but HZ-007 does.
 - **Limits:** the model learns whatever is "normal" in its training data, so training on data that already contains attacks teaches it to accept them. Treat alerts as leads to investigate.
+
+## MITRE ATT&CK mapping
+
+Each rule is tagged with ATT&CK techniques (shown as badges on alerts, on the Analytics coverage panel and in reports). The mapping is fixed in `backend/app/mitre.py`. It gives investigation context, not proof that a technique was used. Dashed badges mark low-confidence mappings.
+
+| Rule | Techniques |
+| --- | --- |
+| HZ-001 Repeated login failures | T1110 Brute Force, T1110.001 Password Guessing |
+| HZ-002 Unusual login hours | T1078 Valid Accounts |
+| HZ-003 Unknown users | T1110 Brute Force, T1087 Account Discovery (low confidence) |
+| HZ-004 Privilege escalation events | T1548.003 Sudo and Sudo Caching, T1098 Account Manipulation |
+| HZ-005 Service failures | T1489 Service Stop (low confidence) |
+| HZ-006 Account lockouts | T1110 Brute Force |
+| HZ-007 Anomalous IP activity | T1110.003 Password Spraying, T1110 Brute Force |
+
+Technique IDs and tactics follow ATT&CK Enterprise; re-check them against the current ATT&CK release before relying on them.

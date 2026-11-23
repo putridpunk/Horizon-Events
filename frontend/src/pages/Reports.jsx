@@ -45,6 +45,16 @@ export default function Reports() {
               {report.top_event_types.map((t) => <div key={t.name} className="bar-row"><span className="name">{t.name}</span><span>{t.count}</span></div>)}
             </section>
             <section className="card">
+              <h2>MITRE ATT&amp;CK techniques</h2>
+              {report.techniques.filter((t) => t.alerts > 0).length ? (
+                report.techniques.filter((t) => t.alerts > 0).map((t) => (
+                  <div key={t.id} className="bar-row"><span className="name">{t.id} {t.name}</span><span>{t.alerts}</span></div>
+                ))
+              ) : (
+                <EmptyState>No alerts mapped to techniques in this period.</EmptyState>
+              )}
+            </section>
+            <section className="card">
               <h2>Alert severity</h2>
               {report.severity_distribution.map((s) => <div key={s.severity} className="bar-row"><span className="name">{s.severity}</span><span>{s.count}</span></div>)}
             </section>
