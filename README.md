@@ -2,9 +2,15 @@
 
 **Security Information and Event Management** · *Turning security events into actionable intelligence.*
 
-[![CI](https://github.com/putridpunk/Horizon-Events/actions/workflows/ci.yml/badge.svg)](https://github.com/putridpunk/Horizon-Events/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/putridpunk/Horizon-Events/ci.yml?branch=main&label=CI&logo=github)](https://github.com/putridpunk/Horizon-Events/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/putridpunk/Horizon-Events?label=release&color=orange)](https://github.com/putridpunk/Horizon-Events/releases/latest)
+[![licence](https://img.shields.io/badge/licence-MIT%20(non--commercial)-blue)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white)](#quick-start-local)
+[![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4?logo=windows&logoColor=white)](#windows-desktop-app)
+[![detection](https://img.shields.io/badge/detection-MITRE%20ATT%26CK-red)](docs/detection-rules.md)
+[![network](https://img.shields.io/badge/network-local%20only-brightgreen)](docs/security.md)
 
-Horizon Events is a lightweight SIEM. It imports logs from Linux and Windows systems and applications, normalises them into one event format, runs configurable detection rules, raises alerts with a full status history, and presents everything in a dark, interactive dashboard. Reports export to JSON, CSV and HTML.
+Horizon Events is a lightweight SIEM. It imports logs from Linux and Windows systems and applications, normalises them into one event format, runs configurable detection rules, raises alerts with a full status history, and presents everything in an interactive dashboard (light by default, with a dark theme). Reports export to JSON, CSV and HTML.
 
 Built with Python, FastAPI, SQLAlchemy (SQLite), React, Chart.js and Docker. All bundled data is synthetic.
 
