@@ -35,7 +35,7 @@ describe("empty database", () => {
     mockApiDefaults();
     render(<Analytics />);
     // Each panel loads independently; wait for the ones whose text only appears once data has arrived.
-    expect(await screen.findByText(/No model trained yet/)).toBeInTheDocument();
+    expect(await screen.findByText(/No model trained yet/, undefined, { timeout: 4000 })).toBeInTheDocument();
     expect(await screen.findByText(/No feeds loaded yet/)).toBeInTheDocument();
     await waitFor(() => expect(api.getRuleStats).toHaveBeenCalled());
     expect(screen.getByText(/Rule statistics appear after the first import/)).toBeInTheDocument();

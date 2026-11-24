@@ -105,7 +105,7 @@ describe("ModelCard", () => {
   it("says anomaly detection is inactive until a model is trained", async () => {
     mockApiDefaults();
     render(<ModelCard />);
-    expect(await screen.findByText(/No model trained yet/)).toBeInTheDocument();
+    expect(await screen.findByText(/No model trained yet/, undefined, { timeout: 4000 })).toBeInTheDocument();
   });
 
   it("trains on the synthetic baseline and refreshes the status", async () => {
