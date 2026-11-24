@@ -25,6 +25,13 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - Windows tools are started by full path from the system folder, without a shell or console window.
 - Collected events contain what Windows records: account names, host names and IP addresses. They are stored unencrypted in the local database, like all other data.
 
+## File scanning
+
+- Scanning reads only the paths the user picked in the native Windows dialog, and runs Microsoft Defender in report-only mode (`-DisableRemediation`); nothing is uploaded, moved or deleted by this app.
+- The API accepts only absolute, existing, local paths (at most 50 per scan). UNC (`\\host\share`) and device paths are refused, because opening them would make Windows authenticate to the host the path names.
+- The tool is started by full path, without a shell. The verdict comes from Defender's own summary, and any failure is reported as an error, never as "clean".
+- The scan endpoints exist only in the desktop app (`HORIZON_FILE_SCAN=1`) and, like the rest of the API, only answer the app's own window.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

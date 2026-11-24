@@ -83,3 +83,8 @@ export const checkCollector = (id) => request(`/collectors/${id}/check`, { metho
 export const enableSecurityAccess = () => request("/collectors/security/enable-access", { method: "POST" });
 export const getSetup = () => request("/setup");
 export const completeSetup = () => request("/setup/complete", { method: "POST" });
+
+export const getScanStatus = () => request("/scans/status");
+export const listScans = () => request("/scans");
+export const getScan = (id) => request(`/scans/${id}`);
+export const startScan = (paths) => request("/scans", json("POST", { paths }));

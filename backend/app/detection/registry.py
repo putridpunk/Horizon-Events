@@ -13,6 +13,10 @@ DEFAULT_RULES: list[dict] = [
     {"id": c.id, "name": c.name, "description": c.description, "severity": c.severity.value,
      "event_types": [t.value for t in c.event_types], "params": dict(c.default_params), "enabled": True}
     for c in RULE_CLASSES.values()]
+# Raised by the file scanner (app/scanning), not by the log-driven engine: build_rule() ignores it.
+DEFAULT_RULES.append({
+    "id": "HZ-008", "name": "Malware detected", "severity": "critical", "event_types": [], "params": {},
+    "description": "Microsoft Defender reported malware in a file or folder you scanned.", "enabled": True})
 
 
 def build_rule(defn: dict) -> Rule | None:

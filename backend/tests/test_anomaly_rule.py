@@ -74,7 +74,7 @@ def test_seed_defaults_adds_missing_rule_and_keeps_edits(session):
     repo.update("HZ-001", params={"threshold": 9})
     repo.seed_defaults(DEFAULT_RULES)
     rules = {r.id: r for r in repo.list()}
-    assert len(rules) == 7 and "HZ-007" in rules and rules["HZ-001"].params["threshold"] == 9
+    assert len(rules) == len(DEFAULT_RULES) and "HZ-007" in rules and rules["HZ-001"].params["threshold"] == 9
 
 
 def test_import_creates_hz007_and_no_hz001_for_spray(session, trained):

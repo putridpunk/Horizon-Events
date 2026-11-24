@@ -28,8 +28,8 @@ def test_overview_and_distribution(seeded):
 
 def test_rule_stats_include_all_rules(seeded):
     rs = st.rule_stats(seeded)
-    assert [r["rule_id"] for r in rs] == [f"HZ-00{i}" for i in range(1, 8)]
-    assert all(r["alerts"] >= 1 for r in rs if r["rule_id"] != "HZ-007")  # HZ-007 needs a trained model
+    assert [r["rule_id"] for r in rs] == [f"HZ-00{i}" for i in range(1, 9)]
+    assert all(r["alerts"] >= 1 for r in rs if r["rule_id"] not in ("HZ-007", "HZ-008"))  # HZ-007 needs a trained model; HZ-008 comes from file scans
 
 
 def test_top_lists_and_timeseries(seeded):

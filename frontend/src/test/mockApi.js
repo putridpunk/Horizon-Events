@@ -23,6 +23,8 @@ export function mockApiDefaults() {
   m.getWatcherStatus.mockImplementation(later({ enabled: false }));
   m.getSetup.mockImplementation(later({ completed: true, system_logs_enabled: false, platform: "windows" }));
   m.getCollectors.mockImplementation(later({ enabled: false, platform: "windows", items: [] }));
+  m.getScanStatus.mockImplementation(later({ enabled: false, engine: "Microsoft Defender", available: false, message: "File scanning is only available in the desktop app." }));
+  m.listScans.mockImplementation(later({ items: [] }));
   m.reportUrl.mockImplementation((start, end, format) => `/api/reports?format=${format}`);
   return m;
 }

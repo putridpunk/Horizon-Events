@@ -128,6 +128,15 @@ powershell -File scriptsuild-installer.ps1
 
 For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
 
+## Scanning files for malware
+
+**Scan files** (sidebar, under Respond) checks files and folders you choose for malware. In the desktop app, *Choose files* and *Choose folder* open the normal Windows pickers; each item is scanned where it is by **Microsoft Defender** on your computer (`MpCmdRun.exe`, report-only), and every detection becomes a critical alert from rule **HZ-008 Malware detected** (MITRE ATT&CK T1204.002), with the threat name and, when the file can still be read, its SHA-256.
+
+- Nothing is uploaded, moved, quarantined or deleted by Horizon Events. Defender's own real-time protection may still act on a file by itself.
+- A scan runs in the background; the page shows progress, per-item results and earlier scans. Only one scan runs at a time.
+- If Defender is missing or fails, the item is reported as *Could not scan*, never as clean. This is a second opinion from the engine Windows already provides, not a replacement for antivirus software.
+- Only available in the desktop app: a server or Docker install cannot see your files. Network (`\\host\share`) paths are refused.
+
 ## Collecting this computer's own logs
 
 In the desktop app, Horizon Events reads the machine's own event logs, so you never attach files. A first-run screen explains what is read and lets you choose; everything stays on this computer.

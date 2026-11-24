@@ -5,7 +5,7 @@ before relying on them for reporting.
 """
 from __future__ import annotations
 
-TACTICS = ("Initial Access", "Persistence", "Privilege Escalation", "Defense Evasion",
+TACTICS = ("Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion",
            "Credential Access", "Discovery", "Impact")
 
 # technique id -> (name, tactics)
@@ -18,6 +18,7 @@ TECHNIQUES: dict[str, tuple[str, tuple[str, ...]]] = {
     "T1548.003": ("Sudo and Sudo Caching", ("Privilege Escalation", "Defense Evasion")),
     "T1098": ("Account Manipulation", ("Persistence", "Privilege Escalation")),
     "T1489": ("Service Stop", ("Impact",)),
+    "T1204.002": ("Malicious File", ("Execution",)),
 }
 
 # rule id -> [(technique id, confidence)]
@@ -29,6 +30,7 @@ RULE_TECHNIQUES: dict[str, list[tuple[str, str]]] = {
     "HZ-005": [("T1489", "low")],
     "HZ-006": [("T1110", "high")],
     "HZ-007": [("T1110.003", "high"), ("T1110", "high")],
+    "HZ-008": [("T1204.002", "high")],
 }
 
 

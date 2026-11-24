@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitre, ml, reports, rules,
-                     statistics, watcher)
+                     scans, statistics, watcher)
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
@@ -17,6 +17,7 @@ from app.security import LocalRequestGuard
 from app.incidents.manager import IncidentManager
 from app.services.ingestion import ensure_default_rules
 from app.system.manager import CollectorManager
+from app.scanning.service import ScanService
 from app.system.registry import build_collectors
 from app.watcher.service import WatchService
 
@@ -38,6 +39,9 @@ async def lifespan(app: FastAPI):
         app.state.collectors = CollectorManager(
             build_collectors(), lambda: Session(get_engine(), expire_on_commit=False))
         app.state.collectors.start()
+    app.state.scans = None
+    if os.environ.get("HORIZON_FILE_SCAN") == "1":  # the desktop app turns this on; server mode cannot see your files
+        app.state.scans = ScanService(lambda: Session(get_engine(), expire_on_commit=False))
     try:
         yield
     finally:
@@ -53,7 +57,7 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors):
+               collectors, scans):
     app.include_router(module.router)
 
 

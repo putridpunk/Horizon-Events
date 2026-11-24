@@ -56,6 +56,29 @@ def _configure_logging(data: Path) -> None:
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
+class FilePicker:
+    """The native Windows file and folder pickers, exposed to the page as `window.pywebview.api`. They only return
+    the chosen paths: the page cannot read or list anything itself."""
+
+    def __init__(self, webview_module):
+        self._webview = webview_module
+        self._window = None
+
+    def _open(self, kind, **options):
+        if self._window is None:
+            return []
+        dialog = getattr(self._webview, "FileDialog", None)
+        mode = getattr(dialog, kind) if dialog else getattr(self._webview, "OPEN_DIALOG" if kind == "OPEN" else "FOLDER_DIALOG")
+        chosen = self._window.create_file_dialog(mode, **options)
+        return [str(p) for p in chosen] if chosen else []
+
+    def pick_files(self):
+        return self._open("OPEN", allow_multiple=True)
+
+    def pick_folder(self):
+        return self._open("FOLDER")
+
+
 def _run(data: Path) -> int:
     from app.desktop import make_secret, pick_free_port, wait_until_ready
 
@@ -63,6 +86,7 @@ def _run(data: Path) -> int:
     os.environ.setdefault("HORIZON_MODEL_PATH", str(data / "horizon_model.joblib"))
     os.environ.setdefault("HORIZON_WATCH_DIR", str(data / "watch"))
     os.environ.setdefault("HORIZON_SYSTEM_LOGS", "1")  # collect this machine's own logs
+    os.environ.setdefault("HORIZON_FILE_SCAN", "1")  # let the user scan files and folders
     secret = make_secret()
     os.environ["HORIZON_SESSION_SECRET"] = secret
 
@@ -107,8 +131,9 @@ def _run(data: Path) -> int:
         return 1
     logging.info("serving on 127.0.0.1:%s", port)
 
-    webview.create_window(TITLE, f"http://127.0.0.1:{port}/?hz={secret}", width=1360, height=860,
-                          min_size=(1100, 700))
+    picker = FilePicker(webview)
+    picker._window = webview.create_window(TITLE, f"http://127.0.0.1:{port}/?hz={secret}", width=1360, height=860,
+                                          min_size=(1100, 700), js_api=picker)
     try:
         webview.start(storage_path=str(data / "webview"), private_mode=False)
     except Exception:

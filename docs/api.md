@@ -32,6 +32,9 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/collectors/{id}/check` | Re-check access to one source. |
 | POST | `/api/collectors/security/enable-access` | Asks Windows (through its own permission prompt) to add the current user to Event Log Readers. Returns `{requested, access}`. 409 off Windows. |
 | GET / POST | `/api/setup`, `/api/setup/complete` | First-run setup state. |
+| GET | `/api/scans/status` | `{enabled, engine, available, message}`. `enabled` is false outside the desktop app. |
+| POST | `/api/scans` | Body `{paths: [...]}` (absolute, existing, local; at most 50). Starts a background Microsoft Defender scan and returns the scan (202). 422 bad path, 409 busy or disabled. |
+| GET | `/api/scans`, `/api/scans/{id}` | Recent scans / one scan: `status` (running, completed, failed), `targets`, `results` (`path, status: clean|threat|error, message, threats[{threat, path, sha256, alert_id}]`), `done`, `total`, `threats`. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.
