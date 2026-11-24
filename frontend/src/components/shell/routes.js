@@ -1,7 +1,7 @@
 // The pages of the app, grouped the way the sidebar shows them: [path, label, icon].
 export const NAV_GROUPS = [
   ["Monitor", [["/", "Overview", "dashboard"], ["/events", "Events", "list"], ["/sources", "Data sources", "database"]]],
-  ["Respond", [["/alerts", "Alerts", "bell"], ["/incidents", "Incidents", "folders"], ["/scan", "Scan files", "shield"]]],
+  ["Respond", [["/alerts", "Alerts", "bell"], ["/incidents", "Incidents", "folders"], ["/scan", "Scan files", "shield"], ["/mitigation", "Mitigation", "lock"]]],
   ["Insight", [["/analytics", "Analytics", "chart"], ["/reports", "Reports", "file"]]],
 ];
 

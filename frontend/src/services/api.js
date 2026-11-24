@@ -88,3 +88,11 @@ export const getScanStatus = () => request("/scans/status");
 export const listScans = () => request("/scans");
 export const getScan = (id) => request(`/scans/${id}`);
 export const startScan = (paths) => request("/scans", json("POST", { paths }));
+
+export const getMitigationSettings = () => request("/mitigation/settings");
+export const updateMitigationSettings = (body) => request("/mitigation/settings", json("PUT", body));
+export const getAlertMitigation = (alertId) => request(`/mitigation/alerts/${alertId}`);
+export const getMitigationHistory = () => request("/mitigation/history");
+export const approveMitigation = (id) => request(`/mitigation/${id}/approve`, { method: "POST" });
+export const dismissMitigation = (id) => request(`/mitigation/${id}/dismiss`, { method: "POST" });
+export const undoMitigation = (id) => request(`/mitigation/${id}/undo`, { method: "POST" });

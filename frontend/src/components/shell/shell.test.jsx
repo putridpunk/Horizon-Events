@@ -30,7 +30,7 @@ describe("sidebar", () => {
       name, within(nav.getByText(name).closest(".nav-group")).getAllByRole("link").map((a) => a.textContent)]));
     expect(groups).toEqual({
       Monitor: ["Overview", "Events", "Data sources"],
-      Respond: ["Alerts", "Incidents", "Scan files"],
+      Respond: ["Alerts", "Incidents", "Scan files", "Mitigation"],
       Insight: ["Analytics", "Reports"],
     });
   });

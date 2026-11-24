@@ -35,6 +35,10 @@ Interactive documentation is served at `/docs` when the backend runs.
 | GET | `/api/scans/status` | `{enabled, engine, available, message}`. `enabled` is false outside the desktop app. |
 | POST | `/api/scans` | Body `{paths: [...]}` (absolute, existing, local; at most 50). Starts a background Microsoft Defender scan and returns the scan (202). 422 bad path, 409 busy or disabled. |
 | GET | `/api/scans`, `/api/scans/{id}` | Recent scans / one scan: `status` (running, completed, failed), `targets`, `results` (`path, status: clean|threat|error, message, threats[{threat, path, sha256, alert_id}]`), `done`, `total`, `threats`. |
+| GET / PUT | `/api/mitigation/settings` | `{enabled, block_ip: off\|ask, quarantine_file: off\|ask\|auto, block_private, block_days (1-365), allowlist[]}`. 422 with a message for bad values (including `block_ip: auto`). `enabled` is false outside the desktop app. |
+| GET | `/api/mitigation/alerts/{id}` | `{enabled, advice[], actions[], skipped[{kind,target,reason}]}`. Advice is always returned; actions only in the desktop app (proposals are created on first read). |
+| GET | `/api/mitigation/history` | Recent actions. |
+| POST | `/api/mitigation/{id}/approve`, `/dismiss`, `/undo` | Act on a proposal (approve runs in the background; poll the alert or history). 409 when the state does not allow it or off the desktop app, 404 unknown. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

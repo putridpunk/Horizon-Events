@@ -9,6 +9,7 @@ import Reports from "./pages/Reports.jsx";
 import Setup from "./pages/Setup.jsx";
 import Sources from "./pages/Sources.jsx";
 import Scan from "./pages/Scan.jsx";
+import Mitigation from "./pages/Mitigation.jsx";
 import SetupGate from "./components/SetupGate.jsx";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/sources" element={<Sources />} />
         <Route path="/scan" element={<Scan />} />
+        <Route path="/mitigation" element={<Mitigation />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="*" element={<Overview />} />
       </Routes>

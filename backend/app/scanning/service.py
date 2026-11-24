@@ -88,9 +88,10 @@ def record_detection(session: Session, finding: Finding, sha256: str | None, now
 
 
 class ScanService:
-    def __init__(self, session_factory: Callable[[], Session], scanner=defender.scan_path):
+    def __init__(self, session_factory: Callable[[], Session], scanner=defender.scan_path, mitigation=None):
         self.session_factory = session_factory
         self.scanner = scanner
+        self.mitigation = mitigation  # optional: told about each malware alert (may quarantine it)
         self._lock = threading.Lock()
         self._active: threading.Thread | None = None
         with session_factory() as session:  # a scan cannot survive a restart: close any left open
@@ -140,6 +141,11 @@ class ScanService:
                 for finding in outcome.findings:
                     sha = sha256_file(finding.path)
                     alert_id = record_detection(session, finding, sha)
+                    if self.mitigation is not None:
+                        try:
+                            self.mitigation.on_malware_alert(session, alert_id, finding.path, sha)
+                        except Exception:  # a mitigation problem must never lose the detection
+                            log.exception("mitigation after a malware alert failed")
                     threats.append({"threat": finding.threat, "path": finding.path, "sha256": sha, "alert_id": alert_id})
             row = session.get(ScanRow, scan_id)
             row.results = [*row.results, {"path": target, "status": outcome.status if outcome.status in

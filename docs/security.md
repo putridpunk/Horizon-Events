@@ -32,6 +32,15 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - The tool is started by full path, without a shell. The verdict comes from Defender's own summary, and any failure is reported as an error, never as "clean".
 - The scan endpoints exist only in the desktop app (`HORIZON_FILE_SCAN=1`) and, like the rest of the API, only answer the app's own window.
 
+## Mitigation
+
+- Only two actions exist: add or remove one Windows Firewall rule, and move or restore one file. Nothing is deleted.
+- Blocking needs administrator rights and is never automatic: each block or removal is approved in the app and then confirmed in Windows' own permission prompt; the app holds no standing privileges and has no privileged helper. Success is checked by reading the rule back, not from an exit code.
+- The command line is built only from an address parsed by `ipaddress` (no user text reaches it) and runs `netsh.exe` by full path, without a shell.
+- Safeguards: no private-network, loopback, multicast or reserved addresses (private ones only if the user allows it), never this computer's own addresses, a user allowlist, and no action from the statistical rule HZ-007.
+- Quarantine moves only the path Defender reported for an HZ-008 alert, never from the Windows folder, never overwrites on restore.
+- The endpoints that act exist only in the desktop app (`HORIZON_MITIGATION=1`) and, like the rest of the API, answer only the app's own window.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

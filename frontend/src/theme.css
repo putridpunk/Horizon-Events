@@ -245,3 +245,18 @@ pre.raw { background: var(--surface-2); border: 1px solid var(--border); border-
   border: 1px solid var(--border-strong); border-radius: var(--r-control); color: var(--text); box-shadow: var(--shadow-drawer); }
 .import-message.error { background: var(--critical-bg); border-color: var(--critical); color: var(--critical); }
 .import-message .icon-button { border: 0; background: none; min-height: 24px; width: 24px; }
+
+/* ---------- mitigation ---------- */
+.steps { margin: 0 0 12px; padding-left: 20px; }
+.steps li { margin-bottom: 6px; }
+.mitigation { border: 1px solid var(--border); border-radius: var(--r-card); padding: 10px 12px; margin-bottom: 10px; background: var(--surface-2); }
+.mitigation .badge { margin-left: 8px; }
+.mitigation .actions { margin: 8px 0 0; }
+.badge.mit-suggested { color: var(--accent); background: var(--accent-soft); }
+.badge.mit-running { color: var(--medium); background: var(--medium-bg); }
+.badge.mit-done { color: var(--ok); background: var(--ok-bg); }
+.badge.mit-failed { color: var(--critical); background: var(--critical-bg); }
+.badge.mit-dismissed, .badge.mit-undone { color: var(--muted); background: var(--hover); }
+.settings-form { display: grid; gap: 12px; max-width: 640px; }
+.settings-form label { display: grid; gap: 4px; font-weight: 600; }
+.settings-form label.check { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; }

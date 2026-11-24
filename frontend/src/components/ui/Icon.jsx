@@ -17,6 +17,7 @@ const PATHS = {
   "arrow-down": <path d="M12 5v14M5 12l7 7 7-7" />,
   minus: <path d="M5 12h14" />,
   check: <path d="M5 13l4 4L19 7" />,
+  lock: <><rect x="5" y="11" width="14" height="10" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
   shield: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />,
   refresh: <path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4M4 13a8 8 0 0 0 14.9 3M20 20v-4h-4" />,
   search: <><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></>,

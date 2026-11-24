@@ -6,6 +6,7 @@ import { ErrorBanner, SeverityBadge, StatusBadge } from "./common.jsx";
 import TechniqueBadges from "./TechniqueBadges.jsx";
 import IntelBadge from "./IntelBadge.jsx";
 import { Drawer } from "./overlay.jsx";
+import MitigationPanel from "./MitigationPanel.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -61,6 +62,8 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
               <dt>Last activity</dt><dd>{fmtTime(alert.last_seen)}</dd>
               <dt>Created</dt><dd>{fmtTime(alert.created_at)}</dd>
             </dl>
+
+            <MitigationPanel alertId={alertId} />
 
             <h2>Investigation</h2>
             <textarea

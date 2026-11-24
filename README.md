@@ -137,6 +137,15 @@ For development, run the API as a server instead with `uvicorn app.main:app` fro
 - If Defender is missing or fails, the item is reported as *Could not scan*, never as clean. This is a second opinion from the engine Windows already provides, not a replacement for antivirus software.
 - Only available in the desktop app: a server or Docker install cannot see your files. Network (`\\host\share`) paths are refused.
 
+## Responding to alerts
+
+Every alert shows **Recommended steps** in plain language (rule by rule, in `backend/app/mitigation/advice.py`). In the desktop app the app can also carry out two of them, under **Mitigation** (sidebar, Respond):
+
+- **Block an attacking address** (rules HZ-001, HZ-003, HZ-006; never the ML rule HZ-007). You approve it in the app and Windows then asks for administrator permission once; the app adds an inbound Windows Firewall rule named `Horizon Events block <ip>` and checks that it exists. *Remove block* undoes it. Nothing keeps administrator rights, so blocks are never automatic. Private-network addresses, this computer's own addresses and your allowlist are never blocked (private ones can be allowed in settings). A block gets a reminder date (default 7 days); expired blocks are flagged for removal.
+- **Quarantine malware** (rule HZ-008). The flagged file is moved, not deleted, into `%LOCALAPPDATA%\HorizonEvents\quarantine` and can be restored; no administrator rights needed. Modes per action: *Off*, *Ask first* (default) or, for quarantine only, *Automatic* (right after a scan finds it).
+
+Every proposal and action is kept in the history with its outcome. Files in the Windows folder are never moved.
+
 ## Collecting this computer's own logs
 
 In the desktop app, Horizon Events reads the machine's own event logs, so you never attach files. A first-run screen explains what is read and lets you choose; everything stays on this computer.

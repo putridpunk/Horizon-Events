@@ -87,6 +87,8 @@ def _run(data: Path) -> int:
     os.environ.setdefault("HORIZON_WATCH_DIR", str(data / "watch"))
     os.environ.setdefault("HORIZON_SYSTEM_LOGS", "1")  # collect this machine's own logs
     os.environ.setdefault("HORIZON_FILE_SCAN", "1")  # let the user scan files and folders
+    os.environ.setdefault("HORIZON_MITIGATION", "1")  # let the user approve actions on alerts
+    os.environ.setdefault("HORIZON_QUARANTINE_DIR", str(data / "quarantine"))
     secret = make_secret()
     os.environ["HORIZON_SESSION_SECRET"] = secret
 
