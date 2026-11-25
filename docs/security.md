@@ -46,7 +46,8 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - The tray icon, notifications and start-with-Windows need no administrator rights. Starting with Windows writes one per-user entry (`HKCU` Run key, value `HorizonEvents`) that launches the installed program with `--background`; it is refused when running from source.
 - Backups are written only to an absolute local path ending in `.hzbackup` (never a UNC path), and an existing file is overwritten only if it is itself a database, so the API cannot be used to overwrite arbitrary files. A restore must contain Horizon Events tables, is staged and applied at the next start, and the previous database is kept.
 - Watching the Downloads folder only reads file names, sizes and modification times, then hands finished files to the same report-only Defender scan. It is off by default.
-- The installer stops a running copy (`taskkill`) before updating or removing it, because in background mode closing the window only hides it.
+- Updating the installed app stops a running copy first (`taskkill`), because in background mode closing the window only hides it. **Uninstalling does not**: while the app runs (it holds the named marker `HorizonEvents.Running`) the uninstaller shows an error and removes nothing, so the user decides when to quit.
+- Uninstalling then runs `HorizonEvents.exe --uninstall-cleanup`, which deletes only a folder named `HorizonEvents` (never any other path), removes the start-up entry and, with one Windows permission prompt and only if any exist, the firewall rules named `Horizon Events block ...` (found by name, so it works in any Windows language).
 
 ## What is not protected
 

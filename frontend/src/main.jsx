@@ -8,12 +8,14 @@ import { initTheme } from "./theme/theme.js";
 import "./theme.css";
 
 initTheme();
-initLanguage();
 
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <BrowserRouter future={routerFuture}>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
-);
+// Load the chosen language first, so the first thing drawn is already in it (no flash of English).
+initLanguage().finally(() => {
+  createRoot(document.getElementById("root")).render(
+    <React.StrictMode>
+      <BrowserRouter future={routerFuture}>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+});

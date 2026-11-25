@@ -4,8 +4,12 @@ import { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import LanguageCard from "../components/settings/LanguageCard.jsx";
-import { activeLanguage, getChoice, initLanguage, setChoice, translatePt } from "./index.js";
+import { LANGUAGE_CODES, LANGUAGES, activeLanguage, getChoice, initLanguage, loadTranslator, setChoice } from "./index.js";
+import { SOURCE_PATTERNS } from "./patterns.js";
 import { createTranslator } from "./translate.js";
+
+const OTHER = LANGUAGE_CODES.filter((code) => code !== "en");
+const placeholders = (text) => (text.match(/\{T?\d\}/g) ?? []).sort();
 
 describe("createTranslator", () => {
   const tr = createTranslator({ Alerts: "Alertas", "Cancel": "Cancelar" }, [[/^(\d+) min ago$/, (n) => `há ${n} min`]]);
@@ -34,32 +38,76 @@ describe("createTranslator", () => {
   });
 });
 
-describe("the Portuguese texts", () => {
-  it("translate names inside patterns only when the name is known", () => {
-    expect(translatePt("Repeated login failures from 192.168.1.15")).toBe("Falhas de início de sessão repetidas de 192.168.1.15");
-    expect(translatePt("Account lockouts on account jsmith")).toBe("Bloqueios de conta na conta jsmith");
+describe("every language", () => {
+  it("offers 12 languages besides English, each with its own name", () => {
+    expect(OTHER).toEqual(["pt", "fr", "es", "de", "it", "pl", "ru", "el", "zh", "ja", "ko", "ar"]);
+    expect(LANGUAGES.map(([code]) => code)).toEqual(["auto", "en", ...OTHER]);
+    expect(LANGUAGES.find(([code]) => code === "zh")[1]).toBe("中文（简体）");
+  });
+
+  it.each(OTHER)("%s: has a translation for every phrase and template, with the same placeholders as Portuguese", async (code) => {
+    const reference = await import("./langs/pt.js");
+    const lang = await import(`./langs/${code}.js`);
+    expect(Object.keys(lang.PHRASES)).toEqual(Object.keys(reference.PHRASES));
+    expect(lang.TEMPLATES).toHaveLength(SOURCE_PATTERNS.length);
+    const empty = Object.entries(lang.PHRASES).filter(([, v]) => !v || !v.trim()).map(([k]) => k);
+    expect(empty).toEqual([]);
+    lang.TEMPLATES.forEach((template, i) => {
+      expect(template, `template ${i}`).toBeTruthy();
+      expect(placeholders(template), `template ${i}: ${template}`).toEqual(placeholders(reference.TEMPLATES[i]));
+    });
+  });
+
+  it.each(OTHER)("%s: keeps language names and the product name as they are, and translates the rest", async (code) => {
+    const { PHRASES } = await import(`./langs/${code}.js`);
+    expect(PHRASES["English"]).toBe("English");
+    expect(PHRASES["Português"]).toBe("Português");
+    expect(PHRASES["Horizon Events"]).toBe("Horizon Events");
+    expect(PHRASES["Alerts"]).not.toBe("Alerts");
+    expect(PHRASES["Settings"]).not.toBe("Settings");
+  });
+
+  it.each(OTHER)("%s: translates relative times, counts and names inside patterns", async (code) => {
+    const tr = await loadTranslator(code);
+    expect(tr("3 h ago")).not.toBe("3 h ago");
+    expect(tr("3 h ago")).toContain("3");
+    expect(tr("Scanning 2 of 5…")).toMatch(/2.*5|5.*2/);
+    expect(tr("Block 8.8.4.4 in Windows Firewall")).toContain("8.8.4.4");
+    expect(tr("Repeated login failures from 192.168.1.15")).toContain("192.168.1.15");
+    expect(tr("Repeated login failures from 192.168.1.15")).not.toMatch(/Repeated/);
+  });
+
+  it("translates names inside patterns only when the name is known", async () => {
+    const tr = await loadTranslator("pt");
+    expect(tr("Repeated login failures from 192.168.1.15")).toBe("Falhas de início de sessão repetidas de 192.168.1.15");
+    expect(tr("Account lockouts on account jsmith")).toBe("Bloqueios de conta na conta jsmith");
     // a log message that happens to end the same way is data, not interface text
-    expect(translatePt("Accepted password for alice from 10.0.0.5")).toBe("Accepted password for alice from 10.0.0.5");
-    expect(translatePt("HZ-001 · Repeated login failures")).toBe("HZ-001 · Falhas de início de sessão repetidas");
-    expect(translatePt("5 minutes")).toBe("5 minutos");
-    expect(translatePt("Created as OPEN")).toBe("Criado como ABERTO");
-    expect(translatePt("OPEN → INVESTIGATING")).toBe("ABERTO → EM INVESTIGAÇÃO");
+    expect(tr("Accepted password for alice from 10.0.0.5")).toBe("Accepted password for alice from 10.0.0.5");
+    expect(tr("Created as OPEN")).toBe("Criado como ABERTO");
+    expect(tr("OPEN → INVESTIGATING")).toBe("ABERTO → EM INVESTIGAÇÃO");
+    expect(tr("HZ-001 · Repeated login failures")).toBe("HZ-001 · Falhas de início de sessão repetidas");
+    expect(tr("A new service was created: EvilSvc.")).toBe("Foi criado(a) serviço: EvilSvc.");
   });
 
-  it("translate history lines that start with a bullet", () => {
-    expect(translatePt("· Alert created by detection engine")).toBe("· Alerta criado pelo motor de deteção");
-    expect(translatePt("· Opened automatically from ALT-000001")).toBe("· Aberto automaticamente a partir de ALT-000001");
-    expect(translatePt("· a note the analyst typed")).toBe("· a note the analyst typed");
+  it("translates history lines that start with a bullet, and leaves typed notes alone", async () => {
+    const tr = await loadTranslator("pt");
+    expect(tr("· Alert created by detection engine")).toBe("· Alerta criado pelo motor de deteção");
+    expect(tr("· Opened automatically from ALT-000001")).toBe("· Aberto automaticamente a partir de ALT-000001");
+    expect(tr("· a note the analyst typed")).toBe("· a note the analyst typed");
   });
 
-  it("cover the navigation, severities and relative times", () => {
-    expect(translatePt("Alerts")).toBe("Alertas");
-    expect(translatePt("Critical")).toBe("Crítico");
-    expect(translatePt("3 h ago")).toBe("há 3 h");
-    expect(translatePt("just now")).toBe("agora mesmo");
-    expect(translatePt("Scanning 2 of 5…")).toBe("A analisar 2 de 5…");
-    expect(translatePt("1 threat found")).toBe("1 ameaça encontrada");
-    expect(translatePt("Block 8.8.4.4 in Windows Firewall")).toBe("Bloquear 8.8.4.4 na Firewall do Windows");
+  it("covers the navigation, severities and relative times in Portuguese", async () => {
+    const tr = await loadTranslator("pt");
+    expect(tr("Alerts")).toBe("Alertas");
+    expect(tr("Critical")).toBe("Crítico");
+    expect(tr("3 h ago")).toBe("há 3 h");
+    expect(tr("just now")).toBe("agora mesmo");
+    expect(tr("1 threat found")).toBe("1 ameaça encontrada");
+  });
+
+  it("returns nothing for English or an unknown language", async () => {
+    expect(await loadTranslator("en")).toBeNull();
+    expect(await loadTranslator("tlh")).toBeNull();
   });
 });
 
@@ -75,26 +123,34 @@ describe("choosing a language", () => {
     expect(activeLanguage()).toBe("en");
     vi.spyOn(navigator, "language", "get").mockReturnValue("en-US");
     expect(activeLanguage()).toBe("en");
-    setChoice("pt", () => {});
-    expect(activeLanguage()).toBe("pt");
+    setChoice("de", () => {});
+    expect(activeLanguage()).toBe("de");
   });
+
+  it.each([["fr-FR", "fr"], ["es-MX", "es"], ["zh-CN", "zh"], ["zh-TW", "zh"], ["ru-RU", "ru"], ["pl", "pl"], ["de-AT", "de"],
+    ["it-IT", "it"], ["el-GR", "el"], ["ja-JP", "ja"], ["ar-EG", "ar"], ["ko-KR", "ko"], ["sv-SE", "en"], ["en-GB", "en"]])(
+    "Windows set to %s gives %s", (system, expected) => {
+      vi.spyOn(navigator, "language", "get").mockReturnValue(system);
+      expect(activeLanguage()).toBe(expected);
+    });
 
   it("ignores a stored value it does not know", () => {
     localStorage.setItem("horizon-language", "klingon");
     expect(getChoice()).toBe("auto");
   });
 
-  it("saves the choice and reloads the page", async () => {
+  it("saves the choice and reloads the page", () => {
     const reload = vi.fn();
-    setChoice("pt", reload);
-    expect(localStorage.getItem("horizon-language")).toBe("pt");
+    setChoice("ja", reload);
+    expect(localStorage.getItem("horizon-language")).toBe("ja");
     expect(reload).toHaveBeenCalled();
   });
 
-  it("offers the three choices in the Settings card", async () => {
+  it("offers every language in the Settings card, each under its own name", () => {
     render(<MemoryRouter><LanguageCard /></MemoryRouter>);
     const select = screen.getByLabelText("Language");
-    expect([...select.options].map((o) => o.value)).toEqual(["auto", "en", "pt"]);
+    expect([...select.options].map((o) => o.value)).toEqual(["auto", "en", ...OTHER]);
+    expect([...select.options].map((o) => o.textContent)).toContain("Русский");
     expect(select).toHaveValue("auto");
   });
 });
@@ -108,6 +164,7 @@ describe("translating the page", () => {
   afterEach(() => {
     localStorage.clear();
     document.documentElement.lang = "en";
+    document.documentElement.dir = "ltr";
   });
 
   function Demo() {
@@ -125,11 +182,14 @@ describe("translating the page", () => {
     );
   }
 
+  const mount = () => render(<Demo />, { container: document.body.appendChild(document.createElement("div")) });
+
   it("translates what is on screen, what appears later and what changes", async () => {
-    const stop = initLanguage(document);
-    render(<Demo />, { container: document.body.appendChild(document.createElement("div")) });
+    const stop = await initLanguage(document);
+    mount();
     await waitFor(() => expect(screen.getByRole("heading")).toHaveTextContent("Alertas"));
-    expect(document.documentElement.lang).toBe("pt-PT");
+    expect(document.documentElement.lang).toBe("pt");
+    expect(document.documentElement.dir).toBe("ltr");
     expect(screen.getByText("há 1 min")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Pesquisar mensagem, utilizador, IP, anfitrião…")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Seguinte" }));
@@ -139,18 +199,35 @@ describe("translating the page", () => {
   });
 
   it("does not touch typed text, or elements marked translate=no", async () => {
-    const stop = initLanguage(document);
-    render(<Demo />, { container: document.body.appendChild(document.createElement("div")) });
+    const stop = await initLanguage(document);
+    mount();
     await waitFor(() => expect(screen.getByRole("heading")).toHaveTextContent("Alertas"));
     expect(document.querySelector("textarea")).toHaveValue("Alerts");
     expect(document.querySelector("[translate=no]")).toHaveTextContent("Alerts");
     stop();
   });
 
-  it("does nothing in English", () => {
+  it("switches the page to right-to-left for Arabic, and back for the others", async () => {
+    localStorage.setItem("horizon-language", "ar");
+    const stop = await initLanguage(document);
+    mount();
+    await waitFor(() => expect(screen.getByRole("heading")).toHaveTextContent("التنبيهات"));
+    expect(document.documentElement.dir).toBe("rtl");
+    expect(document.documentElement.lang).toBe("ar");
+    stop();
+    localStorage.setItem("horizon-language", "ja");
+    document.body.innerHTML = "";
+    const stopJa = await initLanguage(document);
+    expect(document.documentElement.dir).toBe("ltr");
+    mount();
+    await waitFor(() => expect(screen.getByRole("heading")).toHaveTextContent("アラート"));
+    stopJa();
+  });
+
+  it("does nothing in English", async () => {
     localStorage.setItem("horizon-language", "en");
-    const stop = initLanguage(document);
-    render(<Demo />, { container: document.body.appendChild(document.createElement("div")) });
+    const stop = await initLanguage(document);
+    mount();
     expect(screen.getByRole("heading")).toHaveTextContent("Alerts");
     expect(document.documentElement.lang).toBe("en");
     stop();
