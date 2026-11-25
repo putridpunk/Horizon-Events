@@ -5,8 +5,8 @@ so it opens in the system tray instead of in front of whatever the user is doing
 """
 from __future__ import annotations
 
-import os
 import sys
+from pathlib import PureWindowsPath
 
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 VALUE_NAME = "HorizonEvents"
@@ -45,7 +45,7 @@ def set_enabled(enabled: bool, exe: str | None, registry=None, frozen: bool | No
     if enabled:
         if frozen is None:
             frozen = bool(getattr(sys, "frozen", False))
-        if not frozen or not exe or not os.path.isabs(exe):
+        if not frozen or not exe or not PureWindowsPath(exe).is_absolute():  # a Windows path, whatever runs the check
             raise AutostartError("Starting with Windows works from the installed app, not when running from source.")
         with reg.CreateKey(reg.HKEY_CURRENT_USER, RUN_KEY) as key:
             reg.SetValueEx(key, VALUE_NAME, 0, reg.REG_SZ, command_for(exe))
