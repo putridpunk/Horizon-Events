@@ -210,6 +210,10 @@ def _run(data: Path) -> int:
 
 
 def main() -> int:
+    if "--uninstall-cleanup" in sys.argv:  # run by the uninstaller after it has checked that no copy is running
+        from app.uninstall import cleanup
+
+        return cleanup()
     data = data_dir()
     _configure_logging(data)
     from app.desktop import SingleInstance
@@ -223,6 +227,9 @@ def main() -> int:
             message_box("Horizon Events is already running.")
         return 0
     try:
+        from app.uninstall import hold_running_mutex
+
+        hold_running_mutex()  # lets the uninstaller see that the app is open
         return _run(data)
     except Exception as exc:  # no console in the windowed build: make the failure visible
         logging.exception("Horizon Events failed to start")

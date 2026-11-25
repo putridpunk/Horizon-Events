@@ -60,10 +60,19 @@ begin
   Result := '';
 end;
 
+// Uninstalling never closes the app for the user: if a copy is running (even hidden in the tray) the uninstall stops
+// here, with an error, and nothing has been removed. The app holds this named marker for as long as it runs.
 function InitializeUninstall: Boolean;
 begin
-  StopApp;
   Result := True;
+  if CheckForMutexes('HorizonEvents.Running') then
+  begin
+    MsgBox('Horizon Events is still running.' + #13#10 + #13#10 +
+           'Close all instances of Horizon Events before uninstalling it. If it is in the system tray, ' +
+           'right-click its icon and choose Quit. Nothing has been removed.',
+           mbError, MB_OK);
+    Result := False;
+  end;
 end;
 
 function DataDir: String;
@@ -71,11 +80,21 @@ begin
   Result := ExpandConstant('{localappdata}\HorizonEvents');
 end;
 
+// Uninstalling removes everything the app put on the computer: the program, its shortcuts, its data (events, alerts,
+// settings, quarantine, logs), its start-with-Windows entry and the firewall rules it added. The program does the
+// part that only it knows about (--uninstall-cleanup); the data folder is also removed here as a safety net.
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  Code: Integer;
 begin
-  if (CurUninstallStep = usPostUninstall) and DirExists(DataDir) and not UninstallSilent then
-    if MsgBox('Also delete your Horizon Events data (collected events, alerts and settings)?' + #13#10 + #13#10 +
-              DataDir + #13#10 + #13#10 + 'This cannot be undone. Choose No to keep it.',
-              mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
-      DelTree(DataDir, True, True, True);
+  if CurUninstallStep = usUninstall then
+  begin
+    if Exec(ExpandConstant('{app}\{#AppExe}'), '--uninstall-cleanup', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+      if (Code and 2) <> 0 then
+        SuppressibleMsgBox('Some Windows Firewall rules added by Horizon Events (named "Horizon Events block ...") ' +
+          'could not be removed because administrator permission was not granted. You can delete them in ' +
+          'Windows Defender Firewall with Advanced Security.', mbInformation, MB_OK, IDOK);
+  end;
+  if (CurUninstallStep = usPostUninstall) and DirExists(DataDir) then
+    DelTree(DataDir, True, True, True);
 end;
