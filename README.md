@@ -143,6 +143,16 @@ For development, run the API as a server instead with `uvicorn app.main:app` fro
 - If Defender is missing or fails, the item is reported as *Could not scan*, never as clean. This is a second opinion from the engine Windows already provides, not a replacement for antivirus software.
 - Only available in the desktop app: a server or Docker install cannot see your files. Network (`\\host\share`) paths are refused.
 
+## Everyday use
+
+All of these are in **Settings** (sidebar, Configure) in the desktop app:
+
+- **Running in the background.** A tray icon is always shown. Optionally keep the app running there when the window is closed (Quit from the tray icon stops it), get a Windows notification for new critical (or high) alerts, and start Horizon Events when you sign in to Windows (it then opens hidden in the tray). Only alerts raised after the app started are announced.
+- **Scan new downloads.** Off by default. Each new file in your Downloads folder (or another folder) is scanned with Microsoft Defender once it has finished downloading; files already there are not scanned.
+- **Data.** Delete events older than a chosen period (events that belong to an alert are always kept) and make a backup of all your data, or restore one. A restore is applied the next time the app starts and the previous database is kept next to it as `horizon.db.before-restore`. Backups need the built-in SQLite database.
+- **Suppressed alerts.** In an alert's detail panel, *Suppress similar alerts* hides future alerts for the same rule, address and account (malware detections cannot be suppressed). Settings lists what is suppressed, how many alerts each silenced, and lets you remove it.
+- **Language.** English or Portuguese (Portugal); *Automatic* follows the Windows language. Screens, alert recommendations and rule names are translated; events, log lines and MITRE technique names stay as they are.
+
 ## Responding to alerts
 
 Every alert shows **Recommended steps** in plain language (rule by rule, in `backend/app/mitigation/advice.py`). In the desktop app the app can also carry out two of them, under **Mitigation** (sidebar, Respond):

@@ -39,6 +39,14 @@ Interactive documentation is served at `/docs` when the backend runs.
 | GET | `/api/mitigation/alerts/{id}` | `{enabled, advice[], actions[], skipped[{kind,target,reason}]}`. Advice is always returned; actions only in the desktop app (proposals are created on first read). |
 | GET | `/api/mitigation/history` | Recent actions. |
 | POST | `/api/mitigation/{id}/approve`, `/dismiss`, `/undo` | Act on a proposal (approve runs in the background; poll the alert or history). 409 when the state does not allow it or off the desktop app, 404 unknown. |
+| GET / POST / DELETE | `/api/suppressions`, `/api/suppressions/{id}` | Known false positives: `{rule_id?, source_ip?, username?, note}`; at least one field is required (422 otherwise), HZ-008 cannot be suppressed. A matching detection raises no alert and counts a hit. |
+| POST | `/api/alerts/{id}/suppress` | Suppress alerts like this one (same rule, address, account) and resolve it. |
+| GET / PUT | `/api/scans/downloads` | Scan new downloads: `{enabled, folder, default_folder, effective_folder, available, watching, queued, scanned}`; PUT `{enabled?, folder?}` (422 bad folder, 409 outside the desktop app). |
+| GET | `/api/data/status` | `{backups_available, retention_days, events, oldest_event, database_bytes, restore_pending}`. |
+| PUT | `/api/data/retention` | `{days}` 0 (keep everything) to 3650. Events that belong to an alert are never deleted. |
+| POST | `/api/data/purge` | Delete old events now; returns `{removed, ...status}`. |
+| POST / DELETE | `/api/data/backup`, `/api/data/restore` | Body `{path}`. Backup needs an absolute path ending in `.hzbackup` and never overwrites a file that is not a database; restore validates the file and stages it for the next start (DELETE cancels it). 422 with a message, 409 when unavailable. |
+| GET / PUT | `/api/desktop/settings` | Desktop only: `{enabled, run_in_background, notify: critical\|high\|off, start_with_windows}`. |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

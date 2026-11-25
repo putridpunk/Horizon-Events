@@ -41,6 +41,13 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - Quarantine moves only the path Defender reported for an HZ-008 alert, never from the Windows folder, never overwrites on restore.
 - The endpoints that act exist only in the desktop app (`HORIZON_MITIGATION=1`) and, like the rest of the API, answer only the app's own window.
 
+## Background mode, backups and downloads
+
+- The tray icon, notifications and start-with-Windows need no administrator rights. Starting with Windows writes one per-user entry (`HKCU` Run key, value `HorizonEvents`) that launches the installed program with `--background`; it is refused when running from source.
+- Backups are written only to an absolute local path ending in `.hzbackup` (never a UNC path), and an existing file is overwritten only if it is itself a database, so the API cannot be used to overwrite arbitrary files. A restore must contain Horizon Events tables, is staged and applied at the next start, and the previous database is kept.
+- Watching the Downloads folder only reads file names, sizes and modification times, then hands finished files to the same report-only Defender scan. It is off by default.
+- The installer stops a running copy (`taskkill`) before updating or removing it, because in background mode closing the window only hides it.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

@@ -1,4 +1,5 @@
 import { PageHeader } from "../components/common.jsx";
+import LanguageCard from "../components/settings/LanguageCard.jsx";
 import DesktopCard from "../components/settings/DesktopCard.jsx";
 import DownloadsCard from "../components/settings/DownloadsCard.jsx";
 import DataCard from "../components/settings/DataCard.jsx";
@@ -8,6 +9,7 @@ export default function Settings() {
   return (
     <>
       <PageHeader title="Settings" subtitle="How Horizon Events behaves on this computer" />
+      <LanguageCard />
       <DesktopCard />
       <DownloadsCard />
       <DataCard />
