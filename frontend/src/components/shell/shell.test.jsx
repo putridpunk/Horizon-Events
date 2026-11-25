@@ -26,12 +26,13 @@ describe("sidebar", () => {
   it("groups the pages under Monitor, Respond and Insight", () => {
     at("/");
     const nav = within(screen.getByRole("navigation", { name: "Main" }));
-    const groups = Object.fromEntries(["Monitor", "Respond", "Insight"].map((name) => [
+    const groups = Object.fromEntries(["Monitor", "Respond", "Insight", "Configure"].map((name) => [
       name, within(nav.getByText(name).closest(".nav-group")).getAllByRole("link").map((a) => a.textContent)]));
     expect(groups).toEqual({
       Monitor: ["Overview", "Events", "Data sources"],
       Respond: ["Alerts", "Incidents", "Scan files", "Mitigation"],
       Insight: ["Analytics", "Reports"],
+      Configure: ["Settings"],
     });
   });
 

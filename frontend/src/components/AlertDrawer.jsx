@@ -1,6 +1,6 @@
 import { useState } from "react";
 import usePolling from "../services/usePolling.js";
-import { getAlert, updateAlert } from "../services/api.js";
+import { getAlert, suppressAlert, updateAlert } from "../services/api.js";
 import { fmtTime } from "../services/constants.js";
 import { ErrorBanner, SeverityBadge, StatusBadge } from "./common.jsx";
 import TechniqueBadges from "./TechniqueBadges.jsx";
@@ -19,6 +19,7 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
   const [note, setNote] = useState("");
   const [actionError, setActionError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [confirmSuppress, setConfirmSuppress] = useState(false);
 
   async function change(status) {
     setBusy(true);
@@ -26,6 +27,21 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
     try {
       await updateAlert(alertId, { status, note: note.trim() || null });
       setNote("");
+      await reload();
+      onChanged?.();
+    } catch (e) {
+      setActionError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function suppress() {
+    setBusy(true);
+    setActionError(null);
+    try {
+      await suppressAlert(alertId);
+      setConfirmSuppress(false);
       await reload();
       onChanged?.();
     } catch (e) {
@@ -82,6 +98,21 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
               ))}
             </div>
             {actionError && <div className="error">{actionError}</div>}
+            {alert.rule_id !== "HZ-008" && (confirmSuppress ? (
+              <div className="mitigation" role="group" aria-label="Confirm suppression">
+                <p>
+                  Future alerts from {alert.rule_id}
+                  {alert.source_ip ? ` for ${alert.source_ip}` : ""}{alert.username ? ` and account ${alert.username}` : ""} will
+                  not be raised, and this alert will be resolved. You can undo this in Settings.
+                </p>
+                <div className="actions">
+                  <button className="primary" disabled={busy} onClick={suppress}>Suppress and resolve</button>
+                  <button disabled={busy} onClick={() => setConfirmSuppress(false)}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <p><button disabled={busy} onClick={() => setConfirmSuppress(true)}>Suppress similar alerts…</button></p>
+            ))}
 
             <h2>History</h2>
             <ul className="timeline">

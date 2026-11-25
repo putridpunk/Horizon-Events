@@ -28,6 +28,7 @@ export function mockApiDefaults() {
   m.getAlertMitigation.mockImplementation(later({ enabled: false, advice: ["Review the related events."], actions: [], skipped: [] }));
   m.getMitigationSettings.mockImplementation(later({ enabled: false, block_ip: "ask", quarantine_file: "ask", block_private: false, block_days: 7, allowlist: [] }));
   m.getMitigationHistory.mockImplementation(later({ items: [] }));
+  m.listSuppressions.mockImplementation(later({ items: [] }));
   m.reportUrl.mockImplementation((start, end, format) => `/api/reports?format=${format}`);
   return m;
 }

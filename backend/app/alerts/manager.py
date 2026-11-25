@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from app.alerts.suppression import Suppressions
 from app.database.models import AlertRow
 from app.database.repositories import AlertRepository
 from app.domain import SEVERITY_RANK, AlertStatus, Detection, Severity, utcnow
@@ -19,8 +20,10 @@ class InvalidTransition(ValueError):
 
 
 class AlertManager:
-    def __init__(self, alerts: AlertRepository, dedupe_window_minutes: int = 30):
+    def __init__(self, alerts: AlertRepository, dedupe_window_minutes: int = 30, suppressions: Suppressions | None = None):
         self.alerts = alerts
+        self.suppressions = suppressions  # known false positives (optional)
+        self.suppressed = 0
         self.dedupe = timedelta(minutes=dedupe_window_minutes)
         self.created: list[AlertRow] = []
         self.updated: list[AlertRow] = []
@@ -28,6 +31,11 @@ class AlertManager:
     def process(self, detections: list[Detection]) -> list[AlertRow]:
         out = []
         for d in detections:
+            hit = self.suppressions.match(d) if self.suppressions else None
+            if hit is not None:  # a known false positive: no alert
+                self.suppressions.record_hit(hit)
+                self.suppressed += 1
+                continue
             last_event = max(e.timestamp for e in d.events)
             existing = self.alerts.find_active_by_key(d.key, last_event - self.dedupe)
             ids = [e.id for e in d.events if e.id is not None]

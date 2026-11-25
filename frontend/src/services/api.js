@@ -96,3 +96,8 @@ export const getMitigationHistory = () => request("/mitigation/history");
 export const approveMitigation = (id) => request(`/mitigation/${id}/approve`, { method: "POST" });
 export const dismissMitigation = (id) => request(`/mitigation/${id}/dismiss`, { method: "POST" });
 export const undoMitigation = (id) => request(`/mitigation/${id}/undo`, { method: "POST" });
+
+export const listSuppressions = () => request("/suppressions");
+export const createSuppression = (body) => request("/suppressions", json("POST", body));
+export const deleteSuppression = (id) => request(`/suppressions/${id}`, { method: "DELETE" });
+export const suppressAlert = (alertId) => request(`/alerts/${alertId}/suppress`, { method: "POST" });
