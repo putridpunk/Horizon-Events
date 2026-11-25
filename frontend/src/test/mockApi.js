@@ -29,6 +29,7 @@ export function mockApiDefaults() {
   m.getMitigationSettings.mockImplementation(later({ enabled: false, block_ip: "ask", quarantine_file: "ask", block_private: false, block_days: 7, allowlist: [] }));
   m.getMitigationHistory.mockImplementation(later({ items: [] }));
   m.listSuppressions.mockImplementation(later({ items: [] }));
+  m.getDataStatus.mockImplementation(later({ backups_available: false, retention_days: 0, events: 0, oldest_event: null, database_bytes: null, restore_pending: false }));
   m.reportUrl.mockImplementation((start, end, format) => `/api/reports?format=${format}`);
   return m;
 }

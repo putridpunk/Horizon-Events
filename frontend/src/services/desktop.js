@@ -12,3 +12,15 @@ export async function pickFiles() {
 export async function pickFolder() {
   return (await picker().pick_folder()) ?? [];
 }
+
+export const hasFileDialogs = () => typeof picker()?.pick_save_file === "function" && typeof picker()?.pick_file === "function";
+
+/** Where to save a backup; an empty string when the user cancels. */
+export async function pickSaveFile(suggestedName) {
+  return (await picker().pick_save_file(suggestedName)) ?? "";
+}
+
+/** A single existing file; an empty string when the user cancels. */
+export async function pickFile() {
+  return (await picker().pick_file()) ?? "";
+}

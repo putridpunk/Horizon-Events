@@ -101,3 +101,10 @@ export const listSuppressions = () => request("/suppressions");
 export const createSuppression = (body) => request("/suppressions", json("POST", body));
 export const deleteSuppression = (id) => request(`/suppressions/${id}`, { method: "DELETE" });
 export const suppressAlert = (alertId) => request(`/alerts/${alertId}/suppress`, { method: "POST" });
+
+export const getDataStatus = () => request("/data/status");
+export const setRetention = (days) => request("/data/retention", json("PUT", { days }));
+export const purgeOldEvents = () => request("/data/purge", { method: "POST" });
+export const backupData = (path) => request("/data/backup", json("POST", { path }));
+export const restoreData = (path) => request("/data/restore", json("POST", { path }));
+export const cancelRestore = () => request("/data/restore", { method: "DELETE" });

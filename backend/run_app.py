@@ -64,13 +64,25 @@ class FilePicker:
         self._webview = webview_module
         self._window = None
 
+    def _dialog(self, kind):
+        dialog = getattr(self._webview, "FileDialog", None)
+        legacy = {"OPEN": "OPEN_DIALOG", "FOLDER": "FOLDER_DIALOG", "SAVE": "SAVE_DIALOG"}[kind]
+        return getattr(dialog, kind) if dialog else getattr(self._webview, legacy)
+
     def _open(self, kind, **options):
         if self._window is None:
             return []
-        dialog = getattr(self._webview, "FileDialog", None)
-        mode = getattr(dialog, kind) if dialog else getattr(self._webview, "OPEN_DIALOG" if kind == "OPEN" else "FOLDER_DIALOG")
+        mode = self._dialog(kind)
         chosen = self._window.create_file_dialog(mode, **options)
         return [str(p) for p in chosen] if chosen else []
+
+    def pick_save_file(self, suggested_name="backup.hzbackup"):
+        chosen = self._window.create_file_dialog(self._dialog("SAVE"), save_filename=str(suggested_name)) if self._window else None
+        return str(chosen[0] if isinstance(chosen, (list, tuple)) else chosen) if chosen else ""
+
+    def pick_file(self):
+        picked = self._open("OPEN")
+        return picked[0] if picked else ""
 
     def pick_files(self):
         return self._open("OPEN", allow_multiple=True)
@@ -86,6 +98,7 @@ def _run(data: Path) -> int:
     os.environ.setdefault("HORIZON_MODEL_PATH", str(data / "horizon_model.joblib"))
     os.environ.setdefault("HORIZON_WATCH_DIR", str(data / "watch"))
     os.environ.setdefault("HORIZON_SYSTEM_LOGS", "1")  # collect this machine's own logs
+    os.environ.setdefault("HORIZON_DATA_DIR", str(data))  # backup and restore of the built-in database
     os.environ.setdefault("HORIZON_FILE_SCAN", "1")  # let the user scan files and folders
     os.environ.setdefault("HORIZON_MITIGATION", "1")  # let the user approve actions on alerts
     os.environ.setdefault("HORIZON_QUARANTINE_DIR", str(data / "quarantine"))
@@ -111,6 +124,10 @@ def _run(data: Path) -> int:
     from app.seed import seed
     from app.web import mount_frontend
 
+    from app.data.service import apply_pending_restore
+
+    if apply_pending_restore(data, data / "horizon.db"):  # a backup the user chose to restore last time
+        logging.info("a backup was restored; the previous database was kept as horizon.db.before-restore")
     init_db()
     ensure_model()
     samples = BUNDLE / "sample_logs"

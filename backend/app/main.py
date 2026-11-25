@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, reports, rules,
                      scans, statistics, suppressions, watcher)
+from app.api import data as data_api
+from app.data.service import DataService
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
@@ -40,6 +42,10 @@ async def lifespan(app: FastAPI):
         app.state.collectors = CollectorManager(
             build_collectors(), lambda: Session(get_engine(), expire_on_commit=False))
         app.state.collectors.start()
+    data_dir = os.environ.get("HORIZON_DATA_DIR")  # set by the desktop app; enables backup and restore
+    app.state.data = DataService(lambda: Session(get_engine(), expire_on_commit=False), get_engine(),
+                                 Path(data_dir) if data_dir else None)
+    app.state.data.start()
     app.state.mitigation = None
     if os.environ.get("HORIZON_MITIGATION") == "1":  # the desktop app turns this on: actions change this PC
         quarantine_dir = Path(os.environ.get("HORIZON_QUARANTINE_DIR", "quarantine"))
@@ -51,6 +57,7 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        app.state.data.stop()
         if app.state.watcher:
             app.state.watcher.stop()
         if app.state.collectors:
@@ -63,7 +70,7 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions):
+               collectors, scans, mitigation, suppressions, data_api):
     app.include_router(module.router)
 
 
