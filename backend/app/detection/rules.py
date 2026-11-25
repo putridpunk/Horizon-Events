@@ -104,7 +104,7 @@ class UnusualLoginHours(Rule):
     name = "Unusual login hours"
     description = "A successful login occurred outside the configured working hours."
     severity = Severity.medium
-    event_types = [EventType.authentication_success]
+    event_types = [EventType.authentication_success, EventType.remote_login]
     default_params = {"work_start": 8, "work_end": 18, "weekends": True}
 
     def evaluate(self, new_events, history):

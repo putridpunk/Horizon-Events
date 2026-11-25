@@ -126,7 +126,7 @@ def test_rules_include_techniques_and_mitre_endpoint(client):
 
 def test_statistics_mitre_empty_db(client):
     d = client.get("/api/statistics/mitre").json()
-    assert len(d["tactics"]) == 8 and all(t["alerts"] == 0 for t in d["tactics"])
+    assert len(d["tactics"]) == 9 and all(t["alerts"] == 0 for t in d["tactics"])
     assert all(t["alerts"] == 0 for t in d["techniques"])
 
 

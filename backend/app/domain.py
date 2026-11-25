@@ -25,6 +25,10 @@ class EventType(str, Enum):
     privilege_escalation = "privilege_escalation"
     service_failure = "service_failure"
     service_start = "service_start"
+    log_cleared = "log_cleared"
+    service_installed = "service_installed"
+    scheduled_task_created = "scheduled_task_created"
+    remote_login = "remote_login"
     generic = "generic"
 
 

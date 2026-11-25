@@ -102,7 +102,8 @@ _WIN_MAP = {
     "4624": "authentication_success", "4625": "authentication_failure", "4740": "account_lockout",
     "4672": "privilege_escalation", "4728": "privilege_escalation", "4732": "privilege_escalation",
     "4756": "privilege_escalation", "7031": "service_failure", "7034": "service_failure",
-    "1000": "service_failure",
+    "1000": "service_failure", "1102": "log_cleared", "104": "log_cleared", "7045": "service_installed",
+    "4697": "service_installed", "4698": "scheduled_task_created",
 }
 
 # Short, language-independent descriptions for the events the live collector reads.
@@ -111,7 +112,9 @@ _WIN_TEXT = {
     "4720": "User account created", "4728": "Member added to a global security group",
     "4732": "Member added to a local security group", "4756": "Member added to a universal security group",
     "7031": "Service terminated unexpectedly", "7034": "Service terminated unexpectedly",
-    "1000": "Application crashed",
+    "1000": "Application crashed", "1102": "Audit log cleared", "104": "Event log cleared",
+    "7045": "Service installed", "4697": "Service installed", "4698": "Scheduled task created",
+    "4624_rdp": "Remote desktop logon",
 }
 # For these events TargetUserName is the group; the account of interest is who made the change.
 _SUBJECT_FIRST = {"4728", "4732", "4756"}
@@ -137,6 +140,8 @@ def parse_windows_record(rec: dict) -> dict | None:
         ip = None
     if eid == "4625" and str(r.get("substatus", "")).lower() == "0xc0000064":
         hint = "unknown_user"
+    if eid == "4624" and str(r.get("logontype", "")).strip() == "10":
+        hint = "remote_login"  # an interactive sign-in through Remote Desktop
     out = {
         "timestamp": ts, "host": r.get("computer"), "process": "windows", "event_hint": hint,
         "message": str(r.get("message") or (f"{_WIN_TEXT[eid]} ({eid})" if eid in _WIN_TEXT else f"Windows event {eid}")),
@@ -145,6 +150,13 @@ def parse_windows_record(rec: dict) -> dict | None:
     }
     if hint == "service_failure":
         out["service"] = r.get("servicename") or r.get("param1") or r.get("data0")
+    if hint in ("service_installed", "scheduled_task_created"):
+        name = r.get("servicename") or r.get("taskname") or r.get("param1")
+        out["service"] = name
+        if name and "message" not in r:
+            out["message"] = f"{_WIN_TEXT[eid]}: {name}"
+    if hint == "remote_login" and "message" not in r:
+        out["message"] = _WIN_TEXT["4624_rdp"]
     return out
 
 

@@ -6,7 +6,7 @@ before relying on them for reporting.
 from __future__ import annotations
 
 TACTICS = ("Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion",
-           "Credential Access", "Discovery", "Impact")
+           "Credential Access", "Discovery", "Lateral Movement", "Impact")
 
 # technique id -> (name, tactics)
 TECHNIQUES: dict[str, tuple[str, tuple[str, ...]]] = {
@@ -19,6 +19,10 @@ TECHNIQUES: dict[str, tuple[str, tuple[str, ...]]] = {
     "T1098": ("Account Manipulation", ("Persistence", "Privilege Escalation")),
     "T1489": ("Service Stop", ("Impact",)),
     "T1204.002": ("Malicious File", ("Execution",)),
+    "T1070.001": ("Clear Windows Event Logs", ("Defense Evasion",)),
+    "T1543.003": ("Windows Service", ("Persistence", "Privilege Escalation")),
+    "T1053.005": ("Scheduled Task", ("Execution", "Persistence", "Privilege Escalation")),
+    "T1021.001": ("Remote Desktop Protocol", ("Lateral Movement",)),
 }
 
 # rule id -> [(technique id, confidence)]
@@ -31,6 +35,10 @@ RULE_TECHNIQUES: dict[str, list[tuple[str, str]]] = {
     "HZ-006": [("T1110", "high")],
     "HZ-007": [("T1110.003", "high"), ("T1110", "high")],
     "HZ-008": [("T1204.002", "high")],
+    "HZ-009": [("T1070.001", "high")],
+    "HZ-010": [("T1543.003", "high")],
+    "HZ-011": [("T1053.005", "high")],
+    "HZ-012": [("T1021.001", "high")],
 }
 
 

@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from app.detection.anomaly import AnomalousIpActivity
+from app.detection.windows_rules import AuditLogCleared, RemoteDesktopLogin, ScheduledTaskCreated, ServiceInstalled
 from app.detection.rules import (AccountLockouts, PrivilegeEscalation, RepeatedLoginFailures, Rule, ServiceFailures,
                                  UnknownUsers, UnusualLoginHours)
 
 RULE_CLASSES: dict[str, type[Rule]] = {c.id: c for c in (
     RepeatedLoginFailures, UnusualLoginHours, UnknownUsers, PrivilegeEscalation, ServiceFailures, AccountLockouts,
-    AnomalousIpActivity)}
+    AnomalousIpActivity, AuditLogCleared, ServiceInstalled, ScheduledTaskCreated, RemoteDesktopLogin)}
 
 DEFAULT_RULES: list[dict] = [
     {"id": c.id, "name": c.name, "description": c.description, "severity": c.severity.value,

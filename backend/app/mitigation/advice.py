@@ -35,6 +35,24 @@ ADVICE: dict[str, list[str]] = {
         "This alert comes from a statistical model, so it is a hint, not proof. Compare the address's activity with its normal pattern.",
         "Check the address against the threat feeds in Analytics before acting. No automatic action is offered for this rule.",
     ],
+    "HZ-009": [
+        "Clearing the log is rarely routine. Ask whoever had administrator access at that time whether they did it.",
+        "If not, treat the computer as compromised: other evidence may have been erased, so check accounts, services and scheduled tasks.",
+        "Keep a copy of other logs you still have, and consider forwarding logs to another machine in future.",
+    ],
+    "HZ-010": [
+        "Check that you or an installer you trust added this service (the name and the file it runs are in the event).",
+        "If you do not recognise it, stop and disable the service and scan the file it points to with Scan files.",
+    ],
+    "HZ-011": [
+        "Check that a program you installed created this task; look at what it runs and when.",
+        "If you do not recognise it, disable the task and scan the program it runs with Scan files.",
+    ],
+    "HZ-012": [
+        "Confirm that you or someone you expect signed in remotely at this time.",
+        "If you do not use Remote Desktop, turn it off. If you do, require strong passwords and do not expose it directly to the internet.",
+        "A sign-in from a public address is the riskier case and is rated high.",
+    ],
     "HZ-008": [
         "Do not open or run the file. Quarantining it moves it out of the way without deleting it, and it can be restored.",
         "If you downloaded it from the internet, delete the original download and note where it came from.",

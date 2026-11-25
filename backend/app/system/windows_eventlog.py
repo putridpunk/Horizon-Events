@@ -41,11 +41,13 @@ class ChannelSpec:
 CHANNELS: dict[str, ChannelSpec] = {
     "Security": ChannelSpec(
         "Security", "Windows Security log",
-        "Sign-in activity: failed and successful logons, account lockouts, new accounts and changes to "
-        "privileged groups. Reading it needs a one-time permission.",
-        event_ids=(4625, 4740, 4720, 4728, 4732, 4756), logon_types=(2, 7, 10, 11)),
+        "Sign-in activity: failed and successful logons, account lockouts, new accounts, changes to "
+        "privileged groups, new services and scheduled tasks, and a cleared audit log. Reading it needs a "
+        "one-time permission.",
+        event_ids=(4625, 4740, 4720, 4728, 4732, 4756, 1102, 4697, 4698), logon_types=(2, 7, 10, 11)),
     "System": ChannelSpec(
-        "System", "Windows System log", "Services that crash or stop unexpectedly.", event_ids=(7031, 7034)),
+        "System", "Windows System log", "Services that crash, stop unexpectedly or are newly installed, and a cleared log.",
+        event_ids=(7031, 7034, 7045, 104)),
     "Application": ChannelSpec(
         "Application", "Windows Application log", "Applications that crash.", event_ids=(1000,)),
 }

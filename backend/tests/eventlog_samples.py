@@ -60,3 +60,19 @@ def app_crash(record_id: int, app: str = "chrome.exe", when="2026-11-23T15:00:00
 def wrap(*events: str) -> str:
     """What the collector does with `wevtutil` output: give the concatenated events a root."""
     return "<Events>" + "".join(events) + "</Events>"
+
+
+def log_cleared(record_id: int, who: str = "mallory", event_id: int = 1102, when="2026-11-23T03:12:00") -> str:
+    return event_xml("Security" if event_id == 1102 else "System", event_id, record_id, when, {
+        "SubjectUserName": who, "SubjectDomainName": "WS-DEMO"})
+
+
+def service_installed(record_id: int, name: str = "EvilSvc", event_id: int = 7045, image: str = r"C:\Temp\evil.exe",
+                      when="2026-11-23T03:15:00") -> str:
+    return event_xml("System" if event_id == 7045 else "Security", event_id, record_id, when, {
+        "ServiceName": name, "ImagePath": image, "ServiceType": "user mode service", "StartType": "auto start",
+        "SubjectUserName": "mallory"})
+
+
+def task_created(record_id: int, name: str = r"\Updater", who: str = "mallory", when="2026-11-23T03:20:00") -> str:
+    return event_xml("Security", 4698, record_id, when, {"SubjectUserName": who, "TaskName": name})

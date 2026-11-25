@@ -54,11 +54,11 @@ def event_count(session):
 
 # -- queries ---------------------------------------------------------------------------------
 def test_query_for_each_channel():
-    assert build_query(CHANNELS["System"], None) == "*[System[(EventID=7031 or EventID=7034)]]"
-    assert build_query(CHANNELS["System"], 123) == "*[System[(EventID=7031 or EventID=7034) and (EventRecordID>123)]]"
+    assert build_query(CHANNELS["System"], None) == "*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104)]]"
+    assert build_query(CHANNELS["System"], 123) == "*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104) and (EventRecordID>123)]]"
     assert build_query(CHANNELS["Application"], 5) == "*[System[(EventID=1000) and (EventRecordID>5)]]"
     assert build_query(CHANNELS["Security"], 7) == (
-        "*[System[(EventID=4625 or EventID=4740 or EventID=4720 or EventID=4728 or EventID=4732 or EventID=4756) "
+        "*[System[(EventID=4625 or EventID=4740 or EventID=4720 or EventID=4728 or EventID=4732 or EventID=4756 or EventID=1102 or EventID=4697 or EventID=4698) "
         "and (EventRecordID>7)]] or *[System[(EventID=4624) and (EventRecordID>7)] and EventData["
         "(Data[@Name='LogonType']='2') or (Data[@Name='LogonType']='7') or (Data[@Name='LogonType']='10') or "
         "(Data[@Name='LogonType']='11')]]")
@@ -66,13 +66,13 @@ def test_query_for_each_channel():
 
 def test_backfill_query_uses_a_time_window():
     assert build_query(CHANNELS["System"], None, backfill_ms=86_400_000) == (
-        "*[System[(EventID=7031 or EventID=7034) and TimeCreated[timediff(@SystemTime) <= 86400000]]]")
+        "*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104) and TimeCreated[timediff(@SystemTime) <= 86400000]]]")
 
 
 def test_only_the_listed_events_are_ever_requested():
     for spec in CHANNELS.values():
         q = build_query(spec, 1)
-        assert "4672" not in q and "4688" not in q and "1102" not in q
+        assert "4672" not in q and "4688" not in q
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="needs the Windows wevtutil tool")
@@ -133,7 +133,7 @@ def test_poll_imports_and_advances_the_bookmark(session):
     row = setting(session, collector, last_record_id=100)
     assert collector.poll(session, row) == 2
     assert row.last_record_id == 102 and event_count(session) == 2
-    assert fake.queries == ["*[System[(EventID=7031 or EventID=7034) and (EventRecordID>100)]]"]
+    assert fake.queries == ["*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104) and (EventRecordID>100)]]"]
 
 
 def test_batches_repeat_until_a_short_batch(session, monkeypatch):
@@ -169,7 +169,7 @@ def test_bookmark_survives_restart_and_nothing_is_reimported(engine):
     second, fake2 = make(batches=[])  # a restarted app: new collector, new manager, same database
     m2 = CollectorManager([second], factory, access_ttl=0)
     assert m2.poll_once() == 0
-    assert fake2.queries == ["*[System[(EventID=7031 or EventID=7034) and (EventRecordID>102)]]"]
+    assert fake2.queries == ["*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104) and (EventRecordID>102)]]"]
     with factory() as session:
         assert event_count(session) == 2
 

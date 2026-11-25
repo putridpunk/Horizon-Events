@@ -11,6 +11,10 @@ _DEFAULT_SEVERITY = {
     EventType.privilege_escalation: Severity.high,
     EventType.service_failure: Severity.medium,
     EventType.service_start: Severity.low,
+    EventType.log_cleared: Severity.high,
+    EventType.service_installed: Severity.medium,
+    EventType.scheduled_task_created: Severity.medium,
+    EventType.remote_login: Severity.low,
     EventType.generic: Severity.low,
 }
 

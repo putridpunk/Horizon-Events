@@ -12,6 +12,10 @@ Rules are stored in the `detection_rules` table and can be changed through `PATC
 | HZ-006 | Account lockouts | `account_lockout` | Any lockout is **high** | none |
 | HZ-007 | Anomalous IP activity | all | ML rule: an Isolation Forest scores each source IP's hourly activity against a learned baseline. Outliers are **medium**, the most extreme **high**. Needs a trained model; without one the rule stays silent | `min_events` |
 | HZ-008 | Malware detected | file scan | Raised by **Scan files**, not by the log engine: Microsoft Defender reported a threat in a file or folder you scanned. Always **critical**; one alert per file (hash or path) and threat | none |
+| HZ-009 | Audit log cleared | `log_cleared` | A Windows event log was cleared (events 1102 or 104). Always **critical** | none |
+| HZ-010 | New service installed | `service_installed` | A service was installed (events 7045 or 4697). **Medium**; one alert per service name | `ignore` (service-name prefixes to skip) |
+| HZ-011 | Scheduled task created | `scheduled_task_created` | A task was created (event 4698). **Medium**; one alert per task. Tasks under the Microsoft folder are ignored by default | `ignore` (task-name prefixes to skip) |
+| HZ-012 | Remote desktop logon | `remote_login` | A successful sign-in through Remote Desktop (logon type 10). **Medium**, **high** when it came from a public address | none |
 
 Windows event IDs recognised: 4624 (success), 4625 (failure; sub-status `0xC0000064` means unknown user), 4740 (lockout), 4672/4728/4732/4756 (privilege), 7031/7034 (service failure).
 
