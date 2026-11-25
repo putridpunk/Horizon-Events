@@ -14,6 +14,8 @@ if (-not (Test-Path "assets\horizon.ico")) { & ".venv\Scripts\python.exe" script
   --paths backend `
   --add-data "frontend\dist;static" `
   --add-data "sample_logs;sample_logs" `
+  --add-data "assets\horizon.ico;assets" `
+  --collect-submodules pystray `
   --collect-submodules uvicorn `
   --collect-submodules app `
   --collect-submodules sklearn `

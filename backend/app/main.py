@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, reports, rules,
                      scans, statistics, suppressions, watcher)
 from app.api import data as data_api
+from app.api import desktop_settings
+from app.shell.settings import ShellSettings
 from app.data.service import DataService
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
@@ -47,6 +49,10 @@ async def lifespan(app: FastAPI):
     app.state.data = DataService(lambda: Session(get_engine(), expire_on_commit=False), get_engine(),
                                  Path(data_dir) if data_dir else None)
     app.state.data.start()
+    app.state.shell = None
+    if os.environ.get("HORIZON_DESKTOP") == "1":  # the desktop app turns this on: tray, notifications, auto-start
+        import sys
+        app.state.shell = ShellSettings(lambda: Session(get_engine(), expire_on_commit=False), sys.executable)
     app.state.mitigation = None
     if os.environ.get("HORIZON_MITIGATION") == "1":  # the desktop app turns this on: actions change this PC
         quarantine_dir = Path(os.environ.get("HORIZON_QUARANTINE_DIR", "quarantine"))
@@ -77,7 +83,7 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings):
     app.include_router(module.router)
 
 

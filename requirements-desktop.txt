@@ -1,2 +1,4 @@
 # Native window for the Windows desktop app (not needed for server or Docker mode)
 pywebview>=5; sys_platform == "win32"
+pystray>=0.19; sys_platform == "win32"
+pillow>=10; sys_platform == "win32"

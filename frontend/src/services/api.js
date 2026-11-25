@@ -111,3 +111,6 @@ export const cancelRestore = () => request("/data/restore", { method: "DELETE" }
 
 export const getDownloadsScan = () => request("/scans/downloads");
 export const updateDownloadsScan = (body) => request("/scans/downloads", json("PUT", body));
+
+export const getDesktopSettings = () => request("/desktop/settings");
+export const updateDesktopSettings = (body) => request("/desktop/settings", json("PUT", body));

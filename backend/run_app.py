@@ -41,6 +41,8 @@ def focus_existing_window() -> bool:
     hwnd = user32.FindWindowW(None, TITLE)
     if not hwnd:
         return False
+    if not user32.IsWindowVisible(hwnd):
+        user32.ShowWindow(hwnd, 5)  # SW_SHOW: it was hidden in the tray
     if user32.IsIconic(hwnd):
         user32.ShowWindow(hwnd, 9)  # SW_RESTORE
     user32.SetForegroundWindow(hwnd)
@@ -91,6 +93,42 @@ class FilePicker:
         return self._open("FOLDER")
 
 
+def _setup_tray(window, app, get_engine, bundle: Path):
+    """Tray icon, background mode and notifications. Returns the notifier (or None if there is no tray)."""
+    from sqlalchemy.orm import Session
+
+    from app.shell.notifier import AlertNotifier
+    from app.shell.tray import Tray
+
+    state = {"quitting": False}
+
+    def open_window():
+        window.show()
+        window.restore()
+
+    def quit_app():
+        state["quitting"] = True
+        window.destroy()
+
+    tray = Tray(TITLE, bundle / "assets" / "horizon.ico", open_window, quit_app)
+    if not tray.start():
+        return None
+    shell = getattr(app.state, "shell", None)
+
+    def on_closing():
+        # With "keep running in the background" the close button hides the window; Quit in the tray really quits.
+        if state["quitting"] or shell is None or not shell.keeps_running_in_background():
+            return True
+        window.hide()
+        return False
+
+    window.events.closing += on_closing
+    window.events.closed += tray.stop
+    notifier = AlertNotifier(lambda: Session(get_engine(), expire_on_commit=False), tray.notify)
+    notifier.start()
+    return notifier
+
+
 def _run(data: Path) -> int:
     from app.desktop import make_secret, pick_free_port, wait_until_ready
 
@@ -98,6 +136,7 @@ def _run(data: Path) -> int:
     os.environ.setdefault("HORIZON_MODEL_PATH", str(data / "horizon_model.joblib"))
     os.environ.setdefault("HORIZON_WATCH_DIR", str(data / "watch"))
     os.environ.setdefault("HORIZON_SYSTEM_LOGS", "1")  # collect this machine's own logs
+    os.environ.setdefault("HORIZON_DESKTOP", "1")  # tray, notifications and starting with Windows
     os.environ.setdefault("HORIZON_DATA_DIR", str(data))  # backup and restore of the built-in database
     os.environ.setdefault("HORIZON_FILE_SCAN", "1")  # let the user scan files and folders
     os.environ.setdefault("HORIZON_MITIGATION", "1")  # let the user approve actions on alerts
@@ -151,8 +190,10 @@ def _run(data: Path) -> int:
     logging.info("serving on 127.0.0.1:%s", port)
 
     picker = FilePicker(webview)
-    picker._window = webview.create_window(TITLE, f"http://127.0.0.1:{port}/?hz={secret}", width=1360, height=860,
-                                          min_size=(1100, 700), js_api=picker)
+    window = webview.create_window(TITLE, f"http://127.0.0.1:{port}/?hz={secret}", width=1360, height=860,
+                                   min_size=(1100, 700), js_api=picker, hidden="--background" in sys.argv)
+    picker._window = window
+    notifier = _setup_tray(window, app, get_engine, BUNDLE)
     try:
         webview.start(storage_path=str(data / "webview"), private_mode=False)
     except Exception:
@@ -161,6 +202,8 @@ def _run(data: Path) -> int:
                     f"runtime.\n\nInstall it from:\n{WEBVIEW2_URL}")
         server.should_exit = True
         return 1
+    if notifier:
+        notifier.stop()
     server.should_exit = True  # the window was closed: stop the server and exit
     thread.join(timeout=10)
     return 0
@@ -174,6 +217,8 @@ def main() -> int:
     if not lock.acquire():
         # Already running: show that window instead of starting a second collector. If it is still
         # starting up and has no window yet, say so.
+        if "--background" in sys.argv:  # started by Windows at sign-in while already running: nothing to show
+            return 0
         if not focus_existing_window():
             message_box("Horizon Events is already running.")
         return 0

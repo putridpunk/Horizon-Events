@@ -45,6 +45,27 @@ Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: startmenu
 Filename: "{app}\{#AppExe}"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent
 
 [Code]
+// The app can stay running in the system tray, where closing its window only hides it. Stop it before files are
+// replaced or removed, so an update or uninstall does not fail on a file that is in use.
+procedure StopApp;
+var
+  Code: Integer;
+begin
+  Exec(ExpandConstant('{sys}	askkill.exe'), '/IM {#AppExe} /F', '', SW_HIDE, ewWaitUntilTerminated, Code);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  StopApp;
+  Result := '';
+end;
+
+function InitializeUninstall: Boolean;
+begin
+  StopApp;
+  Result := True;
+end;
+
 function DataDir: String;
 begin
   Result := ExpandConstant('{localappdata}\HorizonEvents');
