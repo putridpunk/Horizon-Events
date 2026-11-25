@@ -108,3 +108,6 @@ export const purgeOldEvents = () => request("/data/purge", { method: "POST" });
 export const backupData = (path) => request("/data/backup", json("POST", { path }));
 export const restoreData = (path) => request("/data/restore", json("POST", { path }));
 export const cancelRestore = () => request("/data/restore", { method: "DELETE" });
+
+export const getDownloadsScan = () => request("/scans/downloads");
+export const updateDownloadsScan = (body) => request("/scans/downloads", json("PUT", body));

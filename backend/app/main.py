@@ -20,6 +20,7 @@ from app.incidents.manager import IncidentManager
 from app.services.ingestion import ensure_default_rules
 from app.system.manager import CollectorManager
 from app.mitigation.service import MitigationService
+from app.scanning.downloads import DownloadsWatcher
 from app.scanning.service import ScanService
 from app.system.registry import build_collectors
 from app.watcher.service import WatchService
@@ -54,10 +55,16 @@ async def lifespan(app: FastAPI):
     if os.environ.get("HORIZON_FILE_SCAN") == "1":  # the desktop app turns this on; server mode cannot see your files
         app.state.scans = ScanService(lambda: Session(get_engine(), expire_on_commit=False),
                                       mitigation=app.state.mitigation)
+    app.state.downloads = None
+    if app.state.scans is not None:  # new files in the Downloads folder can be scanned (opt-in, off by default)
+        app.state.downloads = DownloadsWatcher(lambda: Session(get_engine(), expire_on_commit=False), app.state.scans)
+        app.state.downloads.start()
     try:
         yield
     finally:
         app.state.data.stop()
+        if app.state.downloads:
+            app.state.downloads.stop()
         if app.state.watcher:
             app.state.watcher.stop()
         if app.state.collectors:
