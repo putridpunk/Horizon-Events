@@ -76,3 +76,21 @@ def service_installed(record_id: int, name: str = "EvilSvc", event_id: int = 704
 
 def task_created(record_id: int, name: str = r"\Updater", who: str = "mallory", when="2026-11-23T03:20:00") -> str:
     return event_xml("Security", 4698, record_id, when, {"SubjectUserName": who, "TaskName": name})
+
+
+def ntlm_logon(record_id: int, user: str = "svc_backup", ip: str = "93.184.216.34", when="2026-11-23T04:00:00") -> str:
+    return event_xml("Security", 4624, record_id, when, {
+        "SubjectUserName": "-", "TargetUserName": user, "LogonType": "3", "IpAddress": ip,
+        "AuthenticationPackageName": "NTLM"})
+
+
+def explicit_logon(record_id: int, who: str = "alice", target: str = "admin", when="2026-11-23T10:00:00") -> str:
+    return event_xml("Security", 4648, record_id, when, {"SubjectUserName": who, "TargetUserName": target})
+
+
+def powershell_block(record_id: int, script: str = "Get-Date", when="2026-11-23T10:30:00") -> str:
+    return event_xml("Microsoft-Windows-PowerShell/Operational", 4104, record_id, when, {"ScriptBlockText": script})
+
+
+def usb_device(record_id: int, device: str = "USB Mass Storage Device", when="2026-11-23T10:45:00") -> str:
+    return event_xml("Security", 6416, record_id, when, {"DeviceDescription": device, "SubjectUserName": "alice"})

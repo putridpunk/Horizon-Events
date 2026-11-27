@@ -53,6 +53,26 @@ ADVICE: dict[str, list[str]] = {
         "If you do not use Remote Desktop, turn it off. If you do, require strong passwords and do not expose it directly to the internet.",
         "A sign-in from a public address is the riskier case and is rated high.",
     ],
+    "HZ-013": [
+        "Check which program asked for another account's credentials, and whether you started it.",
+        "If it was not you, change that account's password and look for other sign-ins from the same computer.",
+    ],
+    "HZ-014": [
+        "Check that you expected a network sign-in from this address, and that the account is one you know.",
+        "Prefer Kerberos over NTLM where you can, and restrict NTLM in the local security policy.",
+    ],
+    "HZ-015": [
+        "Confirm that you or an administrator you trust added this account to the Administrators group.",
+        "If not, remove the account from the group and change the passwords of the account that made the change.",
+    ],
+    "HZ-016": [
+        "Read the script in the event. Encoded or downloaded commands that you did not start are a warning sign.",
+        "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.",
+    ],
+    "HZ-017": [
+        "Check that you plugged in this device. Unknown drives can carry malware.",
+        "Scan the device's files with Scan files before opening them.",
+    ],
     "HZ-008": [
         "Do not open or run the file. Quarantining it moves it out of the way without deleting it, and it can be restored.",
         "If you downloaded it from the internet, delete the original download and note where it came from.",

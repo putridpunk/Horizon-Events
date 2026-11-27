@@ -23,6 +23,10 @@ TECHNIQUES: dict[str, tuple[str, tuple[str, ...]]] = {
     "T1543.003": ("Windows Service", ("Persistence", "Privilege Escalation")),
     "T1053.005": ("Scheduled Task", ("Execution", "Persistence", "Privilege Escalation")),
     "T1021.001": ("Remote Desktop Protocol", ("Lateral Movement",)),
+    "T1550.002": ("Pass the Hash", ("Defense Evasion", "Lateral Movement")),
+    "T1059.001": ("PowerShell", ("Execution",)),
+    "T1136.001": ("Local Account", ("Persistence",)),
+    "T1200": ("Hardware Additions", ("Initial Access",)),
 }
 
 # rule id -> [(technique id, confidence)]
@@ -39,6 +43,11 @@ RULE_TECHNIQUES: dict[str, list[tuple[str, str]]] = {
     "HZ-010": [("T1543.003", "high")],
     "HZ-011": [("T1053.005", "high")],
     "HZ-012": [("T1021.001", "high")],
+    "HZ-013": [("T1078", "low")],
+    "HZ-014": [("T1550.002", "low")],
+    "HZ-015": [("T1098", "high"), ("T1136.001", "low")],
+    "HZ-016": [("T1059.001", "high")],
+    "HZ-017": [("T1200", "low")],
 }
 
 

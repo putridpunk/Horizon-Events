@@ -29,6 +29,10 @@ class EventType(str, Enum):
     service_installed = "service_installed"
     scheduled_task_created = "scheduled_task_created"
     remote_login = "remote_login"
+    explicit_credentials = "explicit_credentials"
+    ntlm_logon = "ntlm_logon"
+    powershell_script = "powershell_script"
+    usb_device = "usb_device"
     generic = "generic"
 
 

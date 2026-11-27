@@ -58,10 +58,11 @@ def test_query_for_each_channel():
     assert build_query(CHANNELS["System"], 123) == "*[System[(EventID=7031 or EventID=7034 or EventID=7045 or EventID=104) and (EventRecordID>123)]]"
     assert build_query(CHANNELS["Application"], 5) == "*[System[(EventID=1000) and (EventRecordID>5)]]"
     assert build_query(CHANNELS["Security"], 7) == (
-        "*[System[(EventID=4625 or EventID=4740 or EventID=4720 or EventID=4728 or EventID=4732 or EventID=4756 or EventID=1102 or EventID=4697 or EventID=4698) "
+        "*[System[(EventID=4625 or EventID=4740 or EventID=4720 or EventID=4728 or EventID=4732 or EventID=4756 or EventID=1102 or EventID=4697 or EventID=4698 or EventID=4648 or EventID=6416) "
         "and (EventRecordID>7)]] or *[System[(EventID=4624) and (EventRecordID>7)] and EventData["
         "(Data[@Name='LogonType']='2') or (Data[@Name='LogonType']='7') or (Data[@Name='LogonType']='10') or "
-        "(Data[@Name='LogonType']='11')]]")
+        "(Data[@Name='LogonType']='11') or ((Data[@Name='LogonType']='3') and "
+        "(Data[@Name='AuthenticationPackageName']='NTLM'))]]")
 
 
 def test_backfill_query_uses_a_time_window():

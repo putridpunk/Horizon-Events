@@ -15,6 +15,10 @@ _DEFAULT_SEVERITY = {
     EventType.service_installed: Severity.medium,
     EventType.scheduled_task_created: Severity.medium,
     EventType.remote_login: Severity.low,
+    EventType.explicit_credentials: Severity.low,
+    EventType.ntlm_logon: Severity.low,
+    EventType.powershell_script: Severity.low,
+    EventType.usb_device: Severity.low,
     EventType.generic: Severity.low,
 }
 
@@ -28,7 +32,7 @@ def normalize(parsed: dict, source: str) -> Event:
         sev = Severity(str(parsed["severity"]).lower()) if parsed.get("severity") else _DEFAULT_SEVERITY[etype]
     except ValueError:
         sev = _DEFAULT_SEVERITY[etype]
-    meta = {k: parsed[k] for k in ("process", "level") if parsed.get(k)}
+    meta = {k: parsed[k] for k in ("process", "level", "group", "script", "device", "geo") if parsed.get(k)}
     return Event(
         timestamp=parsed["timestamp"], source=source, event_type=etype, severity=sev,
         message=parsed.get("message", ""), raw=parsed.get("raw", ""),

@@ -16,7 +16,8 @@ def platform_name() -> str:
 def build_collectors() -> list[Collector]:
     if sys.platform == "win32":
         return [WindowsEventLogCollector("Security", refine=make_security_refine()),
-                WindowsEventLogCollector("System"), WindowsEventLogCollector("Application")]
+                WindowsEventLogCollector("System"), WindowsEventLogCollector("Application"),
+                WindowsEventLogCollector("PowerShell")]
     if sys.platform.startswith("linux"):
         return list(default_linux_collectors())
     return []
