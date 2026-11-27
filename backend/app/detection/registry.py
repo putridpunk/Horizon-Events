@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from app.detection.anomaly import AnomalousIpActivity
+from app.detection.geo_rules import ImpossibleTravel, NewCountryLogin
 from app.detection.custom import ID_PREFIX, CustomRule, RuleError, validate_params
 from app.detection.windows_rules import (AuditLogCleared, ExplicitCredentialLogon, NewLocalAdministrator,
                                          NtlmNetworkLogon, RemoteDesktopLogin, ScheduledTaskCreated, ServiceInstalled,
@@ -12,7 +13,8 @@ from app.detection.rules import (AccountLockouts, PrivilegeEscalation, RepeatedL
 RULE_CLASSES: dict[str, type[Rule]] = {c.id: c for c in (
     RepeatedLoginFailures, UnusualLoginHours, UnknownUsers, PrivilegeEscalation, ServiceFailures, AccountLockouts,
     AnomalousIpActivity, AuditLogCleared, ServiceInstalled, ScheduledTaskCreated, RemoteDesktopLogin,
-    ExplicitCredentialLogon, NtlmNetworkLogon, NewLocalAdministrator, SuspiciousPowerShell, UsbDevice)}
+    ExplicitCredentialLogon, NtlmNetworkLogon, NewLocalAdministrator, SuspiciousPowerShell, UsbDevice,
+    NewCountryLogin, ImpossibleTravel)}
 
 DEFAULT_RULES: list[dict] = [
     {"id": c.id, "name": c.name, "description": c.description, "severity": c.severity.value,

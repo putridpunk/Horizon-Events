@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, notifications,
-                     report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
+                     geoip, report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
 from app.api import data as data_api
 from app.api import desktop_settings
 from app.shell.settings import ShellSettings
@@ -18,6 +18,7 @@ from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
 from app.desktop import SessionGuard
+from app.geo import settings as geo_settings
 from app.security import LocalRequestGuard
 from app.incidents.manager import IncidentManager
 from app.services.ingestion import ensure_default_rules
@@ -38,6 +39,7 @@ async def lifespan(app: FastAPI):
         ensure_default_rules(session)
         IncidentManager(IncidentRepository(session)).backfill()  # group alerts that predate incidents
         session.commit()
+        app.state.geo_error = geo_settings.load_on_start(session)  # optional location database
     watch_dir = os.environ.get("HORIZON_WATCH_DIR")
     app.state.watcher = None
     if watch_dir:  # live monitoring is opt-in: only when a watch folder is configured
@@ -103,7 +105,7 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog, geoip):
     app.include_router(module.router)
 app.include_router(events.searches)
 

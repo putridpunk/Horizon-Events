@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "Si vous ne le reconnaissez pas, déconnectez l'ordinateur du réseau et analysez-le avec Analyser les fichiers.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "Vérifiez que c'est vous qui avez branché ce périphérique. Les clés inconnues peuvent contenir des logiciels malveillants.",
   "Scan the device's files with Scan files before opening them.": "Analysez les fichiers du périphérique avec Analyser les fichiers avant de les ouvrir.",
+  "Sign-in from a new country": "Connexion depuis un nouveau pays",
+  "An account signed in from a country it has not signed in from recently.": "Un compte s'est connecté depuis un pays dont il ne se connectait pas récemment.",
+  "Impossible travel": "Déplacement impossible",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "Un compte s'est connecté depuis deux lieux trop éloignés pour avoir voyagé de l'un à l'autre dans ce délai.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "Demandez au titulaire du compte s'il voyageait ou utilisait un nouveau réseau ou un VPN.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "Sinon, changez le mot de passe, déconnectez le compte partout et activez l'authentification multifacteur.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "Deux connexions aussi éloignées et aussi rapprochées signifient souvent que l'une n'est pas celle du titulaire, ou qu'un VPN est en jeu.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "Demandez au titulaire puis, si ce n'était pas lui, changez le mot de passe et examinez l'activité récente du compte.",
 };
 
 export const TEMPLATES = [

@@ -48,6 +48,8 @@ RULE_TECHNIQUES: dict[str, list[tuple[str, str]]] = {
     "HZ-015": [("T1098", "high"), ("T1136.001", "low")],
     "HZ-016": [("T1059.001", "high")],
     "HZ-017": [("T1200", "low")],
+    "HZ-018": [("T1078", "low")],
+    "HZ-019": [("T1078", "high")],
 }
 
 

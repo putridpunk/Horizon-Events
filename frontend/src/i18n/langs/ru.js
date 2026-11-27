@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "Если вы его не узнаёте, отключите компьютер от сети и проверьте его с помощью «Проверка файлов».",
   "Check that you plugged in this device. Unknown drives can carry malware.": "Убедитесь, что это устройство подключили вы. Неизвестные накопители могут содержать вредоносное ПО.",
   "Scan the device's files with Scan files before opening them.": "Проверьте файлы устройства с помощью «Проверка файлов», прежде чем открывать их.",
+  "Sign-in from a new country": "Вход из новой страны",
+  "An account signed in from a country it has not signed in from recently.": "Учётная запись вошла из страны, из которой в последнее время не входила.",
+  "Impossible travel": "Невозможное перемещение",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "Учётная запись вошла из двух мест, расстояние между которыми невозможно преодолеть за это время.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "Уточните у владельца учётной записи, был ли он в поездке или использовал новую сеть или VPN.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "Если нет, смените пароль, завершите все сеансы учётной записи и включите многофакторную аутентификацию.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "Два таких удалённых и быстрых входа обычно означают, что один из них не принадлежит владельцу, либо используется VPN.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "Спросите владельца; если это был не он, смените пароль и проверьте недавнюю активность учётной записи.",
 };
 
 export const TEMPLATES = [

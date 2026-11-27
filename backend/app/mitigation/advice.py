@@ -73,6 +73,14 @@ ADVICE: dict[str, list[str]] = {
         "Check that you plugged in this device. Unknown drives can carry malware.",
         "Scan the device's files with Scan files before opening them.",
     ],
+    "HZ-018": [
+        "Check with the account's owner whether they were travelling or using a new network or VPN.",
+        "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.",
+    ],
+    "HZ-019": [
+        "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.",
+        "Ask the owner, then change the password and review recent activity of the account if it was not them.",
+    ],
     "HZ-008": [
         "Do not open or run the file. Quarantining it moves it out of the way without deleting it, and it can be restored.",
         "If you downloaded it from the internet, delete the original download and note where it came from.",

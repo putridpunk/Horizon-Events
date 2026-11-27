@@ -94,5 +94,5 @@ def test_a_usb_device_raises_one_alert_per_device_and_can_be_ignored(session):
 
 
 def test_new_rules_are_registered_with_advice_and_mitre():
-    ids = [f"HZ-{i:03d}" for i in range(13, 18)]
+    ids = [f"HZ-{i:03d}" for i in range(13, 20)]
     assert set(ids) <= {r["id"] for r in DEFAULT_RULES} and set(ids) <= set(ADVICE) and set(ids) <= set(RULE_TECHNIQUES)

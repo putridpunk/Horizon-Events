@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "見覚えがない場合は、コンピューターをネットワークから切断し、「ファイルをスキャン」でスキャンしてください。",
   "Check that you plugged in this device. Unknown drives can carry malware.": "このデバイスを接続したのが自分であることを確認してください。不明なドライブにはマルウェアが含まれている可能性があります。",
   "Scan the device's files with Scan files before opening them.": "デバイス内のファイルを開く前に、「ファイルをスキャン」でスキャンしてください。",
+  "Sign-in from a new country": "新しい国からのサインイン",
+  "An account signed in from a country it has not signed in from recently.": "アカウントが、最近サインインしていない国からサインインしました。",
+  "Impossible travel": "不可能な移動",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "アカウントが、その時間では移動できないほど離れた2か所からサインインしました。",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "アカウントの所有者に、旅行中だったか、新しいネットワークや VPN を使っていたか確認してください。",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "そうでない場合は、パスワードを変更し、アカウントをすべての場所からサインアウトさせ、多要素認証を有効にしてください。",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "これほど離れた場所から短時間に2回サインインがある場合、片方は所有者ではないか、VPN が関係していることが多いです。",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "所有者に確認し、本人でなければパスワードを変更して、アカウントの最近のアクティビティを確認してください。",
 };
 
 export const TEMPLATES = [

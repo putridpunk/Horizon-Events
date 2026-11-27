@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "Wenn Sie es nicht erkennen, trennen Sie den Computer vom Netzwerk und prüfen Sie ihn mit „Dateien prüfen“.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "Prüfen Sie, ob Sie dieses Gerät angeschlossen haben. Unbekannte Laufwerke können Schadsoftware enthalten.",
   "Scan the device's files with Scan files before opening them.": "Prüfen Sie die Dateien des Geräts mit „Dateien prüfen“, bevor Sie sie öffnen.",
+  "Sign-in from a new country": "Anmeldung aus einem neuen Land",
+  "An account signed in from a country it has not signed in from recently.": "Ein Konto hat sich aus einem Land angemeldet, aus dem es sich zuletzt nicht angemeldet hat.",
+  "Impossible travel": "Unmögliche Reise",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "Ein Konto hat sich von zwei Orten angemeldet, die zu weit voneinander entfernt sind, um in dieser Zeit dazwischen zu reisen.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "Fragen Sie den Kontoinhaber, ob er unterwegs war oder ein neues Netzwerk oder VPN genutzt hat.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "Falls nicht, ändern Sie das Kennwort, melden Sie das Konto überall ab und aktivieren Sie die Multi-Faktor-Anmeldung.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "Zwei so weit entfernte und so schnell aufeinanderfolgende Anmeldungen bedeuten meist, dass eine nicht vom Inhaber stammt oder ein VPN im Spiel ist.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "Fragen Sie den Inhaber; war er es nicht, ändern Sie das Kennwort und prüfen Sie die letzten Aktivitäten des Kontos.",
 };
 
 export const TEMPLATES = [

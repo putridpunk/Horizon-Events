@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "如果您不认识它，请将计算机从网络断开，并使用“扫描文件”进行扫描。",
   "Check that you plugged in this device. Unknown drives can carry malware.": "确认是您接入了此设备。来历不明的驱动器可能携带恶意软件。",
   "Scan the device's files with Scan files before opening them.": "打开设备中的文件前，请先使用“扫描文件”进行扫描。",
+  "Sign-in from a new country": "来自新国家的登录",
+  "An account signed in from a country it has not signed in from recently.": "某个帐户从其近期未曾登录过的国家登录。",
+  "Impossible travel": "不可能的行程",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "某个帐户从两个相距太远的地点登录，在这么短的时间内不可能往返。",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "向帐户所有者确认其是否在旅行，或是否使用了新的网络或 VPN。",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "如果不是，请更改密码，让该帐户在所有位置退出登录，并启用多重身份验证。",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "两次相距如此之远又如此接近的登录，通常意味着其中一次不是所有者本人，或涉及 VPN。",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "先询问所有者；如果不是本人，请更改密码并检查该帐户的近期活动。",
 };
 
 export const TEMPLATES = [

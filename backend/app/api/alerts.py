@@ -6,6 +6,7 @@ from app.alerts.manager import AlertManager, InvalidTransition
 from app.api.schemas import AlertTriage, AlertUpdate, alert_out, event_out, history_out
 from app.database.connection import get_session
 from app.database.repositories import AlertRepository
+from app.geo.locator import locate
 from app.intel.ioc import find_matches
 from app.intel.service import enrich
 from app.live.bus import bus
@@ -19,6 +20,7 @@ def _detail(repo: AlertRepository, row) -> dict:
     text = " ".join([row.description or "", *(f"{e.message} {e.host or ''} {e.service or ''}" for e in events)])
     return {**alert_out(row), **triage.view(row, repo.s.get(triage.AlertMetaRow, row.id)),
             "intel": enrich(repo.s, row.source_ip), "iocs": find_matches(repo.s, text, hashes),
+            "geo": (lambda place: place.as_dict() if place else None)(locate(row.source_ip)),
             "events": [event_out(e) for e in events],
             "history": [history_out(h) for h in repo.history(row.id)]}
 

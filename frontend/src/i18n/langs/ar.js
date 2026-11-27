@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "إذا لم تتعرف عليه، فافصل الجهاز عن الشبكة وافحصه باستخدام فحص الملفات.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "تحقق من أنك أنت من وصل هذا الجهاز. قد تحمل المحركات المجهولة برامج ضارة.",
   "Scan the device's files with Scan files before opening them.": "افحص ملفات الجهاز باستخدام فحص الملفات قبل فتحها.",
+  "Sign-in from a new country": "تسجيل دخول من دولة جديدة",
+  "An account signed in from a country it has not signed in from recently.": "سجّل حساب الدخول من دولة لم يسجّل منها الدخول مؤخرًا.",
+  "Impossible travel": "سفر مستحيل",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "سجّل حساب الدخول من مكانين متباعدين جدًا بحيث يستحيل التنقل بينهما في هذا الوقت.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "اسأل صاحب الحساب عمّا إذا كان مسافرًا أو يستخدم شبكة جديدة أو VPN.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "إن لم يكن كذلك، فغيّر كلمة المرور وأنهِ جلسات الحساب في كل مكان وفعّل المصادقة متعددة العوامل.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "عادةً ما يعني تسجيلا دخول متباعدان ومتقاربان زمنيًا أن أحدهما ليس للمالك أو أن هناك VPN.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "اسأل المالك، وإن لم يكن هو فغيّر كلمة المرور وراجع النشاط الأخير للحساب.",
 };
 
 export const TEMPLATES = [

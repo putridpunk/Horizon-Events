@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "Si no lo reconoce, desconecte el equipo de la red y analícelo con Analizar archivos.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "Compruebe que usted conectó este dispositivo. Las unidades desconocidas pueden contener malware.",
   "Scan the device's files with Scan files before opening them.": "Analice los archivos del dispositivo con Analizar archivos antes de abrirlos.",
+  "Sign-in from a new country": "Inicio de sesión desde un país nuevo",
+  "An account signed in from a country it has not signed in from recently.": "Una cuenta inició sesión desde un país desde el que no lo hacía recientemente.",
+  "Impossible travel": "Viaje imposible",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "Una cuenta inició sesión desde dos lugares demasiado lejanos para haber viajado entre ellos en ese tiempo.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "Compruebe con el titular de la cuenta si estaba de viaje o usando una red nueva o una VPN.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "Si no, cambie la contraseña, cierre las sesiones de la cuenta en todas partes y active la autenticación multifactor.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "Dos inicios de sesión tan lejanos y tan seguidos suelen significar que uno no es del titular, o que interviene una VPN.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "Pregunte al titular y, si no fue él, cambie la contraseña y revise la actividad reciente de la cuenta.",
 };
 
 export const TEMPLATES = [

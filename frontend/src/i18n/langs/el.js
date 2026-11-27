@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "Αν δεν το αναγνωρίζετε, αποσυνδέστε τον υπολογιστή από το δίκτυο και σαρώστε τον με το Σάρωση αρχείων.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "Ελέγξτε ότι εσείς συνδέσατε αυτή τη συσκευή. Άγνωστες μονάδες μπορεί να περιέχουν κακόβουλο λογισμικό.",
   "Scan the device's files with Scan files before opening them.": "Σαρώστε τα αρχεία της συσκευής με το Σάρωση αρχείων πριν τα ανοίξετε.",
+  "Sign-in from a new country": "Σύνδεση από νέα χώρα",
+  "An account signed in from a country it has not signed in from recently.": "Ένας λογαριασμός συνδέθηκε από χώρα από την οποία δεν είχε συνδεθεί πρόσφατα.",
+  "Impossible travel": "Αδύνατη μετακίνηση",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "Ένας λογαριασμός συνδέθηκε από δύο μέρη πολύ μακριά μεταξύ τους για να έχει ταξιδέψει στο διάστημα αυτό.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "Ρωτήστε τον κάτοχο του λογαριασμού αν ταξίδευε ή χρησιμοποιούσε νέο δίκτυο ή VPN.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "Αν όχι, αλλάξτε τον κωδικό, αποσυνδέστε τον λογαριασμό από παντού και ενεργοποιήστε την ταυτοποίηση πολλαπλών παραγόντων.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "Δύο συνδέσεις τόσο μακριά και τόσο γρήγορα συνήθως σημαίνουν ότι η μία δεν ανήκει στον κάτοχο ή ότι εμπλέκεται VPN.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "Ρωτήστε τον κάτοχο· αν δεν ήταν αυτός, αλλάξτε τον κωδικό και ελέγξτε την πρόσφατη δραστηριότητα του λογαριασμού.",
 };
 
 export const TEMPLATES = [

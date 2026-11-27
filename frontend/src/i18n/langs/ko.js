@@ -451,6 +451,14 @@ export const PHRASES = {
   "If you do not recognise it, disconnect the computer from the network and scan it with Scan files.": "알 수 없다면 컴퓨터를 네트워크에서 분리하고 '파일 검사'로 검사하세요.",
   "Check that you plugged in this device. Unknown drives can carry malware.": "이 장치를 직접 연결했는지 확인하세요. 알 수 없는 드라이브에는 악성코드가 있을 수 있습니다.",
   "Scan the device's files with Scan files before opening them.": "장치의 파일을 열기 전에 '파일 검사'로 검사하세요.",
+  "Sign-in from a new country": "새 국가에서 로그인",
+  "An account signed in from a country it has not signed in from recently.": "계정이 최근에 로그인한 적 없는 국가에서 로그인했습니다.",
+  "Impossible travel": "불가능한 이동",
+  "An account signed in from two places too far apart to have travelled between them in the time.": "계정이 그 시간 안에 이동할 수 없을 만큼 멀리 떨어진 두 곳에서 로그인했습니다.",
+  "Check with the account's owner whether they were travelling or using a new network or VPN.": "계정 소유자에게 여행 중이었는지, 새 네트워크나 VPN을 사용했는지 확인하세요.",
+  "If not, change the password, sign the account out everywhere and turn on multi-factor sign-in.": "그렇지 않다면 암호를 변경하고, 계정을 모든 곳에서 로그아웃시키고, 다단계 인증을 켜세요.",
+  "Two sign-ins this far apart this quickly usually mean one of them is not the owner, or a VPN is involved.": "이렇게 멀리 떨어진 두 로그인이 이렇게 빨리 발생하면 보통 하나는 소유자가 아니거나 VPN이 관련된 경우입니다.",
+  "Ask the owner, then change the password and review recent activity of the account if it was not them.": "소유자에게 물어보고, 본인이 아니라면 암호를 변경하고 계정의 최근 활동을 검토하세요.",
 };
 
 export const TEMPLATES = [
