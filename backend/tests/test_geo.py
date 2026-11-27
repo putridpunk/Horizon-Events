@@ -1,3 +1,4 @@
+import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -20,6 +21,8 @@ TOKYO = {"country": {"iso_code": "JP", "names": {"en": "Japan"}}, "city": {"name
          "location": {"latitude": 35.68, "longitude": 139.69}}
 PORTO = {"country": {"iso_code": "PT", "names": {"en": "Portugal"}}, "city": {"names": {"en": "Porto"}},
          "location": {"latitude": 41.15, "longitude": -8.61}}
+# An absolute path to a file that does not exist, on any operating system (C:/... is not absolute on Linux).
+MISSING = str(Path(tempfile.gettempdir()) / "horizon-no-such-folder" / "db.mmdb")
 SPAIN_ONLY = {"country": {"iso_code": "ES", "names": {"en": "Spain"}}}
 
 RECORDS = {"8.8.1.1": LISBON, "8.8.2.2": TOKYO, "8.8.3.3": PORTO, "8.8.4.4": SPAIN_ONLY, "8.8.5.5": SPAIN_ONLY,
@@ -74,7 +77,7 @@ def test_distance():
 
 
 @pytest.mark.parametrize("path,message", [
-    ("relative/file.mmdb", "full path"), ("C:/data/file.txt", "full path"), ("C:/definitely/missing/db.mmdb", "not found")])
+    ("relative/file.mmdb", "full path"), ("C:/data/file.txt", "full path"), (MISSING, "not found")])
 def test_bad_database_paths_are_explained(path, message):
     with pytest.raises(GeoError, match=message):
         GeoLocator.open(path)
@@ -210,13 +213,13 @@ def test_the_database_is_chosen_remembered_and_cleared(client, monkeypatch, tmp_
 
 def test_a_bad_database_is_refused_and_the_old_one_stays(client, monkeypatch):
     set_locator(GeoLocator(FakeReader()))
-    r = client.put("/api/geoip", json={"path": "C:/definitely/missing/db.mmdb"})
+    r = client.put("/api/geoip", json={"path": MISSING})
     assert r.status_code == 422 and "not found" in r.json()["detail"]
     assert locate("8.8.1.1") is not None
 
 
 def test_start_up_loading_never_raises(session, monkeypatch):
-    monkeypatch.setenv("HORIZON_GEOIP_DB", "C:/definitely/missing/db.mmdb")
+    monkeypatch.setenv("HORIZON_GEOIP_DB", MISSING)
     assert "not found" in geo_settings.load_on_start(session)
     monkeypatch.delenv("HORIZON_GEOIP_DB")
     assert geo_settings.load_on_start(session) is None

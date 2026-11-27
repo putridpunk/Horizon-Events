@@ -13,6 +13,12 @@ import * as api from "../services/api.js";
 import Overview from "./Overview.jsx";
 
 vi.mock("../services/api.js");
+// Chart.js needs a real canvas; the charts themselves are not under test here.
+vi.mock("../charts/charts.jsx", () => ({
+  EventsOverTime: () => <div>chart:events-over-time</div>,
+  SeverityDoughnut: () => <div>chart:severity</div>,
+  HorizontalBars: () => <div>chart:bars</div>,
+}));
 
 const ADMIN = { enabled: true, setup_required: false, user: { username: "boss", role: "admin" } };
 
