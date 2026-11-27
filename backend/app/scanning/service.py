@@ -15,6 +15,7 @@ from app.alerts.manager import AlertManager
 from app.database.repositories import AlertRepository, EventRepository
 from app.database.scan_models import ScanRow
 from app.domain import Detection, Event, EventType, Severity, utcnow
+from app.live.bus import bus
 from app.notifications.service import dispatch_async
 from app.scanning import defender
 from app.scanning.defender import CLEAN, ERROR, THREAT, Finding, ScanOutcome
@@ -158,6 +159,7 @@ class ScanService:
                                           (CLEAN, THREAT) else ERROR, "message": outcome.message, "threats": threats}]
             session.commit()
             dispatch_async(session.get_bind(), announce)
+            bus.publish("scans", *(["alerts", "events"] if threats else []))
 
     def _finish(self, scan_id: int, status: str, error: str | None) -> None:
         with self.session_factory() as session:

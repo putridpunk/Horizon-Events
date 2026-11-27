@@ -1,4 +1,5 @@
 """FastAPI application entry point."""
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -8,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, notifications,
-                     report_schedules, reports, rules, scans, statistics, suppressions, watcher)
+                     report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
 from app.api import data as data_api
 from app.api import desktop_settings
 from app.shell.settings import ShellSettings
@@ -25,6 +26,7 @@ from app.mitigation.service import MitigationService
 from app.scanning.downloads import DownloadsWatcher
 from app.scanning.service import ScanService
 from app.reports.scheduler import ReportScheduler
+from app.syslog.receiver import SyslogReceiver
 from app.system.registry import build_collectors
 from app.watcher.service import WatchService
 
@@ -41,6 +43,16 @@ async def lifespan(app: FastAPI):
     if watch_dir:  # live monitoring is opt-in: only when a watch folder is configured
         app.state.watcher = WatchService(Path(watch_dir), lambda: Session(get_engine(), expire_on_commit=False))
         app.state.watcher.start()
+    app.state.syslog = None
+    syslog_port = os.environ.get("HORIZON_SYSLOG_PORT", "").strip()
+    if syslog_port:  # off unless asked for: it opens a network port
+        try:
+            app.state.syslog = SyslogReceiver(lambda: Session(get_engine(), expire_on_commit=False),
+                                              os.environ.get("HORIZON_SYSLOG_BIND", "127.0.0.1"), int(syslog_port))
+            app.state.syslog.start()
+        except (OSError, ValueError) as exc:  # a busy or invalid port must not stop the app
+            logging.getLogger(__name__).error("syslog receiver not started: %s", exc)
+            app.state.syslog = None
     app.state.collectors = None
     if os.environ.get("HORIZON_SYSTEM_LOGS") == "1":  # the desktop app turns this on; server mode stays off
         app.state.collectors = CollectorManager(
@@ -75,6 +87,8 @@ async def lifespan(app: FastAPI):
     finally:
         app.state.data.stop()
         app.state.reports.stop()
+        if app.state.syslog:
+            app.state.syslog.stop()
         if app.state.downloads:
             app.state.downloads.stop()
         if app.state.watcher:
@@ -89,8 +103,9 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog):
     app.include_router(module.router)
+app.include_router(events.searches)
 
 
 @app.get("/api/health", tags=["health"])

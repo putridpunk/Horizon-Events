@@ -7,6 +7,7 @@ from app.api.schemas import AlertTriage, AlertUpdate, alert_out, event_out, hist
 from app.database.connection import get_session
 from app.database.repositories import AlertRepository
 from app.intel.service import enrich
+from app.live.bus import bus
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 
@@ -53,6 +54,7 @@ def update_alert(alert_id: int, body: AlertUpdate, session: Session = Depends(ge
     except InvalidTransition as exc:
         raise HTTPException(422, str(exc))
     session.commit()
+    bus.publish("alerts", "incidents")
     return _detail(repo, row)
 
 
@@ -69,4 +71,5 @@ def triage_alert(alert_id: int, body: AlertTriage, session: Session = Depends(ge
     except triage.TriageError as exc:
         raise HTTPException(422, str(exc)) from exc
     session.commit()
+    bus.publish("alerts")
     return _detail(repo, row)

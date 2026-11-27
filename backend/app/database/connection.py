@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.config import get_settings
 from app.database import (collector_models, incident_models, mitigation_models, notification_models,  # noqa: F401  (register their tables)
-                          scan_models, suppression_models)
+                          scan_models, search_models, suppression_models)
 from app.database.models import Base
 
 

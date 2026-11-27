@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.database.models import (AlertEventLink, AlertHistoryRow, AlertRow, DetectionRuleRow, EventRow,
                                  LogSourceRow)
 from app.domain import Event, EventType, Severity, utcnow
+from app.search.query import compile_query
 
 _SEV_ORDER = case(
     (AlertRow.severity == "critical", 4), (AlertRow.severity == "high", 3),
@@ -46,8 +47,11 @@ class EventRepository:
         self.s.flush()
         return [row_to_event(r) for r in new_rows]
 
-    def _filtered(self, q=None, source=None, event_type=None, severity=None, start=None, end=None):
+    def _filtered(self, q=None, source=None, event_type=None, severity=None, start=None, end=None, query=None):
         stmt = select(EventRow)
+        condition = compile_query(query)  # raises SearchError for a search that cannot be understood
+        if condition is not None:
+            stmt = stmt.where(condition)
         if q:
             like = f"%{q}%"
             stmt = stmt.where(or_(EventRow.message.ilike(like), EventRow.username.ilike(like),
@@ -66,8 +70,8 @@ class EventRepository:
         return stmt
 
     def search(self, q=None, source=None, event_type=None, severity=None, start=None, end=None,
-               limit: int = 50, offset: int = 0) -> tuple[list[EventRow], int]:
-        stmt = self._filtered(q, source, event_type, severity, start, end)
+               limit: int = 50, offset: int = 0, query=None) -> tuple[list[EventRow], int]:
+        stmt = self._filtered(q, source, event_type, severity, start, end, query)
         total = self.s.scalar(select(func.count()).select_from(stmt.subquery()))
         rows = self.s.scalars(stmt.order_by(EventRow.timestamp.desc(), EventRow.id.desc())
                               .limit(limit).offset(offset)).all()

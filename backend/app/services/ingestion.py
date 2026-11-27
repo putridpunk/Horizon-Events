@@ -13,6 +13,7 @@ from app.database.incident_repository import IncidentRepository
 from app.detection.engine import DetectionEngine
 from app.incidents.manager import IncidentManager
 from app.detection.registry import DEFAULT_RULES
+from app.live.bus import bus
 from app.notifications.service import dispatch_async
 
 
@@ -40,6 +41,8 @@ def import_logs(session: Session, source_type: str, filename: str, content: byte
     IncidentManager(IncidentRepository(session)).correlate(list(touched.values()))
     session.commit()
     dispatch_async(session.get_bind(), [a.id for a in manager.created])  # after the commit, so the alerts exist
+    if stored or manager.created or manager.updated:
+        bus.publish("events", "alerts", "incidents")
     return {
         "source_id": source.id, "total": result.total, "imported": len(stored), "skipped": result.skipped,
         "duplicates": result.imported - len(stored), "alerts_created": len(manager.created),
