@@ -83,7 +83,9 @@ def feed_status(session: Session) -> list[dict]:
     rows = session.scalars(select(IntelFeedRow).order_by(IntelFeedRow.id))
     return [{"id": r.id, "name": r.name, "source": r.source, "entries": r.entries,
              "fetched_at": r.fetched_at.isoformat() if r.fetched_at else None,
-             "description": FEEDS.get(r.id, {}).get("description", "Synthetic data for demonstrations only.")}
+             "description": FEEDS.get(r.id, {}).get(
+                 "description", "A list you imported from a file." if r.source == "custom"
+                 else "Synthetic data for demonstrations only.")}
             for r in rows]
 
 
