@@ -158,9 +158,13 @@ class AlertRepository:
             select(AlertRow).where(AlertRow.key == key, AlertRow.status.in_(["OPEN", "INVESTIGATING"]),
                                    AlertRow.last_seen >= since).order_by(AlertRow.id.desc())).first()
 
-    def list(self, severity=None, status=None, rule_id=None, limit: int = 50, offset: int = 0
-             ) -> tuple[list[AlertRow], int]:
+    def list(self, severity=None, status=None, rule_id=None, limit: int = 50, offset: int = 0,
+             assignee=None, tag=None) -> tuple[list[AlertRow], int]:
         stmt = select(AlertRow)
+        if assignee or tag:
+            from app.alerts.triage import matching_alert_ids  # local: triage imports this module's models
+            ids = matching_alert_ids(self.s, assignee, tag)
+            stmt = stmt.where(AlertRow.id.in_(ids))
         if severity:
             stmt = stmt.where(AlertRow.severity == severity)
         if status:

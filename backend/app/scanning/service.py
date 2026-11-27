@@ -15,6 +15,7 @@ from app.alerts.manager import AlertManager
 from app.database.repositories import AlertRepository, EventRepository
 from app.database.scan_models import ScanRow
 from app.domain import Detection, Event, EventType, Severity, utcnow
+from app.notifications.service import dispatch_async
 from app.scanning import defender
 from app.scanning.defender import CLEAN, ERROR, THREAT, Finding, ScanOutcome
 from app.services.ingestion import ensure_default_rules
@@ -67,8 +68,10 @@ def sha256_file(path: str, limit: int = MAX_HASH_BYTES) -> str | None:
         return None
 
 
-def record_detection(session: Session, finding: Finding, sha256: str | None, now: datetime | None = None) -> int:
-    """Store the detection as an event and raise (or update) its alert. Returns the alert id."""
+def record_detection(session: Session, finding: Finding, sha256: str | None, now: datetime | None = None,
+                     created: list[int] | None = None) -> int:
+    """Store the detection as an event and raise (or update) its alert. Returns the alert id.
+    The id of a newly created alert is also appended to `created`, so the caller can announce it."""
     now = now or utcnow()
     message = f"Malware detected: {finding.threat} in {finding.path}"
     event = Event(
@@ -83,7 +86,10 @@ def record_detection(session: Session, finding: Finding, sha256: str | None, now
                     + (f" SHA-256 {sha256}." if sha256 else ""),
         events=stored, source_ip=None, username=None, occurrences=1, window_minutes=None,
         key=f"{RULE_ID}|{sha256 or finding.path}|{finding.threat}")
-    alert = AlertManager(AlertRepository(session)).process([detection])[0]
+    manager = AlertManager(AlertRepository(session))
+    alert = manager.process([detection])[0]
+    if created is not None and manager.created:
+        created.append(alert.id)
     return alert.id
 
 
@@ -136,11 +142,11 @@ class ScanService:
 
     def _store(self, scan_id: int, target: str, outcome: ScanOutcome) -> None:
         with self.session_factory() as session:
-            threats = []
+            threats, announce = [], []
             if outcome.status == THREAT:
                 for finding in outcome.findings:
                     sha = sha256_file(finding.path)
-                    alert_id = record_detection(session, finding, sha)
+                    alert_id = record_detection(session, finding, sha, created=announce)
                     if self.mitigation is not None:
                         try:
                             self.mitigation.on_malware_alert(session, alert_id, finding.path, sha)
@@ -151,6 +157,7 @@ class ScanService:
             row.results = [*row.results, {"path": target, "status": outcome.status if outcome.status in
                                           (CLEAN, THREAT) else ERROR, "message": outcome.message, "threats": threats}]
             session.commit()
+            dispatch_async(session.get_bind(), announce)
 
     def _finish(self, scan_id: int, status: str, error: str | None) -> None:
         with self.session_factory() as session:

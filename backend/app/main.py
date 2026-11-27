@@ -7,8 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, reports, rules,
-                     scans, statistics, suppressions, watcher)
+from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, notifications,
+                     report_schedules, reports, rules, scans, statistics, suppressions, watcher)
 from app.api import data as data_api
 from app.api import desktop_settings
 from app.shell.settings import ShellSettings
@@ -24,6 +24,7 @@ from app.system.manager import CollectorManager
 from app.mitigation.service import MitigationService
 from app.scanning.downloads import DownloadsWatcher
 from app.scanning.service import ScanService
+from app.reports.scheduler import ReportScheduler
 from app.system.registry import build_collectors
 from app.watcher.service import WatchService
 
@@ -49,6 +50,10 @@ async def lifespan(app: FastAPI):
     app.state.data = DataService(lambda: Session(get_engine(), expire_on_commit=False), get_engine(),
                                  Path(data_dir) if data_dir else None)
     app.state.data.start()
+    app.state.report_dir = os.environ.get("HORIZON_REPORT_DIR") or str(Path(data_dir or ".") / "reports")
+    app.state.reports = ReportScheduler(lambda: Session(get_engine(), expire_on_commit=False),
+                                        Path(app.state.report_dir))
+    app.state.reports.start()
     app.state.shell = None
     if os.environ.get("HORIZON_DESKTOP") == "1":  # the desktop app turns this on: tray, notifications, auto-start
         import sys
@@ -69,6 +74,7 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         app.state.data.stop()
+        app.state.reports.stop()
         if app.state.downloads:
             app.state.downloads.stop()
         if app.state.watcher:
@@ -83,7 +89,7 @@ app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origin
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api, desktop_settings):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules):
     app.include_router(module.router)
 
 

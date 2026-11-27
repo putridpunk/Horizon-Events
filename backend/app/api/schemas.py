@@ -13,6 +13,11 @@ class AlertUpdate(BaseModel):
     note: str | None = None
 
 
+class AlertTriage(BaseModel):
+    assignee: str | None = None
+    tags: list[str] | None = None
+
+
 class RuleUpdate(BaseModel):
     enabled: bool | None = None
     severity: Severity | None = None
