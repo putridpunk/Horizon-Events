@@ -19,6 +19,7 @@ from app.domain import utcnow
 
 MAX_ENTRIES = 200_000
 MAX_FEEDS = 20
+MAX_LOOKUP = 500  # values compared with the stored lists in one query
 PREFIX = "user:"
 HASH_KINDS = {32: "md5", 40: "sha1", 64: "sha256"}
 _HEX = re.compile(r"^[0-9a-f]+$")
@@ -190,6 +191,7 @@ def find_matches(session: Session, text: str, hashes: list[str] | None = None) -
     values = wanted | _candidate_domains(text)
     if not values:
         return []
+    values = set(sorted(values, key=lambda v: (v not in wanted, len(v)))[:MAX_LOOKUP])  # hashes first, then short names
     names = {f.id: f.name for f in session.scalars(select(IntelFeedRow))}
     rows = session.execute(select(IocRow.kind, IocRow.value, IocRow.feed_id).where(IocRow.value.in_(sorted(values)))).all()
     return [{"kind": k, "value": v, "feed": names.get(f, f)} for k, v, f in sorted(rows)]

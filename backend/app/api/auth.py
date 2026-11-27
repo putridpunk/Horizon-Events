@@ -41,6 +41,13 @@ class UserUpdate(BaseModel):
 
 
 def _ip(request: Request) -> str | None:
+    """The caller's address. Behind the bundled web server every request would otherwise look like it came from that
+    server, so one person's failed attempts would throttle everybody. HORIZON_TRUST_PROXY=1 (set in docker-compose.yml,
+    where the backend is reachable only through that server) uses the address it reports in X-Real-IP."""
+    if os.environ.get("HORIZON_TRUST_PROXY") == "1":
+        reported = request.headers.get("x-real-ip", "").strip()
+        if reported:
+            return reported[:64]
     return request.client.host if request.client else None
 
 

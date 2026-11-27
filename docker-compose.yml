@@ -13,6 +13,7 @@ services:
       HORIZON_ADMIN_USER: ${HORIZON_ADMIN_USER:-}
       HORIZON_ADMIN_PASSWORD: ${HORIZON_ADMIN_PASSWORD:-}
       HORIZON_COOKIE_SECURE: ${HORIZON_COOKIE_SECURE:-}
+      HORIZON_TRUST_PROXY: "1"  # the backend is reachable only through the bundled web server, which reports the caller's address
     volumes:
       - horizon-data:/data
       - ./watch:/watch

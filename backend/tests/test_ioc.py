@@ -175,3 +175,11 @@ def test_alerts_without_matches_have_an_empty_list(client):
     client.post("/api/imports", files={"file": ("a.log", data)}, data={"source_type": "linux_auth"})
     alert = client.get("/api/alerts").json()["items"][0]
     assert client.get(f"/api/alerts/{alert['id']}").json()["iocs"] == []
+
+
+def test_a_huge_text_cannot_turn_into_a_huge_query(session, monkeypatch):
+    ioc.import_list(session, "Mine", f"evil.example.com\n{SHA}\n")
+    monkeypatch.setattr(ioc, "MAX_LOOKUP", 5)
+    noise = " ".join(f"host{i}.noise{i}.example.org" for i in range(2000))
+    found = ioc.find_matches(session, f"{noise} evil.example.com", [SHA])
+    assert any(m["value"] == SHA for m in found)  # hashes are looked up first, so they are never pushed out

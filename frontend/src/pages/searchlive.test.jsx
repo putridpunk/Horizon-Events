@@ -212,3 +212,30 @@ describe("Syslog card", () => {
     expect(screen.getByText("db down")).toBeInTheDocument();
   });
 });
+
+describe("Live updates after a refusal", () => {
+  beforeEach(() => { FakeSource.instances = []; vi.stubGlobal("EventSource", FakeSource); vi.useFakeTimers({ shouldAdvanceTime: true }); });
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+  it("opens a fresh connection when the browser has given up on the old one", async () => {
+    render(<Probe load={async () => 1} />);
+    await screen.findByText("count 1");
+    const [first] = FakeSource.instances;
+    first.readyState = 2;  // closed for good, for example after a 401
+    act(() => first.onerror());
+    expect(FakeSource.instances).toHaveLength(1);
+    await act(async () => { vi.advanceTimersByTime(5000); });
+    expect(FakeSource.instances).toHaveLength(2);
+  });
+
+  it("does not retry once nobody is listening", async () => {
+    const { unmount } = render(<Probe load={async () => 1} />);
+    await screen.findByText("count 1");
+    const [first] = FakeSource.instances;
+    first.readyState = 2;
+    act(() => first.onerror());
+    unmount();
+    await act(async () => { vi.advanceTimersByTime(6000); });
+    expect(FakeSource.instances).toHaveLength(1);
+  });
+});

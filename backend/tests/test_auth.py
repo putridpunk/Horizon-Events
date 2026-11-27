@@ -318,3 +318,24 @@ def test_when_sign_in_is_off_nothing_changes(engine, monkeypatch):
         assert c.post("/api/auth/login", json={"username": "a.b.c", "password": GOOD}).status_code == 404
     finally:
         app.dependency_overrides.clear()
+
+
+def test_the_callers_address_comes_from_the_proxy_only_when_trusted(server, engine, monkeypatch):
+    client_for(engine, "viewer", "proxy.user")
+    other = TestClient(app)
+    other.post("/api/auth/login", json={"username": "proxy.user", "password": GOOD}, headers={"X-Real-IP": "198.51.100.9"})
+    with Session(engine) as s:
+        assert s.query(AuditRow).filter_by(action="login").order_by(AuditRow.id.desc()).first().ip != "198.51.100.9"
+    monkeypatch.setenv("HORIZON_TRUST_PROXY", "1")
+    other.post("/api/auth/login", json={"username": "proxy.user", "password": GOOD}, headers={"X-Real-IP": "198.51.100.9"})
+    with Session(engine) as s:
+        assert s.query(AuditRow).filter_by(action="login").order_by(AuditRow.id.desc()).first().ip == "198.51.100.9"
+
+
+def test_throttling_is_per_caller_behind_a_trusted_proxy(server, monkeypatch):
+    monkeypatch.setenv("HORIZON_TRUST_PROXY", "1")
+    for _ in range(20):
+        server.post("/api/auth/login", json={"username": "nobody.x", "password": "wrong password"}, headers={"X-Real-IP": "203.0.113.1"})
+    blocked = server.post("/api/auth/login", json={"username": "nobody.x", "password": "wrong password"}, headers={"X-Real-IP": "203.0.113.1"})
+    other = server.post("/api/auth/login", json={"username": "nobody.x", "password": "wrong password"}, headers={"X-Real-IP": "203.0.113.2"})
+    assert blocked.status_code == 429 and other.status_code == 401
