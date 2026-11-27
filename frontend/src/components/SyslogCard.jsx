@@ -11,15 +11,12 @@ export default function SyslogCard() {
       <h2>Network syslog</h2>
       {!data.enabled ? (
         <p className="muted">
-          Off. Set <span className="mono">HORIZON_SYSLOG_PORT</span> (for example 5514) before starting the server to receive
-          syslog from other machines over UDP and TCP. It listens on this computer only unless
-          <span className="mono"> HORIZON_SYSLOG_BIND</span> says otherwise.
+          Off. Set HORIZON_SYSLOG_PORT (for example 5514) before starting the server to receive syslog from other machines over UDP and TCP. It listens on this computer only unless HORIZON_SYSLOG_BIND says otherwise.
         </p>
       ) : (
         <>
           <p className="muted">
-            Listening on <span className="mono">{data.bind}:{data.port}</span> (UDP and TCP). Anything that can reach this
-            port can add events, so only expose it to networks you trust.
+            {`Listening on ${data.bind}:${data.port} (UDP and TCP). Anything that can reach this port can add events, so only expose it to networks you trust.`}
           </p>
           <dl className="kv">
             <dt>Received</dt><dd>{data.received}</dd>

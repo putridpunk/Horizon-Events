@@ -138,7 +138,7 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
               {alert.history.map((h, i) => (
                 <li key={i}>
                   <div>
-                    {h.from_status ? `${h.from_status} → ${h.to_status}` : `Created as ${h.to_status}`}
+                    {h.from_status && h.from_status !== h.to_status ? `${h.from_status} → ${h.to_status}` : h.from_status ? "Updated" : `Created as ${h.to_status}`}
                   </div>
                   <div className="muted">{fmtTime(h.at)}{h.note ? ` · ${h.note}` : ""}</div>
                 </li>

@@ -12,7 +12,7 @@ const BLANK = { name: "", frequency: "weekly", format: "html", email_channel_id:
 /** Reports that make themselves: saved to the reports folder every morning or Monday, and optionally emailed. */
 export default function ReportSchedulesCard() {
   const { data, error, reload } = usePolling(listReportSchedules, [], 0);
-  const { data: channels } = usePolling(listNotificationChannels, [], 0);
+  const { data: channels } = usePolling(listNotificationChannels, [], 15000);
   const [form, setForm] = useState(null);
   const [message, setMessage] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -63,7 +63,7 @@ export default function ReportSchedulesCard() {
                   <td>{s.name}{!s.enabled && <span className="muted"> (off)</span>}</td>
                   <td>{s.frequency}</td>
                   <td>{s.format}</td>
-                  <td><Time value={s.next_run} /></td>
+                  <td><Time value={s.next_run} upcoming /></td>
                   <td>
                     {s.last_run ? <Time value={s.last_run} /> : "-"}
                     {s.last_error && <div className="sla-late">{s.last_error}</div>}

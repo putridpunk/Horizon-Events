@@ -40,7 +40,7 @@ export default function TriagePanel({ alert, onSaved }) {
     <>
       <h2>Owner and tags</h2>
       <p className="muted">
-        Waiting {lateText(alert.age_minutes ?? 0)}; target for {alert.severity} alerts is {lateText(alert.sla_minutes ?? 0)}.
+        {`Waiting ${lateText(alert.age_minutes ?? 0)}; target for ${alert.severity} alerts is ${lateText(alert.sla_minutes ?? 0)}.`}
         {alert.sla_breached && <strong className="sla-late"> This alert is late.</strong>}
       </p>
       <form className="settings-form" onSubmit={save}>

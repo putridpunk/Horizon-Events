@@ -19,7 +19,7 @@ export default function IntelCard() {
     setImportMessage(null);
     try {
       const r = await importIntelList(file, listName);
-      setImportMessage({ text: `${r.replaced ? "Replaced" : "Imported"} "${r.name}": ${r.ips} addresses, ${r.hashes} file hashes, ${r.domains} domains${r.skipped ? `, ${r.skipped} lines skipped` : ""}.` });
+      setImportMessage({ text: `List "${r.name}" saved. Addresses: ${r.ips}. File hashes: ${r.hashes}. Domains: ${r.domains}. Lines skipped: ${r.skipped}.` });
       setListName("");
       setFile(null);
       await reload();

@@ -29,10 +29,10 @@ export default function UpdateCard() {
   return (
     <section className="card">
       <h2>Updates</h2>
-      <p>You have version <strong>{s.current}</strong>.</p>
+      <p>{`You have version ${s.current}.`}</p>
       {s.update_available ? (
         <div className="mitigation" role="group" aria-label="Update available">
-          <strong>Version {s.latest} is available.</strong>
+          <strong>{`Version ${s.latest} is available.`}</strong>
           {s.notes && <p>{s.notes.length > 400 ? `${s.notes.slice(0, 400)}…` : s.notes}</p>}
           <p>
             <a href={s.url} target="_blank" rel="noopener noreferrer">See what changed and download it</a>
@@ -40,7 +40,7 @@ export default function UpdateCard() {
           </p>
         </div>
       ) : s.checked_at && !s.error ? (
-        <p className="muted">This is the latest version (checked <Time value={s.checked_at} />).</p>
+        <p className="muted">This is the latest version. Last checked: <Time value={s.checked_at} /></p>
       ) : null}
       {s.error && <div className="error" role="alert">{s.error}</div>}
       {message && <div className="error" role="alert">{message}</div>}

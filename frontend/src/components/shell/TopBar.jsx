@@ -28,7 +28,7 @@ export default function TopBar() {
           {state.active ? "Collecting" : "Not collecting"}
         </span>
         {update?.update_available && (
-          <Link className="update-badge" to="/settings" title={`Version ${update.latest} is available`}>Update available</Link>
+          <Link className="update-badge" to="/settings" title={`Version ${update.latest} is available.`}>Update available</Link>
         )}
         <ThemeToggle />
         {enabled && user && (

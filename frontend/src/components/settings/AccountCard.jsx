@@ -31,7 +31,7 @@ export default function AccountCard() {
   return (
     <section className="card">
       <h2>Your account</h2>
-      <p>Signed in as <strong>{user.username}</strong> ({user.role}).</p>
+      <p>{`Signed in as ${user.username} (${user.role}).`}</p>
       <form className="settings-form" onSubmit={submit} aria-label="Change your password">
         <label>Current password<input type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} /></label>
         <label>New password (at least 12 characters)<input type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} /></label>

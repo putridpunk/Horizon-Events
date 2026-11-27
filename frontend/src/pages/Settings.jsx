@@ -1,3 +1,4 @@
+import { useAuth } from "../auth/AuthGate.jsx";
 import { PageHeader } from "../components/common.jsx";
 import LanguageCard from "../components/settings/LanguageCard.jsx";
 import DesktopCard from "../components/settings/DesktopCard.jsx";
@@ -12,6 +13,8 @@ import NotificationsCard from "../components/settings/NotificationsCard.jsx";
 import ReportSchedulesCard from "../components/settings/ReportSchedulesCard.jsx";
 
 export default function Settings() {
+  const { enabled, user } = useAuth();
+  const admin = !enabled || user?.role === "admin";
   return (
     <>
       <PageHeader title="Settings" subtitle="How Horizon Events behaves on this computer" />
@@ -21,9 +24,9 @@ export default function Settings() {
       <DesktopCard />
       <DownloadsCard />
       <DataCard />
-      <GeoIpCard />
-      <NotificationsCard />
-      <ReportSchedulesCard />
+      {admin && <GeoIpCard />}
+      {admin && <NotificationsCard />}
+      {admin && <ReportSchedulesCard />}
       <SuppressionsCard />
       <UpdateCard />
     </>
