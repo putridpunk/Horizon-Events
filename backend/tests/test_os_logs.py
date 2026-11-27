@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from app.database.collector_models import CollectorSettingRow
+from app.database.collector_models import CollectorSettingRow, get_setting, set_setting
 from app.database.models import EventRow
 from app.system import os_logs
 from app.system.base import NEEDS_PERMISSION, READY, UNAVAILABLE
@@ -14,6 +14,14 @@ from app.system.registry import platform_name
 def micro(iso: str) -> int:
     from datetime import datetime, timezone
     return int(datetime.fromisoformat(iso).replace(tzinfo=timezone.utc).timestamp() * 1_000_000)
+
+
+def bm(session, collector_id):
+    return int(get_setting(session, f"bookmark:{collector_id}", "0"))
+
+
+def set_bm(session, collector_id, value):
+    set_setting(session, f"bookmark:{collector_id}", str(value))
 
 
 def journal(*entries):
@@ -60,7 +68,7 @@ def test_the_first_poll_only_follows_from_now(session, setting):
     runner = Runner(journal(entry("2026-11-23T14:20:31", "old")))
     c = JournaldCollector(runner)
     assert c.poll(session, setting) == 0 and runner.calls == []
-    assert abs(setting.last_record_id - time.time() * 1e6) < 5e6
+    assert abs(bm(session, "linux-journal") - time.time() * 1e6) < 5e6
 
 
 def test_backfill_reads_history_once(session, setting):
@@ -70,13 +78,13 @@ def test_backfill_reads_history_once(session, setting):
             "SYSLOG_IDENTIFIER": "sshd", "_PID": "1", "_HOSTNAME": "web01"}
     runner = Runner(json.dumps(line))
     assert JournaldCollector(runner).poll(session, setting) == 1
-    assert setting.backfill_hours is None and setting.last_record_id == now - 3_600_000_000
+    assert setting.backfill_hours is None and bm(session, "linux-journal") == now - 3_600_000_000
     assert runner.calls[0][:3] == ["journalctl", "-o", "json"] and "--since" in runner.calls[0]
 
 
 def test_entries_become_events_and_the_bookmark_advances(session, setting):
     start = micro("2026-11-23T14:00:00")
-    setting.last_record_id = start
+    set_bm(session, "linux-journal", start)
     out = journal(
         entry("2026-11-23T14:20:31", "Failed password for admin from 192.168.1.15 port 40122 ssh2"),
         entry("2026-11-23T14:20:32", "Failed password for admin from 192.168.1.15 port 40124 ssh2"),
@@ -88,18 +96,18 @@ def test_entries_become_events_and_the_bookmark_advances(session, setting):
     assert c.poll(session, setting) == 3
     types = [e.event_type for e in events(session)]
     assert types.count("authentication_failure") == 2 and "service_failure" in types
-    assert setting.last_record_id == micro("2026-11-23T14:22:00")  # the newest entry seen, even the unreadable one
+    assert bm(session, "linux-journal") == micro("2026-11-23T14:22:00")  # the newest entry seen, even the unreadable one
     # the same output again adds nothing: every entry is at or before the bookmark
     assert JournaldCollector(Runner(out)).poll(session, setting) == 0
 
 
 def test_a_failing_tool_raises_and_keeps_the_bookmark(session, setting):
-    setting.last_record_id = 123
+    set_bm(session, "linux-journal", 123)
     with pytest.raises(RuntimeError, match="exited with code 1"):
         JournaldCollector(Runner(rc=1)).poll(session, setting)
     with pytest.raises(RuntimeError, match="could not run"):
         JournaldCollector(Runner(error=OSError("gone"))).poll(session, setting)
-    assert setting.last_record_id == 123
+    assert bm(session, "linux-journal") == 123
 
 
 # ---- macOS -----------------------------------------------------------------------------------------------------
@@ -114,7 +122,7 @@ def test_mac_access_states():
 
 
 def test_mac_entries_become_events(session, setting):
-    setting.last_record_id = micro("2026-11-23T14:00:00")
+    set_bm(session, "mac-log", micro("2026-11-23T14:00:00"))
     out = "\n".join([
         mac("2026-11-23 14:20:31.123456+0000", "Failed password for admin from 192.168.1.15 port 40122 ssh2"),
         mac("2026-11-23 14:20:32.000000+0000", "Invalid user ghost from 203.0.113.7 port 22"),
@@ -125,17 +133,17 @@ def test_mac_entries_become_events(session, setting):
     assert MacLogCollector(runner).poll(session, setting) == 4 - 1
     got = {e.event_type for e in events(session)}
     assert {"authentication_failure", "unknown_user", "authentication_success"} <= got
-    assert setting.last_record_id == micro("2026-11-23T14:20:33")
+    assert bm(session, "mac-log") == micro("2026-11-23T14:20:33")
     call = runner.calls[0]
     assert call[:3] == ["log", "show", "--style"] and "--predicate" in call and 'process == "sshd"' in call[call.index("--predicate") + 1]
 
 
 def test_mac_reads_the_oldest_entries_first_when_there_are_too_many(session, setting, monkeypatch):
     monkeypatch.setattr(os_logs, "MAX_ENTRIES", 2)
-    setting.last_record_id = micro("2026-11-23T14:00:00")
+    set_bm(session, "mac-log", micro("2026-11-23T14:00:00"))
     out = "\n".join(mac(f"2026-11-23 14:20:3{i}.000000+0000", f"Invalid user u{i} from 203.0.113.7 port 22") for i in range(5))
     assert MacLogCollector(Runner(out)).poll(session, setting) == 2
-    assert setting.last_record_id == micro("2026-11-23T14:20:31")
+    assert bm(session, "mac-log") == micro("2026-11-23T14:20:31")
     assert MacLogCollector(Runner(out)).poll(session, setting) == 2  # the next two
 
 
@@ -149,3 +157,12 @@ def test_collectors_are_registered_per_platform(monkeypatch):
     assert [c.id for c in registry.build_collectors()] == ["mac-log"] and registry.platform_name() == "mac"
     monkeypatch.setattr(registry.sys, "platform", "linux")
     assert [c.id for c in registry.build_collectors()] == ["linux-auth", "linux-syslog", "linux-journal"]
+
+
+def test_bookmarks_never_touch_the_32_bit_integer_column(session, setting):
+    """PostgreSQL stores collector_settings.last_record_id in 32 bits; a microsecond time does not fit."""
+    JournaldCollector(Runner("")).poll(session, setting)  # first run saves "now"
+    set_bm(session, "linux-journal", micro("2026-11-23T14:00:00"))
+    JournaldCollector(Runner(journal(entry("2026-11-23T14:20:31", "Invalid user a from 203.0.113.7 port 22")))).poll(session, setting)
+    assert not setting.last_record_id  # untouched
+    assert bm(session, "linux-journal") == micro("2026-11-23T14:20:31") > 2**31

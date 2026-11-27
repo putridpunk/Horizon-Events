@@ -14,7 +14,7 @@ from typing import Callable
 
 from sqlalchemy.orm import Session
 
-from app.database.collector_models import CollectorSettingRow
+from app.database.collector_models import CollectorSettingRow, get_setting, set_setting
 from app.services.ingestion import import_logs
 from app.syslog import lines as syslog_lines
 from app.system.base import NEEDS_PERMISSION, READY, UNAVAILABLE, Collector
@@ -43,20 +43,33 @@ def _import(session: Session, lines: list[str], name: str) -> int:
 
 
 class _OsLogCollector(Collector):
-    """Shared bookkeeping: the bookmark is the newest entry time seen, in microseconds since 1970."""
+    """Shared bookkeeping: the bookmark is the newest entry time seen, in microseconds since 1970.
+
+    It is kept as text in the app settings, not in the collector settings' integer column: a microsecond time is far
+    larger than the 32-bit integer that PostgreSQL gives that column."""
 
     def __init__(self, runner: Runner = run_command):
         self._runner = runner
 
-    def _start(self, setting: CollectorSettingRow) -> int | None:
+    def bookmark(self, session: Session) -> int:
+        try:
+            return int(get_setting(session, f"bookmark:{self.id}", "0") or 0)
+        except ValueError:
+            return 0
+
+    def save_bookmark(self, session: Session, value: int) -> None:
+        set_setting(session, f"bookmark:{self.id}", str(int(value)))
+
+    def _start(self, session: Session, setting: CollectorSettingRow) -> int | None:
         """The time to read from (microseconds), or None when this is the first run and we only follow from now."""
-        if setting.last_record_id:
-            return setting.last_record_id
+        saved = self.bookmark(session)
+        if saved:
+            return saved
         if setting.backfill_hours:
             start = int(time.time() * 1_000_000) - setting.backfill_hours * 3_600_000_000
             setting.backfill_hours = None
             return start
-        setting.last_record_id = int(time.time() * 1_000_000)  # first run: follow from now, no history flood
+        self.save_bookmark(session, int(time.time() * 1_000_000))  # first run: follow from now, no history flood
         return None
 
     def _run(self, args: list[str]) -> str:
@@ -89,7 +102,7 @@ class JournaldCollector(_OsLogCollector):
         return READY if rc == 0 else NEEDS_PERMISSION  # without the right group the journal opens no files
 
     def poll(self, session: Session, setting: CollectorSettingRow) -> int:
-        start = self._start(setting)
+        start = self._start(session, setting)
         if start is None:
             return 0
         out = self._run(["journalctl", "-o", "json", "--no-pager", "--utc", "-q", "-n", str(MAX_ENTRIES),
@@ -111,7 +124,7 @@ class JournaldCollector(_OsLogCollector):
                 _since(at), e.get("_HOSTNAME") or socket.gethostname(),
                 e.get("SYSLOG_IDENTIFIER") or e.get("_COMM") or "unknown", e.get("_PID"), message)))
         imported = _import(session, [line for _, line in sorted(entries)], "journald") if entries else 0
-        setting.last_record_id = newest  # advanced only after the lines were stored
+        self.save_bookmark(session, newest)  # advanced only after the lines were stored
         return imported
 
 
@@ -139,7 +152,7 @@ class MacLogCollector(_OsLogCollector):
         return READY if rc == 0 else NEEDS_PERMISSION
 
     def poll(self, session: Session, setting: CollectorSettingRow) -> int:
-        start = self._start(setting)
+        start = self._start(session, setting)
         if start is None:
             return 0
         local = datetime.fromtimestamp(start / 1_000_000)  # `log show` reads the start time as local time
@@ -166,5 +179,5 @@ class MacLogCollector(_OsLogCollector):
             entries = entries[:MAX_ENTRIES]
             newest = entries[-1][0]
         imported = _import(session, [line for _, line in entries], "macos-log") if entries else 0
-        setting.last_record_id = newest
+        self.save_bookmark(session, newest)
         return imported
