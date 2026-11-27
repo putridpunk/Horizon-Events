@@ -63,6 +63,18 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - Imported threat lists are read from the file you choose and never fetched. Values are only compared with alerts; they are not executed or opened. Files are limited to 10 MB and 200,000 indicators.
 - The search language is turned into SQL with bound parameters only. Exports defuse cells that start with `=`, `+`, `-` or `@`.
 
+## Sign-in (server mode, optional)
+
+Off unless `HORIZON_AUTH=1`; ignored in the desktop app, which has its own protection above.
+
+- **Who may do what** is decided in one place (`app/auth/guard.py`), before any request reaches a handler, so a new endpoint cannot forget to check. Unknown change requests default to administrator; unknown reads default to viewer. The API documentation (`/docs`) needs a sign-in too. Only the web page itself, `/api/health`, and the sign-in and setup calls are open.
+- **Passwords** are never stored or logged: salted PBKDF2-HMAC-SHA256 with 600,000 iterations, at least 12 characters. An unknown user name takes as long to refuse as a wrong password, so the answers do not reveal which names exist.
+- **Lock-out and throttling:** five wrong passwords lock an account for 15 minutes (a right password does not unlock it early; an administrator can), and one address can make at most 20 sign-in attempts per 10 minutes.
+- **Sessions:** a random secret in an `HttpOnly`, `SameSite=Strict` cookie (`Secure` over https or with `HORIZON_COOKIE_SECURE=1`); only its SHA-256 is stored. Idle sessions end after 12 hours, all after 7 days, and disabling a user, resetting or changing a password ends their sessions. Together with the Host and Origin checks above this also blocks cross-site requests.
+- **First administrator:** a one-time setup code written to the server log (single use, and only while there are no users), or `HORIZON_ADMIN_USER` and `HORIZON_ADMIN_PASSWORD`. Environment variables are visible to anyone who can inspect the container, so prefer the setup code, or change the password after the first sign-in.
+- **Audit trail:** sign-ins, failures, lock-outs, setup and user changes are recorded with the address; passwords never are.
+- **Not included:** single sign-on, two-factor sign-in, password expiry, and TLS itself (use a reverse proxy). The syslog receiver and the live-update stream are separate: the stream needs a sign-in, syslog has none (see above).
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

@@ -67,6 +67,14 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/rules/sigma` | `{text, save?: true, enabled?: true}`: convert a Sigma rule. With `save: false` it only returns the result. 422 explains anything unsupported. |
 | POST | `/api/rules/replay` | `{rule_id?, severity?, params?, name?, days}`: what a stored rule (with the given overrides) or a draft custom rule would have flagged over the last `days` (1 to 90). Saves nothing. |
 | GET / PUT | `/api/geoip` | The location database: `{configured, path, database, error}`; PUT `{path}` (an absolute `.mmdb` path, or `null` to stop). 422 says why a file cannot be used. |
+| GET | `/api/auth/status` | `{enabled, setup_required, user}`. Always open. |
+| POST | `/api/auth/setup`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/password` | First administrator (`{token, username, password}`), sign in, sign out, change your own password (`{current_password, new_password}`). Only when `HORIZON_AUTH=1`. 401 wrong credentials, 429 locked or too many attempts. |
+| GET / POST | `/api/users` | Administrators only: list, and create `{username, password, role}` (viewer, analyst, admin). |
+| PATCH / DELETE | `/api/users/{id}` | Administrators only: `{role?, disabled?, password?, unlock?}`; 409 when it would leave no active administrator or acts on yourself. |
+| GET | `/api/audit` | Administrators only: recent sign-ins and changes. |
+| GET | `/api/update` | `{current, latest, update_available, url, notes, checked_at, auto_check, error}`. |
+| POST | `/api/update/check` | Ask GitHub for the latest release now. |
+| PUT | `/api/update/settings` | `{auto_check}`: check once a day (off by default). |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

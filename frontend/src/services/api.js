@@ -11,6 +11,9 @@ async function request(path, options = {}) {
     } catch {
       /* non-JSON error body */
     }
+    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/auth/")) {
+      window.dispatchEvent(new Event("horizon-auth-required"));  // the session ended: show the sign-in page again
+    }
     throw new Error(detail);
   }
   return res.json();
@@ -152,3 +155,17 @@ export const importSigmaRule = (text, save) => request("/rules/sigma", json("POS
 export const replayRule = (body) => request("/rules/replay", json("POST", body));
 export const getGeoIp = () => request("/geoip");
 export const setGeoIp = (path) => request("/geoip", json("PUT", { path }));
+
+export const getAuthStatus = () => request("/auth/status");
+export const login = (username, password) => request("/auth/login", json("POST", { username, password }));
+export const setupAdmin = (token, username, password) => request("/auth/setup", json("POST", { token, username, password }));
+export const logout = () => request("/auth/logout", { method: "POST" });
+export const changePassword = (current_password, new_password) => request("/auth/password", json("POST", { current_password, new_password }));
+export const listUsers = () => request("/users");
+export const createUser = (body) => request("/users", json("POST", body));
+export const updateUser = (id, body) => request(`/users/${id}`, json("PATCH", body));
+export const deleteUser = (id) => request(`/users/${id}`, { method: "DELETE" });
+export const getAudit = () => request("/audit?limit=30");
+export const getUpdateStatus = () => request("/update");
+export const checkForUpdate = () => request("/update/check", { method: "POST" });
+export const setAutoUpdateCheck = (auto_check) => request("/update/settings", json("PUT", { auto_check }));

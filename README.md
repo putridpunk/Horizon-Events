@@ -129,7 +129,7 @@ Download `HorizonEvents-Setup.exe` from the [latest release](https://github.com/
 Build it after the executable (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php), `winget install JRSoftware.InnoSetup`):
 
 ```powershell
-powershell -File scriptsuild-installer.ps1
+powershell -File scripts\build-installer.ps1
 ```
 
 For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
@@ -182,6 +182,14 @@ Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 
 **Security log access.** Windows protects this log. The **Enable access** button asks Windows (through its normal permission prompt) to add your account to the built-in *Event Log Readers* group. Nothing changes unless you approve it, and you can remove yourself from the group at any time. Windows only applies a new group membership after you sign out and back in once; until then the Security source shows *Waiting for sign-out* and the System and Application logs keep working. The **Data sources** page shows every source, its state, how many events it has read and the last error.
 
 Windows must be auditing the events for them to exist: sign-in auditing is on by default, other categories may need to be enabled in the local security policy.
+
+## Signing in (server installs)
+
+The desktop app needs no accounts. For Docker or `uvicorn` installs that other people use, set `HORIZON_AUTH=1` to require sign-in with three roles: **viewer** (read everything except settings), **analyst** (also work on alerts and incidents, import logs, save searches) and **admin** (everything, including users, rules, notifications and anything that changes the computer). On first start the server writes a one-time setup code to its log; open the app, enter the code and create the first administrator. For unattended installs set `HORIZON_ADMIN_USER` and `HORIZON_ADMIN_PASSWORD` instead. Passwords need at least 12 characters and are stored as salted hashes; five wrong passwords lock an account for 15 minutes; sessions end after 12 idle hours or 7 days; **Settings > People** manages users and shows who signed in and what was changed. Put a TLS-terminating proxy in front and set `HORIZON_COOKIE_SECURE=1`. There is no single sign-on or two-factor sign-in yet. Details in [docs/security.md](docs/security.md).
+
+## Updates and your overview
+
+**Settings > Updates** checks GitHub for a newer release when you ask (or daily, if you switch that on) and links to its page; nothing is downloaded or installed for you. **Customize** on the Overview chooses which panels show, their order and the chart's time range, remembered in this browser.
 
 ## Writing, testing and tuning rules
 
@@ -289,13 +297,22 @@ The API has no login, so Horizon Events is built to be used from the machine it 
 ## Limitations
 
 - Syslog lines carry no year or timezone; Horizon Events assumes the current year and treats times as UTC.
-- Windows support is for exported event logs, not live collection.
+- Live Windows collection reads a fixed list of security-relevant event IDs; anything else can be imported from an exported log.
 - The dashboard still polls (every 5-10 seconds) as a fallback; the server also pushes a "something changed" hint over a server-sent-events connection, so new data normally appears at once.
 - Alerts flag *suspicious activity*, not confirmed breaches.
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Incident management (alerts grouped into incidents; see below). Milestone 5 is complete.
+Milestones 1 to 5 gave the core SIEM: import and normalise, detection rules, alerts, reports, ML anomaly detection, MITRE ATT&CK mapping, live monitoring, threat feeds and incidents. Later releases added the Windows desktop app, live Windows and Linux log collection, malware scanning with Defender, mitigation, suppressions, backups and 13 languages.
+
+**Milestone 6 (version 1.5.0)** added, in four groups:
+
+- *Detection:* five more Windows rules (explicit credentials, NTLM, new administrator, suspicious PowerShell, USB), sign-in location rules (new country, impossible travel), rules you write yourself, Sigma import, and testing any rule on past events before changing it.
+- *Alerts and notifications:* webhook, Slack, Discord and email channels; alert owner, tags and late flags; scheduled reports.
+- *Search and live updates:* a search language with saved searches and export, live push updates, an optional syslog receiver, threat-list import (STIX, MISP, text), journald and macOS collectors.
+- *Product:* optional sign-in with roles for server installs, an update check, and a customizable overview.
+
+Known gaps and ideas, in no particular order: text of the new screens is English only (older screens are translated); single sign-on and two-factor sign-in; a lightweight agent for other machines; a push-based desktop notification for the new notification rules; more Sigma coverage (regular expressions, counts over time).
 
 ## Licence
 

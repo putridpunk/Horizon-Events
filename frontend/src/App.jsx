@@ -13,9 +13,11 @@ import Mitigation from "./pages/Mitigation.jsx";
 import Settings from "./pages/Settings.jsx";
 import Rules from "./pages/Rules.jsx";
 import SetupGate from "./components/SetupGate.jsx";
+import AuthGate from "./auth/AuthGate.jsx";
 
 export default function App() {
   return (
+    <AuthGate>
     <Layout>
       <SetupGate>
       <Routes>
@@ -35,5 +37,6 @@ export default function App() {
       </Routes>
       </SetupGate>
     </Layout>
+    </AuthGate>
   );
 }

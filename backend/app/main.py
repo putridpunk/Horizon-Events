@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, notifications,
-                     auth, geoip, report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
+                     auth, geoip, report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, update, watcher)
 from app.api import data as data_api
 from app.api import desktop_settings
 from app.shell.settings import ShellSettings
@@ -21,6 +21,8 @@ from app.database.incident_repository import IncidentRepository
 from app.auth import service as auth_service
 from app.auth.guard import AuthGuard
 from app.desktop import SessionGuard
+from app.update.check import AutoChecker
+from app.version import __version__
 from app.geo import settings as geo_settings
 from app.security import LocalRequestGuard
 from app.incidents.manager import IncidentManager
@@ -78,6 +80,8 @@ async def lifespan(app: FastAPI):
     app.state.reports = ReportScheduler(lambda: Session(get_engine(), expire_on_commit=False),
                                         Path(app.state.report_dir))
     app.state.reports.start()
+    app.state.updates = AutoChecker(lambda: Session(get_engine(), expire_on_commit=False))
+    app.state.updates.start()
     app.state.shell = None
     if os.environ.get("HORIZON_DESKTOP") == "1":  # the desktop app turns this on: tray, notifications, auto-start
         import sys
@@ -99,6 +103,7 @@ async def lifespan(app: FastAPI):
     finally:
         app.state.data.stop()
         app.state.reports.stop()
+        app.state.updates.stop()
         if app.state.syslog:
             app.state.syslog.stop()
         if app.state.downloads:
@@ -109,14 +114,14 @@ async def lifespan(app: FastAPI):
             app.state.collectors.stop()
 
 
-app = FastAPI(title="Horizon Events", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Horizon Events", version=__version__, lifespan=lifespan)
 app.add_middleware(AuthGuard)  # innermost: checks the sign-in cookie after the host and origin checks
 app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origins),
                    allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog, geoip, auth):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog, geoip, auth, update):
     app.include_router(module.router)
 app.include_router(events.searches)
 
