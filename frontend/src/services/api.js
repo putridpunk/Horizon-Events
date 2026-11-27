@@ -130,3 +130,17 @@ export const updateReportSchedule = (id, body) => request(`/report-schedules/${i
 export const deleteReportSchedule = (id) => request(`/report-schedules/${id}`, { method: "DELETE" });
 export const runReportSchedule = (id) => request(`/report-schedules/${id}/run`, { method: "POST" });
 export const reportScheduleDownloadUrl = (id) => `${BASE}/report-schedules/${id}/latest`;
+
+export const exportEventsUrl = (params, format) => `${BASE}/events/export${qs({ ...params, format })}`;
+export const listSavedSearches = () => request("/searches");
+export const createSavedSearch = (name, query) => request("/searches", json("POST", { name, query }));
+export const deleteSavedSearch = (id) => request(`/searches/${id}`, { method: "DELETE" });
+
+export function importIntelList(file, name) {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("name", name);
+  return request("/intel/import", { method: "POST", body });
+}
+export const deleteIntelList = (id) => request(`/intel/feeds/${encodeURIComponent(id)}`, { method: "DELETE" });
+export const getSyslogStatus = () => request("/syslog/status");

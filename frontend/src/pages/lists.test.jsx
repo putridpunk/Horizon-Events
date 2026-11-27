@@ -133,9 +133,9 @@ describe("Events page", () => {
     await screen.findByText(/No events match/);
     const before = api.listEvents.mock.calls.length;
     await user.type(screen.getByPlaceholderText(/Search message/), "admin");
-    await waitFor(() => expect(lastCallArgs(api.listEvents)).toMatchObject({ q: "admin", offset: 0 }));
+    await waitFor(() => expect(lastCallArgs(api.listEvents)).toMatchObject({ query: "admin", offset: 0 }));
     // five keystrokes must not produce five searches
-    const searches = api.listEvents.mock.calls.slice(before).filter(([p]) => p.q);
+    const searches = api.listEvents.mock.calls.slice(before).filter(([p]) => p.query);
     expect(searches.length).toBeLessThanOrEqual(2);
   });
 

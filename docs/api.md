@@ -5,8 +5,14 @@ Interactive documentation is served at `/docs` when the backend runs.
 | Method | Path | Purpose |
 | --- | --- | --- |
 | POST | `/api/imports` | Multipart upload: `file`, `source_type` (`linux_auth`, `linux_syslog`, `windows`, `application`, `json`). 413 above 10 MB, 422 for an unknown type. |
-| GET | `/api/events` | Filters `q, source, event_type, severity, start, end`; pagination `limit, offset`. Returns `{items, total}`. |
+| GET | `/api/events` | Filters `query` (the search language, 422 with an explanation when it cannot be understood), `q` (plain text, older), `source, event_type, severity, start, end`; pagination `limit, offset`. Returns `{items, total}`. |
+| GET | `/api/events/export` | Same filters as the list plus `format` (`csv` or `json`) and `limit` (up to 50,000, default 10,000); newest first; `X-Total-Matches` header. |
 | GET | `/api/events/{id}` | One event including the raw log line. |
+| GET / POST / DELETE | `/api/searches`, `/api/searches/{id}` | Saved searches `{name, query}`; the query is checked when saved (422 says why). Up to 50, names are unique. |
+| GET | `/api/stream` | Server-sent events. Each `change` event is `{"changed": ["alerts", "events", ...]}`; at most 20 open connections (503 beyond). |
+| GET | `/api/syslog/status` | `{enabled}`, and when on: bind, port, received, imported, alerts, queued, dropped, last_message, last_error. |
+| POST | `/api/intel/import` | Multipart `name`, `file` (STIX 2.1, MISP or text; 10 MB). A list with the same name is replaced. 422 says why. |
+| DELETE | `/api/intel/feeds/{id}` | Remove an imported list (ids start with `user:`; the built-in feeds cannot be removed). |
 | GET | `/api/alerts` | Filters `severity, status, rule_id, assignee` (a name, or `unassigned`), `tag`; ordered by severity, then recency. Each alert also carries `assignee, tags, age_minutes, sla_minutes, sla_due_at, sla_breached`. |
 | GET | `/api/alerts/tags` | `{tags, assignees}` in use, for filter menus. |
 | PATCH | `/api/alerts/{id}/triage` | Body `{assignee?, tags?}`; a field left out is unchanged, `assignee: null` unassigns. Up to 10 tags of 30 characters. Each change is written to the alert history. 422 for invalid values. |

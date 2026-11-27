@@ -158,6 +158,14 @@ td.chevron { width: 28px; color: var(--muted); padding-inline-start: 0; }
 .badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: var(--r-control);
   font-size: 12.5px; font-weight: 600; line-height: 1.5; white-space: nowrap; border: 1px solid transparent; }
 .badge.tag { color: var(--muted); background: var(--surface-2); border-color: var(--border); margin-inline-start: 4px; }
+.search-help { margin-top: 8px; }
+.search-help summary { cursor: pointer; font-weight: 600; }
+.search-help td { border-bottom: 0; height: auto; padding: 4px 12px 4px 0; }
+button.link { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-align: start; }
+button.link:hover { text-decoration: underline; }
+a.button { display: inline-flex; align-items: center; padding: 6px 12px; border: 1px solid var(--border-strong);
+  border-radius: var(--r-control); color: var(--text); text-decoration: none; background: var(--surface); }
+a.button:hover { background: var(--hover); }
 .sla-late { color: var(--critical); font-weight: 600; }
 .badge.critical { color: var(--critical); background: var(--critical-bg); }
 .badge.high { color: var(--high); background: var(--high-bg); }

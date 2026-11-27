@@ -68,6 +68,16 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
                 <TechniqueBadges techniques={alert.techniques} />
               </>
             )}
+            {alert.iocs?.length > 0 && (
+              <div className="mitigation" role="group" aria-label="Threat list matches">
+                <strong>On a threat list you imported</strong>
+                <ul>
+                  {alert.iocs.map((i) => (
+                    <li key={`${i.kind}-${i.value}`}><span className="mono">{i.value}</span> ({i.kind}) · {i.feed}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <p className="muted">
               This alert flags suspicious activity for investigation. It is not a confirmed breach.
             </p>

@@ -3,6 +3,7 @@ import usePolling from "../services/usePolling.js";
 import { checkCollector, getCollectors, updateCollector } from "../services/api.js";
 import { EmptyState, ErrorBanner, PageHeader } from "../components/common.jsx";
 import LiveCard from "../components/LiveCard.jsx";
+import SyslogCard from "../components/SyslogCard.jsx";
 import SourceRow from "../components/SourceRow.jsx";
 
 export default function Sources() {
@@ -52,6 +53,7 @@ export default function Sources() {
           <strong> Import logs</strong>. Use these for logs from other machines or applications.
         </p>
         <LiveCard />
+        <SyslogCard />
       </details>
     </>
   );

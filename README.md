@@ -148,6 +148,7 @@ For development, run the API as a server instead with `uvicorn app.main:app` fro
 All of these are in **Settings** (sidebar, Configure) in the desktop app:
 
 - **Running in the background.** A tray icon is always shown. Optionally keep the app running there when the window is closed (Quit from the tray icon stops it), get a Windows notification for new critical (or high) alerts, and start Horizon Events when you sign in to Windows (it then opens hidden in the tray). Only alerts raised after the app started are announced.
+- **Threat lists.** On *Analytics*, import your own list of bad IP addresses, file hashes and domains from a STIX 2.1 bundle, a MISP export or a text file. Matching is local; an alert shows when its IP address, the SHA-256 of a malware detection, or a domain in its events is on a list.
 - **Scan new downloads.** Off by default. Each new file in your Downloads folder (or another folder) is scanned with Microsoft Defender once it has finished downloading; files already there are not scanned.
 - **Data.** Delete events older than a chosen period (events that belong to an alert are always kept) and make a backup of all your data, or restore one. A restore is applied the next time the app starts and the previous database is kept next to it as `horizon.db.before-restore`. Backups need the built-in SQLite database.
 - **Suppressed alerts.** In an alert's detail panel, *Suppress similar alerts* hides future alerts for the same rule, address and account (malware detections cannot be suppressed). Settings lists what is suppressed, how many alerts each silenced, and lets you remove it.
@@ -172,12 +173,39 @@ In the desktop app, Horizon Events reads the machine's own event logs, so you ne
 | Windows System log | services that crash or stop unexpectedly | none |
 | Windows Application log | applications that crash | none |
 | Linux `auth.log` / `secure`, `syslog` / `messages` | same detections as imported Linux logs | read access to the file |
+| Linux systemd journal (`journalctl`) | same detections, for systems without log files | membership of the `systemd-journal` or `adm` group |
+| macOS unified log (`log show`) | SSH, sudo, login window and screen-sharing activity | an administrator account |
+| Windows PowerShell log | scripts that ran (needs script block logging turned on) | may need the same one-time setup as Security |
 
-Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 11, 4740, 4720, 4728, 4732, 4756; System 7031, 7034; Application 1000). Noisy events such as service logons are deliberately skipped. Collection starts from "now"; the setup screen can also read the last 24 hours. Closing the window stops collection.
+Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 11 and for network logons that used NTLM, 4740, 4720, 4728, 4732, 4756, 1102, 4697, 4698, 4648, 6416; System 7031, 7034, 7045, 104; Application 1000; PowerShell 4104). Noisy events such as service logons are deliberately skipped. Collection starts from "now"; the setup screen can also read the last 24 hours. Closing the window stops collection.
 
 **Security log access.** Windows protects this log. The **Enable access** button asks Windows (through its normal permission prompt) to add your account to the built-in *Event Log Readers* group. Nothing changes unless you approve it, and you can remove yourself from the group at any time. Windows only applies a new group membership after you sign out and back in once; until then the Security source shows *Waiting for sign-out* and the System and Application logs keep working. The **Data sources** page shows every source, its state, how many events it has read and the last error.
 
 Windows must be auditing the events for them to exist: sign-in auditing is on by default, other categories may need to be enabled in the local security policy.
+
+## Searching events
+
+The search box on **Event monitoring** understands a small language (open *Search tips* on the page):
+
+```
+failed login                        every word must appear (message, account, address, host, log line)
+user:admin ip:203.0.113.7           fields: user, ip, host, service, source, type, severity, message, since, until
+ip:10.0.0.0/8   ip:192.168.1.*      an address block (/8, /16, /24) or a wildcard
+severity:>=high                     also <=, > and <
+type:authentication_failure -user:root     a minus or NOT leaves out what matches
+user:alice OR user:bob              AND binds tighter than OR; there are no parentheses
+since:2026-11-01 until:2026-11-02   a date alone means the whole day
+```
+
+A search that cannot be understood is explained, not guessed at. **Save this search** keeps it under a name; **Export CSV / JSON** downloads the events a search matches (newest first, up to 10,000 per download; cells that spreadsheets would run as formulas are defused).
+
+## Live updates
+
+Screens that refresh on a timer also refresh the moment the server reports new events, alerts or changes (one `/api/stream` connection shared by the whole window). If the connection drops, the timers keep everything fresh.
+
+## Network syslog (optional)
+
+Set `HORIZON_SYSLOG_PORT` (for example `5514`) to receive syslog from other machines over UDP and TCP (RFC 3164 and 5424; newline-framed or octet-counted). Messages go through the same parsers as the Linux logs, so failed SSH logins and sudo use raise the same alerts. It listens on `127.0.0.1` unless `HORIZON_SYSLOG_BIND` says otherwise, **has no login**, and keeps at most 20,000 queued messages (the oldest are dropped, and counted, during a flood). Status is on *Data sources*.
 
 ## Live monitoring (watch folder, advanced)
 
@@ -256,7 +284,7 @@ The API has no login, so Horizon Events is built to be used from the machine it 
 
 - Syslog lines carry no year or timezone; Horizon Events assumes the current year and treats times as UTC.
 - Windows support is for exported event logs, not live collection.
-- The dashboard polls (every 5-10 seconds) instead of using a push channel.
+- The dashboard still polls (every 5-10 seconds) as a fallback; the server also pushes a "something changed" hint over a server-sent-events connection, so new data normally appears at once.
 - Alerts flag *suspicious activity*, not confirmed breaches.
 
 ## Roadmap

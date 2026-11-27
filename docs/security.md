@@ -57,6 +57,12 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - The API can be asked to contact any `http(s)` address you give it, from this computer. This is why the API must stay reachable only by you (see below).
 - Scheduled reports are written only to the reports folder (`HORIZON_REPORT_DIR`, default `reports` next to the data) under generated names; the API cannot choose a path. The latest 30 files per schedule are kept.
 
+## Syslog receiver and imported lists
+
+- The syslog receiver is **off** unless `HORIZON_SYSLOG_PORT` is set. It listens on `127.0.0.1` by default. Syslog has no authentication, so anyone who can reach the port can add events (and therefore alerts); bind it to a network address only on networks you trust, and firewall it otherwise. Messages are cut to one line, control characters are removed (so a message cannot fake another log line), the queue is capped, and TCP allows at most 32 connections.
+- Imported threat lists are read from the file you choose and never fetched. Values are only compared with alerts; they are not executed or opened. Files are limited to 10 MB and 200,000 indicators.
+- The search language is turned into SQL with bound parameters only. Exports defuse cells that start with `=`, `+`, `-` or `@`.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.
