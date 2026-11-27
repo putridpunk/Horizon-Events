@@ -83,6 +83,12 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
             </p>
             <dl className="kv">
               <dt>Source IP</dt><dd className="mono">{alert.source_ip || "-"}<IntelBadge intel={alert.intel} /></dd>
+              {alert.geo && (
+                <>
+                  <dt>Location</dt>
+                  <dd>{[alert.geo.city, alert.geo.country || alert.geo.country_code].filter(Boolean).join(", ") || "-"}</dd>
+                </>
+              )}
               <dt>Target account</dt><dd>{alert.username || "-"}</dd>
               <dt>Occurrences</dt><dd>{alert.occurrences}</dd>
               <dt>Detection window</dt><dd>{alert.window_minutes ? `${alert.window_minutes} minutes` : "-"}</dd>

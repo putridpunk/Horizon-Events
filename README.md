@@ -183,6 +183,12 @@ Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 
 
 Windows must be auditing the events for them to exist: sign-in auditing is on by default, other categories may need to be enabled in the local security policy.
 
+## Writing, testing and tuning rules
+
+**Detection rules** (sidebar, Configure) lists every rule. Switch rules on and off, **Tune and test** a built-in rule's settings and see what the change would have flagged over the last days before saving it, write rules of your own with a condition builder, or import a [Sigma](https://github.com/SigmaHQ/sigma) rule (only what Horizon Events can evaluate is accepted; the rest is refused with a reason). Nothing a test does is saved or sent. Details in [docs/detection-rules.md](docs/detection-rules.md).
+
+Two rules need a location database that you download yourself (MaxMind's free GeoLite2 City, for example): **new country** and **impossible travel**. Set it in *Settings > Sign-in locations*; addresses are looked up in that file on this computer.
+
 ## Searching events
 
 The search box on **Event monitoring** understands a small language (open *Search tips* on the page):

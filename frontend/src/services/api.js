@@ -144,3 +144,11 @@ export function importIntelList(file, name) {
 }
 export const deleteIntelList = (id) => request(`/intel/feeds/${encodeURIComponent(id)}`, { method: "DELETE" });
 export const getSyslogStatus = () => request("/syslog/status");
+
+export const createCustomRule = (body) => request("/rules/custom", json("POST", body));
+export const replaceCustomRule = (id, body) => request(`/rules/custom/${id}`, json("PUT", body));
+export const deleteCustomRule = (id) => request(`/rules/custom/${id}`, { method: "DELETE" });
+export const importSigmaRule = (text, save) => request("/rules/sigma", json("POST", { text, save }));
+export const replayRule = (body) => request("/rules/replay", json("POST", body));
+export const getGeoIp = () => request("/geoip");
+export const setGeoIp = (path) => request("/geoip", json("PUT", { path }));

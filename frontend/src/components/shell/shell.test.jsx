@@ -32,7 +32,7 @@ describe("sidebar", () => {
       Monitor: ["Overview", "Events", "Data sources"],
       Respond: ["Alerts", "Incidents", "Scan files", "Mitigation"],
       Insight: ["Analytics", "Reports"],
-      Configure: ["Settings"],
+      Configure: ["Detection rules", "Settings"],
     });
   });
 

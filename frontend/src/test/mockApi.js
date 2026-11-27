@@ -35,6 +35,8 @@ export function mockApiDefaults() {
   m.listSavedSearches.mockImplementation(later({ items: [], fields: [] }));
   m.exportEventsUrl.mockImplementation((p, format) => `/api/events/export?format=${format}`);
   m.getSyslogStatus.mockImplementation(later({ enabled: false }));
+  m.listRules.mockImplementation(later([]));
+  m.getGeoIp.mockImplementation(later({ configured: false, path: null, database: null, error: null, from_environment: false }));
   m.listAlertTags.mockImplementation(later({ tags: [], assignees: [] }));
   m.listNotificationChannels.mockImplementation(later({ items: [], kinds: ["webhook", "slack", "discord", "email"] }));
   m.listReportSchedules.mockImplementation(later({ items: [], frequencies: ["daily", "weekly"], formats: ["json", "csv", "html"] }));

@@ -3,7 +3,7 @@ export const NAV_GROUPS = [
   ["Monitor", [["/", "Overview", "dashboard"], ["/events", "Events", "list"], ["/sources", "Data sources", "database"]]],
   ["Respond", [["/alerts", "Alerts", "bell"], ["/incidents", "Incidents", "folders"], ["/scan", "Scan files", "shield"], ["/mitigation", "Mitigation", "lock"]]],
   ["Insight", [["/analytics", "Analytics", "chart"], ["/reports", "Reports", "file"]]],
-  ["Configure", [["/settings", "Settings", "gear"]]],
+  ["Configure", [["/rules", "Detection rules", "shield"], ["/settings", "Settings", "gear"]]],
 ];
 
 /** Breadcrumb parts for a path: { group, title }. Unknown paths fall back to the app name. */
