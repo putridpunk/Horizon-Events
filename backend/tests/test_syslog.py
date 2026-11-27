@@ -55,6 +55,17 @@ def test_the_program_and_host_cannot_break_the_format():
 
 # ---- the receiver ----------------------------------------------------------------------------------------------
 @pytest.fixture
+def engine(tmp_path):
+    """A database file of its own. The receiver imports on its own threads, and the shared in-memory database used by
+    other tests has a single connection: one thread closing its session there rolls back another thread's import."""
+    from app.database.connection import init_db, make_engine
+    eng = make_engine(f"sqlite:///{(tmp_path / 'syslog.db').as_posix()}")
+    init_db(eng)
+    yield eng
+    eng.dispose()
+
+
+@pytest.fixture
 def receiver(engine):
     r = SyslogReceiver(lambda: Session(engine, expire_on_commit=False), port=0, flush_interval=0.1, now=lambda: NOW)
     yield r
