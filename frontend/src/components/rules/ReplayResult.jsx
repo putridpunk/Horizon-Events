@@ -6,16 +6,17 @@ export default function ReplayResult({ result }) {
   const sev = result.by_severity ?? {};
   return (
     <section className="replay" aria-label="Test result">
-      <p>
-        <strong>{result.would_alert}</strong> {result.would_alert === 1 ? "alert" : "alerts"} would have been raised from{" "}
-        {result.events_scanned} events in the last {result.days} {result.days === 1 ? "day" : "days"}
-        {result.already_alerted > 0 && <> ({result.already_alerted} already {result.already_alerted === 1 ? "has" : "have"} an alert)</>}.
-        {result.truncated && " Only the newest events were examined."}
-      </p>
+      <p>{`Alerts that would have been raised: ${result.would_alert}. Events examined: ${result.events_scanned}, over the last ${result.days} day(s).`}</p>
+      {result.already_alerted > 0 && <p className="muted">{`Of these, ${result.already_alerted} already have an alert.`}</p>}
+      {result.truncated && <p className="muted">Only the newest events were examined.</p>}
       {result.would_alert > 0 && (
         <p className="muted">
-          {["critical", "high", "medium", "low"].filter((s) => sev[s]).map((s) => `${sev[s]} ${s}`).join(" · ")}
-          {result.top_sources?.length > 0 && <> · most active: {result.top_sources.map((t) => `${t.value} (${t.count})`).join(", ")}</>}
+          {["critical", "high", "medium", "low"].filter((s) => sev[s]).map((s, i) => (
+            <span key={s}>{i > 0 && " · "}<span>{`${sev[s]} ${s}`}</span></span>
+          ))}
+          {result.top_sources?.length > 0 && (
+            <> · <span>{`Most active: ${result.top_sources.map((t) => `${t.value} (${t.count})`).join(", ")}`}</span></>
+          )}
         </p>
       )}
       {result.detections.length > 0 && (
@@ -37,7 +38,7 @@ export default function ReplayResult({ result }) {
           </table>
         </div>
       )}
-      {result.would_alert > result.shown && <p className="muted">Showing the first {result.shown}.</p>}
+      {result.would_alert > result.shown && <p className="muted">{`Showing the first ${result.shown}.`}</p>}
       <p className="muted">{result.note}</p>
     </section>
   );

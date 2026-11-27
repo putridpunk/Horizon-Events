@@ -154,7 +154,7 @@ describe("Imported threat lists", () => {
     await userEvent.upload(screen.getByLabelText("File"), file);
     await userEvent.click(screen.getByRole("button", { name: "Import list" }));
     await waitFor(() => expect(api.importIntelList).toHaveBeenCalledWith(file, "Team"));
-    expect(await screen.findByText(/Imported "Team": 2 addresses, 1 file hashes, 3 domains, 4 lines skipped/)).toBeInTheDocument();
+    expect(await screen.findByText('List "Team" saved. Addresses: 2. File hashes: 1. Domains: 3. Lines skipped: 4.')).toBeInTheDocument();
   });
 
   it("shows why a file was refused", async () => {
@@ -208,7 +208,7 @@ describe("Syslog card", () => {
     vi.mocked(api.getSyslogStatus).mockResolvedValue({ enabled: true, bind: "127.0.0.1", port: 5514, received: 12, imported: 10,
       alerts: 2, queued: 0, dropped: 1, last_message: "2026-11-24T09:00:00", last_error: "db down" });
     render(<SyslogCard />);
-    expect(await screen.findByText("127.0.0.1:5514")).toBeInTheDocument();
+    expect(await screen.findByText(/Listening on 127\.0\.0\.1:5514/)).toBeInTheDocument();
     expect(screen.getByText("db down")).toBeInTheDocument();
   });
 });

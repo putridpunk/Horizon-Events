@@ -5,12 +5,6 @@ import { useAuth } from "../../auth/AuthGate.jsx";
 import { ErrorBanner } from "../common.jsx";
 import Time from "../ui/Time.jsx";
 
-const ROLE_HELP = {
-  viewer: "can look at everything except settings",
-  analyst: "can also work on alerts and incidents, import logs and save searches",
-  admin: "can do everything, including users, rules and settings",
-};
-
 /** People who may sign in, and what they may do. Administrators only. */
 export default function UsersCard() {
   const { enabled, user: me } = useAuth();
@@ -43,7 +37,7 @@ export default function UsersCard() {
     <section className="card">
       <h2>People</h2>
       <p className="muted">
-        {roles.map((r) => `${r} ${ROLE_HELP[r] ?? ""}`).join("; ")}. Five wrong passwords lock an account for 15 minutes.
+        Viewers can look at everything except settings. Analysts can also work on alerts and incidents, import logs and save searches. Administrators can do everything, including users, rules and settings. Five wrong passwords lock an account for 15 minutes.
       </p>
       <ErrorBanner error={users.error} />
       {message && <div className="error" role="alert">{message}</div>}
@@ -81,7 +75,7 @@ export default function UsersCard() {
       {reset && (
         <form className="settings-form" aria-label={`New password for ${reset.name}`}
           onSubmit={(e) => { e.preventDefault(); run(() => updateUser(reset.id, { password: reset.password }), () => setReset(null)); }}>
-          <label>New password for {reset.name} (at least 12 characters)
+          <label>{`New password for ${reset.name} (at least 12 characters)`}
             <input type="password" autoComplete="new-password" value={reset.password}
               onChange={(e) => setReset({ ...reset, password: e.target.value })} />
           </label>

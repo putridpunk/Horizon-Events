@@ -158,7 +158,7 @@ class SuspiciousPowerShell(Rule):
     description = "A PowerShell script contained a pattern often used by attackers, such as encoded or downloaded code."
     severity = Severity.high
     event_types = [EventType.powershell_script]
-    default_params = {"keywords": ["-encodedcommand", "frombase64string", "invoke-expression", "iex(", "iex (",
+    default_params = {"keywords": ["-encodedcommand", "invoke-expression", "iex(", "iex (",
                                    "downloadstring", "downloadfile", "invoke-mimikatz", "amsiutils",
                                    "-executionpolicy bypass", "-windowstyle hidden", "net.webclient"]}
 

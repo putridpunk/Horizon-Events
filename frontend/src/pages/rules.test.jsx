@@ -73,7 +73,8 @@ describe("Rules page", () => {
     await userEvent.selectOptions(screen.getByLabelText("Count separately for each"), "source_ip");
     await userEvent.click(screen.getByRole("button", { name: "Test this rule" }));
     const result = await screen.findByRole("region", { name: "Test result" });
-    expect(result).toHaveTextContent("2 alerts would have been raised from 120 events in the last 7 days (1 already has an alert)");
+    expect(result).toHaveTextContent("Alerts that would have been raised: 2. Events examined: 120, over the last 7 day(s).");
+    expect(result).toHaveTextContent("Of these, 1 already have an alert.");
     expect(within(result).getByText(/already alerted/)).toBeInTheDocument();
     expect(api.replayRule).toHaveBeenCalledWith({ name: "Admin spray", severity: "medium", days: 7, params: {
       when: { all: [{ field: "event_type", op: "eq", value: "unknown_user" }] }, threshold: 4, window_minutes: 10, group_by: "source_ip" } });

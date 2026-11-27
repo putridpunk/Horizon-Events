@@ -43,6 +43,21 @@ export const SOURCE_PATTERNS = [
   [/^Service '(.+)' failed (\d+) times in (\d+) minutes\.$/, []],
   [/^A new (service|scheduled task) was created: (.*)\.$/, []],
   [/^Page (\d+) of (\d+)$/, []],
+  [/^Waiting (.+); target for (.+) alerts is (.+)\.$/, [2]],
+  [/^Alerts that would have been raised: (\d+)\. Events examined: (\d+), over the last (\d+) day\(s\)\.$/, []],
+  [/^Of these, (\d+) already have an alert\.$/, []],
+  [/^Showing the first (\d+)\.$/, []],
+  [/^(\d+) (critical|high|medium|low)$/, [2]],
+  [/^Most active: (.+)$/, []],
+  [/^You have version (.+)\.$/, []],
+  [/^Version (.+) is available\.$/, []],
+  [/^Test message sent to (.+)\.$/, []],
+  [/^Test to (.+) failed: (.+)$/, []],
+  [/^List "(.+)" saved\. Addresses: (\d+)\. File hashes: (\d+)\. Domains: (\d+)\. Lines skipped: (\d+)\.$/, []],
+  [/^Signed in as (.+) \((viewer|analyst|admin)\)\.$/, [2]],
+  [/^Listening on (.+):(\d+) \(UDP and TCP\)\. Anything that can reach this port can add events, so only expose it to networks you trust\.$/, []],
+  [/^New password for (.+) \(at least 12 characters\)$/, []],
+  [/^New password for (.+)$/, []],
 ];
 
 const fill = (template, groups, phrases) =>

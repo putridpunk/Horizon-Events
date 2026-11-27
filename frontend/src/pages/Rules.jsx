@@ -88,9 +88,7 @@ export default function Rules() {
       <section className="card">
         <h2>Built-in rules</h2>
         <p className="muted">
-          Switch a rule off, or choose <strong>Tune and test</strong> to change its severity and settings and see what the
-          change would have flagged over the last days. Rules that need extra setup (such as the location rules) stay silent
-          until it is done.
+          {"Switch a rule off, or choose \"Tune and test\" to change its severity and settings and see what the change would have flagged over the last days. Rules that need extra setup (such as the location rules) stay silent until it is done."}
         </p>
         {data && table(builtIn)}
       </section>
