@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePolling from "../services/usePolling.js";
 import { completeSetup, getCollectors, updateCollector } from "../services/api.js";
+import { SETUP_COMPLETED } from "../components/SetupGate.jsx";
 import { EmptyState, ErrorBanner, PageHeader } from "../components/common.jsx";
 import SourceRow from "../components/SourceRow.jsx";
 
@@ -29,6 +30,7 @@ export default function Setup() {
         }
       }
       await completeSetup();
+      window.dispatchEvent(new Event(SETUP_COMPLETED));  // tell the gate now, or it would send us straight back here
       navigate("/", { replace: true });
     } catch (e) {
       setSaveError(e.message);
