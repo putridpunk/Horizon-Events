@@ -10,6 +10,14 @@ export const EVENT_TYPES = [
   "privilege_escalation",
   "service_failure",
   "service_start",
+  "log_cleared",
+  "service_installed",
+  "scheduled_task_created",
+  "remote_login",
+  "explicit_credentials",
+  "ntlm_logon",
+  "powershell_script",
+  "usb_device",
   "generic",
 ];
 export const STATUSES = ["OPEN", "INVESTIGATING", "RESOLVED"];

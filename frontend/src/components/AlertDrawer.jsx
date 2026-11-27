@@ -7,6 +7,7 @@ import TechniqueBadges from "./TechniqueBadges.jsx";
 import IntelBadge from "./IntelBadge.jsx";
 import { Drawer } from "./overlay.jsx";
 import MitigationPanel from "./MitigationPanel.jsx";
+import TriagePanel from "./TriagePanel.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -67,11 +68,27 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
                 <TechniqueBadges techniques={alert.techniques} />
               </>
             )}
+            {alert.iocs?.length > 0 && (
+              <div className="mitigation" role="group" aria-label="Threat list matches">
+                <strong>On a threat list you imported</strong>
+                <ul>
+                  {alert.iocs.map((i) => (
+                    <li key={`${i.kind}-${i.value}`}><span className="mono">{i.value}</span> ({i.kind}) · {i.feed}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <p className="muted">
               This alert flags suspicious activity for investigation. It is not a confirmed breach.
             </p>
             <dl className="kv">
               <dt>Source IP</dt><dd className="mono">{alert.source_ip || "-"}<IntelBadge intel={alert.intel} /></dd>
+              {alert.geo && (
+                <>
+                  <dt>Location</dt>
+                  <dd>{[alert.geo.city, alert.geo.country || alert.geo.country_code].filter(Boolean).join(", ") || "-"}</dd>
+                </>
+              )}
               <dt>Target account</dt><dd>{alert.username || "-"}</dd>
               <dt>Occurrences</dt><dd>{alert.occurrences}</dd>
               <dt>Detection window</dt><dd>{alert.window_minutes ? `${alert.window_minutes} minutes` : "-"}</dd>
@@ -80,6 +97,8 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
             </dl>
 
             <MitigationPanel alertId={alertId} />
+
+            <TriagePanel alert={alert} onSaved={async () => { await reload(); onChanged?.(); }} />
 
             <h2>Investigation</h2>
             <textarea

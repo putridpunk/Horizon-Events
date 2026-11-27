@@ -5,9 +5,17 @@ Interactive documentation is served at `/docs` when the backend runs.
 | Method | Path | Purpose |
 | --- | --- | --- |
 | POST | `/api/imports` | Multipart upload: `file`, `source_type` (`linux_auth`, `linux_syslog`, `windows`, `application`, `json`). 413 above 10 MB, 422 for an unknown type. |
-| GET | `/api/events` | Filters `q, source, event_type, severity, start, end`; pagination `limit, offset`. Returns `{items, total}`. |
+| GET | `/api/events` | Filters `query` (the search language, 422 with an explanation when it cannot be understood), `q` (plain text, older), `source, event_type, severity, start, end`; pagination `limit, offset`. Returns `{items, total}`. |
+| GET | `/api/events/export` | Same filters as the list plus `format` (`csv` or `json`) and `limit` (up to 50,000, default 10,000); newest first; `X-Total-Matches` header. |
 | GET | `/api/events/{id}` | One event including the raw log line. |
-| GET | `/api/alerts` | Filters `severity, status, rule_id`; ordered by severity, then recency. |
+| GET / POST / DELETE | `/api/searches`, `/api/searches/{id}` | Saved searches `{name, query}`; the query is checked when saved (422 says why). Up to 50, names are unique. |
+| GET | `/api/stream` | Server-sent events. Each `change` event is `{"changed": ["alerts", "events", ...]}`; at most 20 open connections (503 beyond). |
+| GET | `/api/syslog/status` | `{enabled}`, and when on: bind, port, received, imported, alerts, queued, dropped, last_message, last_error. |
+| POST | `/api/intel/import` | Multipart `name`, `file` (STIX 2.1, MISP or text; 10 MB). A list with the same name is replaced. 422 says why. |
+| DELETE | `/api/intel/feeds/{id}` | Remove an imported list (ids start with `user:`; the built-in feeds cannot be removed). |
+| GET | `/api/alerts` | Filters `severity, status, rule_id, assignee` (a name, or `unassigned`), `tag`; ordered by severity, then recency. Each alert also carries `assignee, tags, age_minutes, sla_minutes, sla_due_at, sla_breached`. |
+| GET | `/api/alerts/tags` | `{tags, assignees}` in use, for filter menus. |
+| PATCH | `/api/alerts/{id}/triage` | Body `{assignee?, tags?}`; a field left out is unchanged, `assignee: null` unassigns. Up to 10 tags of 30 characters. Each change is written to the alert history. 422 for invalid values. |
 | GET | `/api/alerts/{id}` | Alert with linked events and status history. |
 | PATCH | `/api/alerts/{id}` | Body `{status, note?}`. 422 for an invalid status or transition. |
 | GET | `/api/statistics/{overview,timeseries,event-types,source-ips,severity,rules}` | Dashboard aggregates. |
@@ -47,6 +55,26 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/data/purge` | Delete old events now; returns `{removed, ...status}`. |
 | POST / DELETE | `/api/data/backup`, `/api/data/restore` | Body `{path}`. Backup needs an absolute path ending in `.hzbackup` and never overwrites a file that is not a database; restore validates the file and stages it for the next start (DELETE cancels it). 422 with a message, 409 when unavailable. |
 | GET / PUT | `/api/desktop/settings` | Desktop only: `{enabled, run_in_background, notify: critical\|high\|off, start_with_windows}`. |
+| GET / POST | `/api/notifications` | Notification channels. POST `{name, kind: webhook\|slack\|discord\|email, config, min_severity, enabled}`. Webhook `{url, secret?}`, Slack and Discord `{url}` (https only), email `{host, port?, security: starttls\|ssl\|none, username?, password?, from_addr, to_addrs}`. Secrets are never returned: the API shows `url_host`, `has_url`, `has_secret`, `has_password`. 422 for invalid settings. |
+| PATCH / DELETE | `/api/notifications/{id}` | Change a channel (a secret left out keeps its old value), or remove it (409 while a scheduled report emails through it). |
+| POST | `/api/notifications/{id}/test` | Send a test message; returns `{ok, error, channel}`. |
+| GET / POST | `/api/report-schedules` | Scheduled reports `{name, frequency: daily\|weekly, format: html\|csv\|json, email_channel_id?, enabled}`. Runs at 07:00 UTC (weekly: Monday). |
+| PATCH / DELETE | `/api/report-schedules/{id}` | Change or remove a schedule. |
+| POST | `/api/report-schedules/{id}/run` | Make the report now. |
+| GET | `/api/report-schedules/{id}/latest` | Download the most recent file (404 if none). |
+| POST | `/api/rules/custom` | Create a rule of your own `{name, description?, severity, params, enabled}`; `params` is `{when, threshold, window_minutes, group_by}` (see detection-rules.md). 422 says what is wrong. Ids are `CR-001`... |
+| PUT / DELETE | `/api/rules/custom/{id}` | Replace or remove one of your rules (404 for built-in rules). |
+| POST | `/api/rules/sigma` | `{text, save?: true, enabled?: true}`: convert a Sigma rule. With `save: false` it only returns the result. 422 explains anything unsupported. |
+| POST | `/api/rules/replay` | `{rule_id?, severity?, params?, name?, days}`: what a stored rule (with the given overrides) or a draft custom rule would have flagged over the last `days` (1 to 90). Saves nothing. |
+| GET / PUT | `/api/geoip` | The location database: `{configured, path, database, error}`; PUT `{path}` (an absolute `.mmdb` path, or `null` to stop). 422 says why a file cannot be used. |
+| GET | `/api/auth/status` | `{enabled, setup_required, user}`. Always open. |
+| POST | `/api/auth/setup`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/password` | First administrator (`{token, username, password}`), sign in, sign out, change your own password (`{current_password, new_password}`). Only when `HORIZON_AUTH=1`. 401 wrong credentials, 429 locked or too many attempts. |
+| GET / POST | `/api/users` | Administrators only: list, and create `{username, password, role}` (viewer, analyst, admin). |
+| PATCH / DELETE | `/api/users/{id}` | Administrators only: `{role?, disabled?, password?, unlock?}`; 409 when it would leave no active administrator or acts on yourself. |
+| GET | `/api/audit` | Administrators only: recent sign-ins and changes. |
+| GET | `/api/update` | `{current, latest, update_available, url, notes, checked_at, auto_check, error}`. |
+| POST | `/api/update/check` | Ask GitHub for the latest release now. |
+| PUT | `/api/update/settings` | `{auto_check}`: check once a day (off by default). |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

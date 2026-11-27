@@ -32,6 +32,19 @@ export function mockApiDefaults() {
   m.getDataStatus.mockImplementation(later({ backups_available: false, retention_days: 0, events: 0, oldest_event: null, database_bytes: null, restore_pending: false }));
   m.getDownloadsScan.mockImplementation(later({ available: false, enabled: false, folder: "", default_folder: "C:/Users/me/Downloads", effective_folder: "C:/Users/me/Downloads", watching: false, queued: 0, scanned: 0 }));
   m.getDesktopSettings.mockImplementation(later({ enabled: false }));
+  m.listSavedSearches.mockImplementation(later({ items: [], fields: [] }));
+  m.exportEventsUrl.mockImplementation((p, format) => `/api/events/export?format=${format}`);
+  m.getSyslogStatus.mockImplementation(later({ enabled: false }));
+  m.listRules.mockImplementation(later([]));
+  m.getGeoIp.mockImplementation(later({ configured: false, path: null, database: null, error: null, from_environment: false }));
+  m.getAuthStatus.mockImplementation(later({ enabled: false, setup_required: false, user: null }));
+  m.getUpdateStatus.mockImplementation(later({ current: "1.5.0", auto_check: false, checked_at: null, latest: null, update_available: false, url: null, notes: null, error: null }));
+  m.listUsers.mockImplementation(later({ items: [], roles: ["viewer", "analyst", "admin"] }));
+  m.getAudit.mockImplementation(later({ items: [] }));
+  m.listAlertTags.mockImplementation(later({ tags: [], assignees: [] }));
+  m.listNotificationChannels.mockImplementation(later({ items: [], kinds: ["webhook", "slack", "discord", "email"] }));
+  m.listReportSchedules.mockImplementation(later({ items: [], frequencies: ["daily", "weekly"], formats: ["json", "csv", "html"] }));
+  m.reportScheduleDownloadUrl.mockImplementation((id) => `/api/report-schedules/${id}/latest`);
   m.reportUrl.mockImplementation((start, end, format) => `/api/reports?format=${format}`);
   return m;
 }

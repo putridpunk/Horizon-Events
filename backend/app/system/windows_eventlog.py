@@ -36,6 +36,7 @@ class ChannelSpec:
     description: str
     event_ids: tuple[int, ...]
     logon_types: tuple[int, ...] = ()  # when set, 4624 (successful logon) is read for these logon types only
+    ntlm_network: bool = False  # also read 4624 network logons (type 3) that used NTLM
 
 
 CHANNELS: dict[str, ChannelSpec] = {
@@ -44,12 +45,17 @@ CHANNELS: dict[str, ChannelSpec] = {
         "Sign-in activity: failed and successful logons, account lockouts, new accounts, changes to "
         "privileged groups, new services and scheduled tasks, and a cleared audit log. Reading it needs a "
         "one-time permission.",
-        event_ids=(4625, 4740, 4720, 4728, 4732, 4756, 1102, 4697, 4698), logon_types=(2, 7, 10, 11)),
+        event_ids=(4625, 4740, 4720, 4728, 4732, 4756, 1102, 4697, 4698, 4648, 6416),
+        logon_types=(2, 7, 10, 11), ntlm_network=True),
     "System": ChannelSpec(
         "System", "Windows System log", "Services that crash, stop unexpectedly or are newly installed, and a cleared log.",
         event_ids=(7031, 7034, 7045, 104)),
     "Application": ChannelSpec(
         "Application", "Windows Application log", "Applications that crash.", event_ids=(1000,)),
+    "PowerShell": ChannelSpec(
+        "Microsoft-Windows-PowerShell/Operational", "Windows PowerShell log",
+        "PowerShell scripts that ran (script block logging, event 4104). Windows only writes these if script block "
+        "logging is turned on.", event_ids=(4104,)),
 }
 
 
@@ -74,6 +80,8 @@ def build_query(spec: ChannelSpec, after_id: int | None, backfill_ms: int | None
     clauses = [f"*[{system(spec.event_ids)}]"]
     if spec.logon_types:
         types = " or ".join(f"(Data[@Name='LogonType']='{t}')" for t in spec.logon_types)
+        if spec.ntlm_network:
+            types += " or ((Data[@Name='LogonType']='3') and (Data[@Name='AuthenticationPackageName']='NTLM'))"
         clauses.append(f"*[{system((4624,))} and EventData[{types}]]")
     return " or ".join(clauses)
 

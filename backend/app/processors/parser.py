@@ -103,7 +103,8 @@ _WIN_MAP = {
     "4672": "privilege_escalation", "4728": "privilege_escalation", "4732": "privilege_escalation",
     "4756": "privilege_escalation", "7031": "service_failure", "7034": "service_failure",
     "1000": "service_failure", "1102": "log_cleared", "104": "log_cleared", "7045": "service_installed",
-    "4697": "service_installed", "4698": "scheduled_task_created",
+    "4697": "service_installed", "4698": "scheduled_task_created", "4648": "explicit_credentials",
+    "4104": "powershell_script", "6416": "usb_device",
 }
 
 # Short, language-independent descriptions for the events the live collector reads.
@@ -114,7 +115,8 @@ _WIN_TEXT = {
     "7031": "Service terminated unexpectedly", "7034": "Service terminated unexpectedly",
     "1000": "Application crashed", "1102": "Audit log cleared", "104": "Event log cleared",
     "7045": "Service installed", "4697": "Service installed", "4698": "Scheduled task created",
-    "4624_rdp": "Remote desktop logon",
+    "4624_rdp": "Remote desktop logon", "4648": "Logon with explicit credentials",
+    "4624_ntlm": "Network logon using NTLM", "4104": "PowerShell script block", "6416": "External device recognised",
 }
 # For these events TargetUserName is the group; the account of interest is who made the change.
 _SUBJECT_FIRST = {"4728", "4732", "4756"}
@@ -142,6 +144,9 @@ def parse_windows_record(rec: dict) -> dict | None:
         hint = "unknown_user"
     if eid == "4624" and str(r.get("logontype", "")).strip() == "10":
         hint = "remote_login"  # an interactive sign-in through Remote Desktop
+    if eid == "4624" and str(r.get("logontype", "")).strip() == "3" \
+            and str(r.get("authenticationpackagename", "")).strip().upper() == "NTLM":
+        hint = "ntlm_logon"  # a network sign-in that used NTLM: the protocol pass-the-hash relies on
     out = {
         "timestamp": ts, "host": r.get("computer"), "process": "windows", "event_hint": hint,
         "message": str(r.get("message") or (f"{_WIN_TEXT[eid]} ({eid})" if eid in _WIN_TEXT else f"Windows event {eid}")),
@@ -157,6 +162,28 @@ def parse_windows_record(rec: dict) -> dict | None:
             out["message"] = f"{_WIN_TEXT[eid]}: {name}"
     if hint == "remote_login" and "message" not in r:
         out["message"] = _WIN_TEXT["4624_rdp"]
+    if hint == "ntlm_logon" and "message" not in r:
+        out["message"] = _WIN_TEXT["4624_ntlm"]
+    if hint == "explicit_credentials":
+        # 4648: SubjectUserName used the credentials of TargetUserName; the actor is the subject.
+        out["username"] = (r.get("subjectusername") or None) if r.get("subjectusername") not in ("-", "") else None
+        target = r.get("targetusername")
+        if target and "message" not in r:
+            out["message"] = f"{_WIN_TEXT['4648']}: {target}"
+    if eid in _SUBJECT_FIRST and r.get("targetusername"):
+        out["group"] = str(r["targetusername"])
+    if hint == "powershell_script":
+        script = str(r.get("scriptblocktext") or r.get("data2") or r.get("message") or "")
+        out["script"] = script[:4000]
+        out["username"] = out.get("username") if out.get("username") else None
+        if "message" not in r:
+            out["message"] = f"{_WIN_TEXT['4104']}: {' '.join(script.split())[:160]}"
+    if hint == "usb_device":
+        device = r.get("devicedescription") or r.get("classname") or r.get("deviceid") or ""
+        out["device"] = str(device)
+        out["username"] = None
+        if "message" not in r:
+            out["message"] = f"{_WIN_TEXT['6416']}: {device}" if device else _WIN_TEXT["6416"]
     return out
 
 

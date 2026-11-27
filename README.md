@@ -129,7 +129,7 @@ Download `HorizonEvents-Setup.exe` from the [latest release](https://github.com/
 Build it after the executable (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php), `winget install JRSoftware.InnoSetup`):
 
 ```powershell
-powershell -File scriptsuild-installer.ps1
+powershell -File scripts\build-installer.ps1
 ```
 
 For development, run the API as a server instead with `uvicorn app.main:app` from `backend/` and the Vite dev server in `frontend/`.
@@ -148,6 +148,7 @@ For development, run the API as a server instead with `uvicorn app.main:app` fro
 All of these are in **Settings** (sidebar, Configure) in the desktop app:
 
 - **Running in the background.** A tray icon is always shown. Optionally keep the app running there when the window is closed (Quit from the tray icon stops it), get a Windows notification for new critical (or high) alerts, and start Horizon Events when you sign in to Windows (it then opens hidden in the tray). Only alerts raised after the app started are announced.
+- **Threat lists.** On *Analytics*, import your own list of bad IP addresses, file hashes and domains from a STIX 2.1 bundle, a MISP export or a text file. Matching is local; an alert shows when its IP address, the SHA-256 of a malware detection, or a domain in its events is on a list.
 - **Scan new downloads.** Off by default. Each new file in your Downloads folder (or another folder) is scanned with Microsoft Defender once it has finished downloading; files already there are not scanned.
 - **Data.** Delete events older than a chosen period (events that belong to an alert are always kept) and make a backup of all your data, or restore one. A restore is applied the next time the app starts and the previous database is kept next to it as `horizon.db.before-restore`. Backups need the built-in SQLite database.
 - **Suppressed alerts.** In an alert's detail panel, *Suppress similar alerts* hides future alerts for the same rule, address and account (malware detections cannot be suppressed). Settings lists what is suppressed, how many alerts each silenced, and lets you remove it.
@@ -172,12 +173,53 @@ In the desktop app, Horizon Events reads the machine's own event logs, so you ne
 | Windows System log | services that crash or stop unexpectedly | none |
 | Windows Application log | applications that crash | none |
 | Linux `auth.log` / `secure`, `syslog` / `messages` | same detections as imported Linux logs | read access to the file |
+| Linux systemd journal (`journalctl`) | same detections, for systems without log files | membership of the `systemd-journal` or `adm` group |
+| macOS unified log (`log show`) | SSH, sudo, login window and screen-sharing activity | an administrator account |
+| Windows PowerShell log | scripts that ran (needs script block logging turned on) | may need the same one-time setup as Security |
 
-Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 11, 4740, 4720, 4728, 4732, 4756; System 7031, 7034; Application 1000). Noisy events such as service logons are deliberately skipped. Collection starts from "now"; the setup screen can also read the last 24 hours. Closing the window stops collection.
+Only these event IDs are read (Security 4625, 4624 for logon types 2, 7, 10 and 11 and for network logons that used NTLM, 4740, 4720, 4728, 4732, 4756, 1102, 4697, 4698, 4648, 6416; System 7031, 7034, 7045, 104; Application 1000; PowerShell 4104). Noisy events such as service logons are deliberately skipped. Collection starts from "now"; the setup screen can also read the last 24 hours. Closing the window stops collection.
 
 **Security log access.** Windows protects this log. The **Enable access** button asks Windows (through its normal permission prompt) to add your account to the built-in *Event Log Readers* group. Nothing changes unless you approve it, and you can remove yourself from the group at any time. Windows only applies a new group membership after you sign out and back in once; until then the Security source shows *Waiting for sign-out* and the System and Application logs keep working. The **Data sources** page shows every source, its state, how many events it has read and the last error.
 
 Windows must be auditing the events for them to exist: sign-in auditing is on by default, other categories may need to be enabled in the local security policy.
+
+## Signing in (server installs)
+
+The desktop app needs no accounts. For Docker or `uvicorn` installs that other people use, set `HORIZON_AUTH=1` to require sign-in with three roles: **viewer** (read everything except settings), **analyst** (also work on alerts and incidents, import logs, save searches) and **admin** (everything, including users, rules, notifications and anything that changes the computer). On first start the server writes a one-time setup code to its log; open the app, enter the code and create the first administrator. For unattended installs set `HORIZON_ADMIN_USER` and `HORIZON_ADMIN_PASSWORD` instead. Passwords need at least 12 characters and are stored as salted hashes; five wrong passwords lock an account for 15 minutes; sessions end after 12 idle hours or 7 days; **Settings > People** manages users and shows who signed in and what was changed. Put a TLS-terminating proxy in front and set `HORIZON_COOKIE_SECURE=1`. There is no single sign-on or two-factor sign-in yet. Details in [docs/security.md](docs/security.md).
+
+## Updates and your overview
+
+**Settings > Updates** checks GitHub for a newer release when you ask (or daily, if you switch that on) and links to its page; nothing is downloaded or installed for you. **Customize** on the Overview chooses which panels show, their order and the chart's time range, remembered in this browser.
+
+## Writing, testing and tuning rules
+
+**Detection rules** (sidebar, Configure) lists every rule. Switch rules on and off, **Tune and test** a built-in rule's settings and see what the change would have flagged over the last days before saving it, write rules of your own with a condition builder, or import a [Sigma](https://github.com/SigmaHQ/sigma) rule (only what Horizon Events can evaluate is accepted; the rest is refused with a reason). Nothing a test does is saved or sent. Details in [docs/detection-rules.md](docs/detection-rules.md).
+
+Two rules need a location database that you download yourself (MaxMind's free GeoLite2 City, for example): **new country** and **impossible travel**. Set it in *Settings > Sign-in locations*; addresses are looked up in that file on this computer.
+
+## Searching events
+
+The search box on **Event monitoring** understands a small language (open *Search tips* on the page):
+
+```
+failed login                        every word must appear (message, account, address, host, log line)
+user:admin ip:203.0.113.7           fields: user, ip, host, service, source, type, severity, message, since, until
+ip:10.0.0.0/8   ip:192.168.1.*      an address block (/8, /16, /24) or a wildcard
+severity:>=high                     also <=, > and <
+type:authentication_failure -user:root     a minus or NOT leaves out what matches
+user:alice OR user:bob              AND binds tighter than OR; there are no parentheses
+since:2026-11-01 until:2026-11-02   a date alone means the whole day
+```
+
+A search that cannot be understood is explained, not guessed at. **Save this search** keeps it under a name; **Export CSV / JSON** downloads the events a search matches (newest first, up to 10,000 per download; cells that spreadsheets would run as formulas are defused).
+
+## Live updates
+
+Screens that refresh on a timer also refresh the moment the server reports new events, alerts or changes (one `/api/stream` connection shared by the whole window). If the connection drops, the timers keep everything fresh.
+
+## Network syslog (optional)
+
+Set `HORIZON_SYSLOG_PORT` (for example `5514`) to receive syslog from other machines over UDP and TCP (RFC 3164 and 5424; newline-framed or octet-counted). Messages go through the same parsers as the Linux logs, so failed SSH logins and sudo use raise the same alerts. It listens on `127.0.0.1` unless `HORIZON_SYSLOG_BIND` says otherwise, **has no login**, and keeps at most 20,000 queued messages (the oldest are dropped, and counted, during a flood). Status is on *Data sources*.
 
 ## Live monitoring (watch folder, advanced)
 
@@ -199,6 +241,14 @@ Alerts show a **Known malicious** badge when their source IP is on a threat feed
 - [Spamhaus DROP](https://www.spamhaus.org/drop/) netblocks (free use under Spamhaus's terms; fetched at most once an hour, which the app enforces).
 
 Private and loopback addresses are never checked. A small **synthetic demo feed** (clearly labelled, covering the reserved test addresses used in `sample_logs/`) is loaded with the sample data so the badge shows offline; it is not real intelligence. Per-IP lookup services such as AbuseIPDB are not used because they would send your log data to a third party.
+
+## Notifications, owners and scheduled reports
+
+All in **Settings** (and the alert's detail panel):
+
+- **Notifications.** Add a webhook, Slack, Discord or email channel and choose the lowest severity it should receive. New alerts are sent in the background; a failing channel never slows an import, and its last error is shown next to it. **Send test** checks a channel straight away. Webhooks can be signed (`X-Horizon-Signature`). Nothing is sent until you add a channel; see [docs/security.md](docs/security.md).
+- **Owner and tags.** In an alert's detail panel, say who is working on it and label it. The Alerts page filters by owner (or *Unassigned*) and tag, and flags alerts that have waited longer than their target (critical 1 h, high 4 h, medium 24 h, low 72 h) as late. Changes are recorded in the alert's history.
+- **Scheduled reports.** Make a report every day or every Monday at 07:00 UTC, covering the previous day or week, saved in the reports folder and optionally emailed through an email channel. *Run now* and *Download latest* are on the same card.
 
 ## Incidents
 
@@ -247,13 +297,22 @@ The API has no login, so Horizon Events is built to be used from the machine it 
 ## Limitations
 
 - Syslog lines carry no year or timezone; Horizon Events assumes the current year and treats times as UTC.
-- Windows support is for exported event logs, not live collection.
-- The dashboard polls (every 5-10 seconds) instead of using a push channel.
+- Live Windows collection reads a fixed list of security-relevant event IDs; anything else can be imported from an exported log.
+- The dashboard still polls (every 5-10 seconds) as a fallback; the server also pushes a "something changed" hint over a server-sent-events connection, so new data normally appears at once.
 - Alerts flag *suspicious activity*, not confirmed breaches.
 
 ## Roadmap
 
-Done in milestone 5 so far: ML anomaly detection (rule HZ-007, Isolation Forest over per-IP hourly activity; see [docs/detection-rules.md](docs/detection-rules.md)). MITRE ATT&CK mapping (rules and alerts tagged with techniques, coverage panel, report section). Real-time monitoring (a watch folder is tailed continuously; see below). Threat intelligence enrichment (blocklist feeds matched locally; see below). Incident management (alerts grouped into incidents; see below). Milestone 5 is complete.
+Milestones 1 to 5 gave the core SIEM: import and normalise, detection rules, alerts, reports, ML anomaly detection, MITRE ATT&CK mapping, live monitoring, threat feeds and incidents. Later releases added the Windows desktop app, live Windows and Linux log collection, malware scanning with Defender, mitigation, suppressions, backups and 13 languages.
+
+**Milestone 6 (version 1.5.0)** added, in four groups:
+
+- *Detection:* five more Windows rules (explicit credentials, NTLM, new administrator, suspicious PowerShell, USB), sign-in location rules (new country, impossible travel), rules you write yourself, Sigma import, and testing any rule on past events before changing it.
+- *Alerts and notifications:* webhook, Slack, Discord and email channels; alert owner, tags and late flags; scheduled reports.
+- *Search and live updates:* a search language with saved searches and export, live push updates, an optional syslog receiver, threat-list import (STIX, MISP, text), journald and macOS collectors.
+- *Product:* optional sign-in with roles for server installs, an update check, and a customizable overview.
+
+Known gaps and ideas, in no particular order: text of the new screens is English only (older screens are translated); single sign-on and two-factor sign-in; a lightweight agent for other machines; a push-based desktop notification for the new notification rules; more Sigma coverage (regular expressions, counts over time).
 
 ## Licence
 

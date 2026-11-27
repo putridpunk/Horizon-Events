@@ -11,10 +11,13 @@ import Sources from "./pages/Sources.jsx";
 import Scan from "./pages/Scan.jsx";
 import Mitigation from "./pages/Mitigation.jsx";
 import Settings from "./pages/Settings.jsx";
+import Rules from "./pages/Rules.jsx";
 import SetupGate from "./components/SetupGate.jsx";
+import AuthGate from "./auth/AuthGate.jsx";
 
 export default function App() {
   return (
+    <AuthGate>
     <Layout>
       <SetupGate>
       <Routes>
@@ -27,11 +30,13 @@ export default function App() {
         <Route path="/sources" element={<Sources />} />
         <Route path="/scan" element={<Scan />} />
         <Route path="/mitigation" element={<Mitigation />} />
+        <Route path="/rules" element={<Rules />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="*" element={<Overview />} />
       </Routes>
       </SetupGate>
     </Layout>
+    </AuthGate>
   );
 }

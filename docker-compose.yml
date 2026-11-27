@@ -8,6 +8,12 @@ services:
       SEED_ON_START: "${SEED_ON_START:-true}"
       HORIZON_WATCH_DIR: /watch
       HORIZON_ALLOWED_HOSTS: ${HORIZON_ALLOWED_HOSTS:-}
+      # Sign-in with roles (see docs/security.md). Leave HORIZON_AUTH unset to keep the localhost-only, no-login setup.
+      HORIZON_AUTH: ${HORIZON_AUTH:-}
+      HORIZON_ADMIN_USER: ${HORIZON_ADMIN_USER:-}
+      HORIZON_ADMIN_PASSWORD: ${HORIZON_ADMIN_PASSWORD:-}
+      HORIZON_COOKIE_SECURE: ${HORIZON_COOKIE_SECURE:-}
+      HORIZON_TRUST_PROXY: "1"  # the backend is reachable only through the bundled web server, which reports the caller's address
     volumes:
       - horizon-data:/data
       - ./watch:/watch

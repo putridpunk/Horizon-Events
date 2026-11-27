@@ -49,6 +49,33 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - Updating the installed app stops a running copy first (`taskkill`), because in background mode closing the window only hides it. **Uninstalling does not**: while the app runs (it holds the named marker `HorizonEvents.Running`) the uninstaller shows an error and removes nothing, so the user decides when to quit.
 - Uninstalling then runs `HorizonEvents.exe --uninstall-cleanup`, which deletes only a folder named `HorizonEvents` (never any other path), removes the start-up entry and, with one Windows permission prompt and only if any exist, the firewall rules named `Horizon Events block ...` (found by name, so it works in any Windows language).
 
+## Notifications and scheduled reports
+
+- Horizon Events sends nothing anywhere until you add a notification channel. A channel sends the alert's rule, description, source address, account and counts to the webhook, Slack, Discord or mail server **you** entered, and nothing else. Treat those services as places your log data may be stored.
+- Webhook, Slack and Discord addresses and mail passwords usually contain secrets. They are stored in the database (a backup contains them) and are never returned by the API, which shows only the host and whether a value is set. Slack and Discord addresses must use `https`.
+- A webhook with a signing secret carries an `X-Horizon-Signature: sha256=<hmac>` header (HMAC-SHA256 of the request body) so the receiver can check where a message came from.
+- The API can be asked to contact any `http(s)` address you give it, from this computer. This is why the API must stay reachable only by you (see below).
+- Scheduled reports are written only to the reports folder (`HORIZON_REPORT_DIR`, default `reports` next to the data) under generated names; the API cannot choose a path. The latest 30 files per schedule are kept.
+
+## Syslog receiver and imported lists
+
+- The syslog receiver is **off** unless `HORIZON_SYSLOG_PORT` is set. It listens on `127.0.0.1` by default. Syslog has no authentication, so anyone who can reach the port can add events (and therefore alerts); bind it to a network address only on networks you trust, and firewall it otherwise. Messages are cut to one line, control characters are removed (so a message cannot fake another log line), the queue is capped, and TCP allows at most 32 connections.
+- Imported threat lists are read from the file you choose and never fetched. Values are only compared with alerts; they are not executed or opened. Files are limited to 10 MB and 200,000 indicators.
+- The search language is turned into SQL with bound parameters only. Exports defuse cells that start with `=`, `+`, `-` or `@`.
+
+## Sign-in (server mode, optional)
+
+Off unless `HORIZON_AUTH=1`; ignored in the desktop app, which has its own protection above.
+
+- **Who may do what** is decided in one place (`app/auth/guard.py`), before any request reaches a handler, so a new endpoint cannot forget to check. Unknown change requests default to administrator; unknown reads default to viewer. The API documentation (`/docs`) needs a sign-in too. Only the web page itself, `/api/health`, and the sign-in and setup calls are open.
+- **Passwords** are never stored or logged: salted PBKDF2-HMAC-SHA256 with 600,000 iterations, at least 12 characters. An unknown user name takes as long to refuse as a wrong password, so the answers do not reveal which names exist.
+- **Lock-out and throttling:** five wrong passwords lock an account for 15 minutes (a right password does not unlock it early; an administrator can), and one address can make at most 20 sign-in attempts per 10 minutes.
+- **Sessions:** a random secret in an `HttpOnly`, `SameSite=Strict` cookie (`Secure` over https or with `HORIZON_COOKIE_SECURE=1`); only its SHA-256 is stored. Idle sessions end after 12 hours, all after 7 days, and disabling a user, resetting or changing a password ends their sessions. Together with the Host and Origin checks above this also blocks cross-site requests.
+- **First administrator:** a one-time setup code written to the server log (single use, and only while there are no users), or `HORIZON_ADMIN_USER` and `HORIZON_ADMIN_PASSWORD`. Environment variables are visible to anyone who can inspect the container, so prefer the setup code, or change the password after the first sign-in.
+- **Behind the bundled web server** (Docker) every request would seem to come from that server, so the compose file sets `HORIZON_TRUST_PROXY=1` and the backend uses the address the server reports. Set it only where the backend cannot be reached except through a proxy you control, or anyone could claim to be any address.
+- **Audit trail:** sign-ins, failures, lock-outs, setup and user changes are recorded with the address; passwords never are.
+- **Not included:** single sign-on, two-factor sign-in, password expiry, and TLS itself (use a reverse proxy). The syslog receiver and the live-update stream are separate: the stream needs a sign-in, syslog has none (see above).
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

@@ -11,6 +11,9 @@ async function request(path, options = {}) {
     } catch {
       /* non-JSON error body */
     }
+    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/auth/")) {
+      window.dispatchEvent(new Event("horizon-auth-required"));  // the session ended: show the sign-in page again
+    }
     throw new Error(detail);
   }
   return res.json();
@@ -114,3 +117,55 @@ export const updateDownloadsScan = (body) => request("/scans/downloads", json("P
 
 export const getDesktopSettings = () => request("/desktop/settings");
 export const updateDesktopSettings = (body) => request("/desktop/settings", json("PUT", body));
+
+export const triageAlert = (id, body) => request(`/alerts/${id}/triage`, json("PATCH", body));
+export const listAlertTags = () => request("/alerts/tags");
+
+export const listNotificationChannels = () => request("/notifications");
+export const createNotificationChannel = (body) => request("/notifications", json("POST", body));
+export const updateNotificationChannel = (id, body) => request(`/notifications/${id}`, json("PATCH", body));
+export const deleteNotificationChannel = (id) => request(`/notifications/${id}`, { method: "DELETE" });
+export const testNotificationChannel = (id) => request(`/notifications/${id}/test`, { method: "POST" });
+
+export const listReportSchedules = () => request("/report-schedules");
+export const createReportSchedule = (body) => request("/report-schedules", json("POST", body));
+export const updateReportSchedule = (id, body) => request(`/report-schedules/${id}`, json("PATCH", body));
+export const deleteReportSchedule = (id) => request(`/report-schedules/${id}`, { method: "DELETE" });
+export const runReportSchedule = (id) => request(`/report-schedules/${id}/run`, { method: "POST" });
+export const reportScheduleDownloadUrl = (id) => `${BASE}/report-schedules/${id}/latest`;
+
+export const exportEventsUrl = (params, format) => `${BASE}/events/export${qs({ ...params, format })}`;
+export const listSavedSearches = () => request("/searches");
+export const createSavedSearch = (name, query) => request("/searches", json("POST", { name, query }));
+export const deleteSavedSearch = (id) => request(`/searches/${id}`, { method: "DELETE" });
+
+export function importIntelList(file, name) {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("name", name);
+  return request("/intel/import", { method: "POST", body });
+}
+export const deleteIntelList = (id) => request(`/intel/feeds/${encodeURIComponent(id)}`, { method: "DELETE" });
+export const getSyslogStatus = () => request("/syslog/status");
+
+export const createCustomRule = (body) => request("/rules/custom", json("POST", body));
+export const replaceCustomRule = (id, body) => request(`/rules/custom/${id}`, json("PUT", body));
+export const deleteCustomRule = (id) => request(`/rules/custom/${id}`, { method: "DELETE" });
+export const importSigmaRule = (text, save) => request("/rules/sigma", json("POST", { text, save }));
+export const replayRule = (body) => request("/rules/replay", json("POST", body));
+export const getGeoIp = () => request("/geoip");
+export const setGeoIp = (path) => request("/geoip", json("PUT", { path }));
+
+export const getAuthStatus = () => request("/auth/status");
+export const login = (username, password) => request("/auth/login", json("POST", { username, password }));
+export const setupAdmin = (token, username, password) => request("/auth/setup", json("POST", { token, username, password }));
+export const logout = () => request("/auth/logout", { method: "POST" });
+export const changePassword = (current_password, new_password) => request("/auth/password", json("POST", { current_password, new_password }));
+export const listUsers = () => request("/users");
+export const createUser = (body) => request("/users", json("POST", body));
+export const updateUser = (id, body) => request(`/users/${id}`, json("PATCH", body));
+export const deleteUser = (id) => request(`/users/${id}`, { method: "DELETE" });
+export const getAudit = () => request("/audit?limit=30");
+export const getUpdateStatus = () => request("/update");
+export const checkForUpdate = () => request("/update/check", { method: "POST" });
+export const setAutoUpdateCheck = (auto_check) => request("/update/settings", json("PUT", { auto_check }));
