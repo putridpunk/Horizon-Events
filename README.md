@@ -200,6 +200,14 @@ Alerts show a **Known malicious** badge when their source IP is on a threat feed
 
 Private and loopback addresses are never checked. A small **synthetic demo feed** (clearly labelled, covering the reserved test addresses used in `sample_logs/`) is loaded with the sample data so the badge shows offline; it is not real intelligence. Per-IP lookup services such as AbuseIPDB are not used because they would send your log data to a third party.
 
+## Notifications, owners and scheduled reports
+
+All in **Settings** (and the alert's detail panel):
+
+- **Notifications.** Add a webhook, Slack, Discord or email channel and choose the lowest severity it should receive. New alerts are sent in the background; a failing channel never slows an import, and its last error is shown next to it. **Send test** checks a channel straight away. Webhooks can be signed (`X-Horizon-Signature`). Nothing is sent until you add a channel; see [docs/security.md](docs/security.md).
+- **Owner and tags.** In an alert's detail panel, say who is working on it and label it. The Alerts page filters by owner (or *Unassigned*) and tag, and flags alerts that have waited longer than their target (critical 1 h, high 4 h, medium 24 h, low 72 h) as late. Changes are recorded in the alert's history.
+- **Scheduled reports.** Make a report every day or every Monday at 07:00 UTC, covering the previous day or week, saved in the reports folder and optionally emailed through an email channel. *Run now* and *Download latest* are on the same card.
+
 ## Incidents
 
 Related alerts are grouped into **incidents** automatically, so you investigate one story instead of many alerts. A new alert joins the lowest-numbered open incident that has an alert with the same source IP or the same account, with activity within 24 hours; otherwise it opens a new incident. Alerts with neither an IP nor an account are not grouped. Incident severity is the highest of its alerts.

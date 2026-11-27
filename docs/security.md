@@ -49,6 +49,14 @@ The local names are `localhost`, `127.0.0.1` and `::1`. Requests without an `Ori
 - Updating the installed app stops a running copy first (`taskkill`), because in background mode closing the window only hides it. **Uninstalling does not**: while the app runs (it holds the named marker `HorizonEvents.Running`) the uninstaller shows an error and removes nothing, so the user decides when to quit.
 - Uninstalling then runs `HorizonEvents.exe --uninstall-cleanup`, which deletes only a folder named `HorizonEvents` (never any other path), removes the start-up entry and, with one Windows permission prompt and only if any exist, the firewall rules named `Horizon Events block ...` (found by name, so it works in any Windows language).
 
+## Notifications and scheduled reports
+
+- Horizon Events sends nothing anywhere until you add a notification channel. A channel sends the alert's rule, description, source address, account and counts to the webhook, Slack, Discord or mail server **you** entered, and nothing else. Treat those services as places your log data may be stored.
+- Webhook, Slack and Discord addresses and mail passwords usually contain secrets. They are stored in the database (a backup contains them) and are never returned by the API, which shows only the host and whether a value is set. Slack and Discord addresses must use `https`.
+- A webhook with a signing secret carries an `X-Horizon-Signature: sha256=<hmac>` header (HMAC-SHA256 of the request body) so the receiver can check where a message came from.
+- The API can be asked to contact any `http(s)` address you give it, from this computer. This is why the API must stay reachable only by you (see below).
+- Scheduled reports are written only to the reports folder (`HORIZON_REPORT_DIR`, default `reports` next to the data) under generated names; the API cannot choose a path. The latest 30 files per schedule are kept.
+
 ## What is not protected
 
 - **There is no login.** Anyone who can reach the API can read every event, change alert and incident status, tune rules, import logs and pause live monitoring. Keep it on localhost or behind something that authenticates.

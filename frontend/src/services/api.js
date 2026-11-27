@@ -114,3 +114,19 @@ export const updateDownloadsScan = (body) => request("/scans/downloads", json("P
 
 export const getDesktopSettings = () => request("/desktop/settings");
 export const updateDesktopSettings = (body) => request("/desktop/settings", json("PUT", body));
+
+export const triageAlert = (id, body) => request(`/alerts/${id}/triage`, json("PATCH", body));
+export const listAlertTags = () => request("/alerts/tags");
+
+export const listNotificationChannels = () => request("/notifications");
+export const createNotificationChannel = (body) => request("/notifications", json("POST", body));
+export const updateNotificationChannel = (id, body) => request(`/notifications/${id}`, json("PATCH", body));
+export const deleteNotificationChannel = (id) => request(`/notifications/${id}`, { method: "DELETE" });
+export const testNotificationChannel = (id) => request(`/notifications/${id}/test`, { method: "POST" });
+
+export const listReportSchedules = () => request("/report-schedules");
+export const createReportSchedule = (body) => request("/report-schedules", json("POST", body));
+export const updateReportSchedule = (id, body) => request(`/report-schedules/${id}`, json("PATCH", body));
+export const deleteReportSchedule = (id) => request(`/report-schedules/${id}`, { method: "DELETE" });
+export const runReportSchedule = (id) => request(`/report-schedules/${id}/run`, { method: "POST" });
+export const reportScheduleDownloadUrl = (id) => `${BASE}/report-schedules/${id}/latest`;

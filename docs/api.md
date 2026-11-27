@@ -7,7 +7,9 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/imports` | Multipart upload: `file`, `source_type` (`linux_auth`, `linux_syslog`, `windows`, `application`, `json`). 413 above 10 MB, 422 for an unknown type. |
 | GET | `/api/events` | Filters `q, source, event_type, severity, start, end`; pagination `limit, offset`. Returns `{items, total}`. |
 | GET | `/api/events/{id}` | One event including the raw log line. |
-| GET | `/api/alerts` | Filters `severity, status, rule_id`; ordered by severity, then recency. |
+| GET | `/api/alerts` | Filters `severity, status, rule_id, assignee` (a name, or `unassigned`), `tag`; ordered by severity, then recency. Each alert also carries `assignee, tags, age_minutes, sla_minutes, sla_due_at, sla_breached`. |
+| GET | `/api/alerts/tags` | `{tags, assignees}` in use, for filter menus. |
+| PATCH | `/api/alerts/{id}/triage` | Body `{assignee?, tags?}`; a field left out is unchanged, `assignee: null` unassigns. Up to 10 tags of 30 characters. Each change is written to the alert history. 422 for invalid values. |
 | GET | `/api/alerts/{id}` | Alert with linked events and status history. |
 | PATCH | `/api/alerts/{id}` | Body `{status, note?}`. 422 for an invalid status or transition. |
 | GET | `/api/statistics/{overview,timeseries,event-types,source-ips,severity,rules}` | Dashboard aggregates. |
@@ -47,6 +49,13 @@ Interactive documentation is served at `/docs` when the backend runs.
 | POST | `/api/data/purge` | Delete old events now; returns `{removed, ...status}`. |
 | POST / DELETE | `/api/data/backup`, `/api/data/restore` | Body `{path}`. Backup needs an absolute path ending in `.hzbackup` and never overwrites a file that is not a database; restore validates the file and stages it for the next start (DELETE cancels it). 422 with a message, 409 when unavailable. |
 | GET / PUT | `/api/desktop/settings` | Desktop only: `{enabled, run_in_background, notify: critical\|high\|off, start_with_windows}`. |
+| GET / POST | `/api/notifications` | Notification channels. POST `{name, kind: webhook\|slack\|discord\|email, config, min_severity, enabled}`. Webhook `{url, secret?}`, Slack and Discord `{url}` (https only), email `{host, port?, security: starttls\|ssl\|none, username?, password?, from_addr, to_addrs}`. Secrets are never returned: the API shows `url_host`, `has_url`, `has_secret`, `has_password`. 422 for invalid settings. |
+| PATCH / DELETE | `/api/notifications/{id}` | Change a channel (a secret left out keeps its old value), or remove it (409 while a scheduled report emails through it). |
+| POST | `/api/notifications/{id}/test` | Send a test message; returns `{ok, error, channel}`. |
+| GET / POST | `/api/report-schedules` | Scheduled reports `{name, frequency: daily\|weekly, format: html\|csv\|json, email_channel_id?, enabled}`. Runs at 07:00 UTC (weekly: Monday). |
+| PATCH / DELETE | `/api/report-schedules/{id}` | Change or remove a schedule. |
+| POST | `/api/report-schedules/{id}/run` | Make the report now. |
+| GET | `/api/report-schedules/{id}/latest` | Download the most recent file (404 if none). |
 | GET | `/api/health` | Liveness check. |
 
 Alert transitions: OPEN to INVESTIGATING or RESOLVED; INVESTIGATING to RESOLVED or OPEN; RESOLVED to OPEN.

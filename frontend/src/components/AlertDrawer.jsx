@@ -7,6 +7,7 @@ import TechniqueBadges from "./TechniqueBadges.jsx";
 import IntelBadge from "./IntelBadge.jsx";
 import { Drawer } from "./overlay.jsx";
 import MitigationPanel from "./MitigationPanel.jsx";
+import TriagePanel from "./TriagePanel.jsx";
 
 const NEXT = {
   OPEN: [["INVESTIGATING", "Start investigation"], ["RESOLVED", "Resolve"]],
@@ -80,6 +81,8 @@ export default function AlertDrawer({ alertId, onClose, onChanged }) {
             </dl>
 
             <MitigationPanel alertId={alertId} />
+
+            <TriagePanel alert={alert} onSaved={async () => { await reload(); onChanged?.(); }} />
 
             <h2>Investigation</h2>
             <textarea

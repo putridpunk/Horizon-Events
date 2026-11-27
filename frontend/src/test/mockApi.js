@@ -32,6 +32,10 @@ export function mockApiDefaults() {
   m.getDataStatus.mockImplementation(later({ backups_available: false, retention_days: 0, events: 0, oldest_event: null, database_bytes: null, restore_pending: false }));
   m.getDownloadsScan.mockImplementation(later({ available: false, enabled: false, folder: "", default_folder: "C:/Users/me/Downloads", effective_folder: "C:/Users/me/Downloads", watching: false, queued: 0, scanned: 0 }));
   m.getDesktopSettings.mockImplementation(later({ enabled: false }));
+  m.listAlertTags.mockImplementation(later({ tags: [], assignees: [] }));
+  m.listNotificationChannels.mockImplementation(later({ items: [], kinds: ["webhook", "slack", "discord", "email"] }));
+  m.listReportSchedules.mockImplementation(later({ items: [], frequencies: ["daily", "weekly"], formats: ["json", "csv", "html"] }));
+  m.reportScheduleDownloadUrl.mockImplementation((id) => `/api/report-schedules/${id}/latest`);
   m.reportUrl.mockImplementation((start, end, format) => `/api/reports?format=${format}`);
   return m;
 }

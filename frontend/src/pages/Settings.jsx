@@ -4,6 +4,8 @@ import DesktopCard from "../components/settings/DesktopCard.jsx";
 import DownloadsCard from "../components/settings/DownloadsCard.jsx";
 import DataCard from "../components/settings/DataCard.jsx";
 import SuppressionsCard from "../components/settings/SuppressionsCard.jsx";
+import NotificationsCard from "../components/settings/NotificationsCard.jsx";
+import ReportSchedulesCard from "../components/settings/ReportSchedulesCard.jsx";
 
 export default function Settings() {
   return (
@@ -13,6 +15,8 @@ export default function Settings() {
       <DesktopCard />
       <DownloadsCard />
       <DataCard />
+      <NotificationsCard />
+      <ReportSchedulesCard />
       <SuppressionsCard />
     </>
   );
