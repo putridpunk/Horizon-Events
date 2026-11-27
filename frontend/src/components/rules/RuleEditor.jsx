@@ -91,7 +91,7 @@ export default function RuleEditor({ rule, onSaved, onClose }) {
         <input maxLength={1000} value={f.description} onChange={set("description")} />
       </label>
       <label>Severity
-        <select value={f.severity} onChange={set("severity")}>{SEVERITIES.map((s) => <option key={s}>{s}</option>)}</select>
+        <select value={f.severity} onChange={set("severity")}>{SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
       </label>
 
       <fieldset>
@@ -111,7 +111,7 @@ export default function RuleEditor({ rule, onSaved, onClose }) {
             {f.conditions.map((c, i) => (
               <div className="toolbar" key={i} role="group" aria-label={`Condition ${i + 1}`}>
                 <select value={c.field} onChange={setCond(i, "field")} aria-label={`Condition ${i + 1} field`}>
-                  {FIELDS.map((x) => <option key={x}>{x}</option>)}
+                  {FIELDS.map((x) => <option key={x} value={x}>{x}</option>)}
                 </select>
                 <select value={c.op} onChange={setCond(i, "op")} aria-label={`Condition ${i + 1} test`}>
                   {OPS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
@@ -147,7 +147,7 @@ export default function RuleEditor({ rule, onSaved, onClose }) {
         <label>Count separately for each
           <select value={f.group_by} onChange={set("group_by")}>
             <option value="none">(everything together)</option>
-            {["source_ip", "username", "host", "service"].map((g) => <option key={g}>{g}</option>)}
+            {["source_ip", "username", "host", "service"].map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
         </label>
       </fieldset>

@@ -26,10 +26,10 @@ export default function Incidents() {
       <ErrorBanner error={error} />
       <div className="toolbar">
         <select value={filters.severity} onChange={setFilter("severity")}>
-          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filters.status} onChange={setFilter("status")}>
-          <option value="">All statuses</option>{STATUSES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
       <section className="card">

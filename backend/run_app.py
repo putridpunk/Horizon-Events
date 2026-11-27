@@ -130,7 +130,7 @@ def _setup_tray(window, app, get_engine, bundle: Path):
 
 
 def _run(data: Path) -> int:
-    from app.desktop import make_secret, pick_free_port, wait_until_ready
+    from app.desktop import make_secret, remembered_port, wait_until_ready
 
     os.environ.setdefault("DATABASE_URL", f"sqlite:///{(data / 'horizon.db').as_posix()}")
     os.environ.setdefault("HORIZON_MODEL_PATH", str(data / "horizon_model.joblib"))
@@ -178,7 +178,7 @@ def _run(data: Path) -> int:
                 seed(session, samples)
     mount_frontend(app, BUNDLE / "static")
 
-    port = pick_free_port()
+    port = remembered_port(data / "port")
     # access_log=False: the first request carries the session secret in its query string and must not be logged.
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_config=None, access_log=False))
     thread = threading.Thread(target=server.run, name="horizon-server", daemon=True)

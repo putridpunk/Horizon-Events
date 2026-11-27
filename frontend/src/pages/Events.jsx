@@ -74,13 +74,13 @@ export default function Events() {
         <input type="search" placeholder="Search message, user, IP, host… (try user:admin severity:>=high)"
           value={qInput} onChange={(e) => setQInput(e.target.value)} aria-label="Search events" />
         <select value={filters.source} onChange={setFilter("source")}>
-          <option value="">All sources</option>{SOURCES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All sources</option>{SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filters.event_type} onChange={setFilter("event_type")}>
-          <option value="">All categories</option>{EVENT_TYPES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All categories</option>{EVENT_TYPES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filters.severity} onChange={setFilter("severity")}>
-          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         {savedItems.length > 0 && (
           <select value="" aria-label="Saved searches" onChange={(e) => e.target.value && setQInput(e.target.value)}>

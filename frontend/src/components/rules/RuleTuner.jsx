@@ -46,7 +46,7 @@ export default function RuleTuner({ rule, onSaved, onClose }) {
     <div className="settings-form">
       <p className="muted">{rule.description}</p>
       <label>Severity
-        <select value={severity} onChange={(e) => setSeverity(e.target.value)}>{SEVERITIES.map((s) => <option key={s}>{s}</option>)}</select>
+        <select value={severity} onChange={(e) => setSeverity(e.target.value)}>{SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
       </label>
       {Object.keys(rule.params ?? {}).length > 0 ? (
         <label>Settings (JSON)

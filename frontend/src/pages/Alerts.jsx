@@ -26,19 +26,19 @@ export default function Alerts() {
       <ErrorBanner error={error} />
       <div className="toolbar">
         <select value={filters.severity} onChange={setFilter("severity")}>
-          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All severities</option>{SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filters.status} onChange={setFilter("status")}>
-          <option value="">All statuses</option>{STATUSES.map((s) => <option key={s}>{s}</option>)}
+          <option value="">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={filters.assignee} onChange={setFilter("assignee")} aria-label="Owner">
           <option value="">All owners</option>
           <option value="unassigned">Unassigned</option>
-          {(labels?.assignees ?? []).map((a) => <option key={a}>{a}</option>)}
+          {(labels?.assignees ?? []).map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
         {(labels?.tags ?? []).length > 0 && (
           <select value={filters.tag} onChange={setFilter("tag")} aria-label="Tag">
-            <option value="">All tags</option>{labels.tags.map((t) => <option key={t}>{t}</option>)}
+            <option value="">All tags</option>{labels.tags.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         )}
       </div>
