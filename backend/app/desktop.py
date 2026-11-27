@@ -36,6 +36,27 @@ def pick_free_port() -> int:
         return s.getsockname()[1]
 
 
+def remembered_port(path) -> int:
+    """The port the window's address uses. The browser engine keeps saved settings (language, overview layout) per
+    address, and the port is part of the address, so a new random port on every launch made the window forget them.
+    The last port is kept in a small file and used again when it is free; otherwise a new free one is chosen."""
+    path = Path(path)
+    try:
+        saved = int(path.read_text(encoding="ascii").strip())
+        if 1024 <= saved <= 65535:
+            with socket.socket() as s:
+                s.bind(("127.0.0.1", saved))
+            return saved
+    except (OSError, ValueError):
+        pass
+    port = pick_free_port()
+    try:
+        path.write_text(str(port), encoding="ascii")
+    except OSError:
+        pass  # without the file the app still works; it just forgets its settings
+    return port
+
+
 def _same(a: str, b: str) -> bool:
     return hmac.compare_digest(a.encode("utf-8"), b.encode("utf-8"))
 

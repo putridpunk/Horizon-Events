@@ -58,7 +58,7 @@ export default function UsersCard() {
                 <td>
                   <select value={u.role} disabled={busy} aria-label={`Role of ${u.username}`}
                     onChange={(e) => run(() => updateUser(u.id, { role: e.target.value }))}>
-                    {roles.map((r) => <option key={r}>{r}</option>)}
+                    {roles.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </td>
                 <td>{u.last_login ? <Time value={u.last_login} /> : "never"}</td>
@@ -99,7 +99,7 @@ export default function UsersCard() {
         <label>Password (at least 12 characters)<input type="password" value={form.password} autoComplete="new-password"
           onChange={(e) => setForm({ ...form, password: e.target.value })} /></label>
         <label>Role
-          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>{roles.map((r) => <option key={r}>{r}</option>)}</select>
+          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>{roles.map((r) => <option key={r} value={r}>{r}</option>)}</select>
         </label>
         <div className="actions"><button type="submit" disabled={busy || !form.username || !form.password}>Add person</button></div>
       </form>

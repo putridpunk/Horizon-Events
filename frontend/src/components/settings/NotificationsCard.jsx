@@ -113,7 +113,7 @@ export default function NotificationsCard() {
           </label>
           <label>Send alerts from severity
             <select value={form.min_severity} onChange={set("min_severity")}>
-              {SEVERITIES.map((s) => <option key={s}>{s}</option>)}
+              {SEVERITIES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
           {form.kind !== "email" ? (
