@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 import logging
 import os
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -9,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.api import (alerts, collectors, events, imports, incidents, intel, mitigation, mitre, ml, notifications,
-                     geoip, report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
+                     auth, geoip, report_schedules, reports, rules, scans, statistics, stream, suppressions, syslog, watcher)
 from app.api import data as data_api
 from app.api import desktop_settings
 from app.shell.settings import ShellSettings
@@ -17,6 +18,8 @@ from app.data.service import DataService
 from app.config import get_settings
 from app.database.connection import get_engine, init_db
 from app.database.incident_repository import IncidentRepository
+from app.auth import service as auth_service
+from app.auth.guard import AuthGuard
 from app.desktop import SessionGuard
 from app.geo import settings as geo_settings
 from app.security import LocalRequestGuard
@@ -40,6 +43,13 @@ async def lifespan(app: FastAPI):
         IncidentManager(IncidentRepository(session)).backfill()  # group alerts that predate incidents
         session.commit()
         app.state.geo_error = geo_settings.load_on_start(session)  # optional location database
+        app.state.setup_token = None
+        if auth_service.enabled():  # sign-in is on: the first administrator comes from the environment or a one-time code
+            if not auth_service.bootstrap_from_environment(session) and auth_service.user_count(session) == 0:
+                app.state.setup_token = secrets.token_urlsafe(9)
+                logging.getLogger("uvicorn.error").warning(
+                    "Sign-in is on and has no users yet. Open the app and create the first administrator with the "
+                    "setup code: %s", app.state.setup_token)
     watch_dir = os.environ.get("HORIZON_WATCH_DIR")
     app.state.watcher = None
     if watch_dir:  # live monitoring is opt-in: only when a watch folder is configured
@@ -100,12 +110,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Horizon Events", version="0.1.0", lifespan=lifespan)
+app.add_middleware(AuthGuard)  # innermost: checks the sign-in cookie after the host and origin checks
 app.add_middleware(CORSMiddleware, allow_origins=list(get_settings().cors_origins),
                    allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(LocalRequestGuard)  # checks Host and Origin
 app.add_middleware(SessionGuard)  # outermost: desktop mode only (needs HORIZON_SESSION_SECRET)
 for module in (imports, events, alerts, statistics, rules, reports, ml, mitre, watcher, intel, incidents,
-               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog, geoip):
+               collectors, scans, mitigation, suppressions, data_api, desktop_settings, notifications, report_schedules, stream, syslog, geoip, auth):
     app.include_router(module.router)
 app.include_router(events.searches)
 
