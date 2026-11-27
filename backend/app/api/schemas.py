@@ -48,5 +48,5 @@ def history_out(h: AlertHistoryRow) -> dict:
 
 def rule_out(r: DetectionRuleRow) -> dict:
     return {"id": r.id, "name": r.name, "description": r.description, "severity": r.severity,
-            "event_types": r.event_types, "params": r.params, "enabled": r.enabled,
+            "event_types": r.event_types, "params": r.params, "enabled": r.enabled, "custom": r.id.startswith("CR-"),
             "techniques": techniques_for_rule(r.id)}

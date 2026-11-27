@@ -32,7 +32,8 @@ def import_logs(session: Session, source_type: str, filename: str, content: byte
     source.event_count = len(stored)
 
     definitions = [
-        {"id": r.id, "severity": r.severity, "params": r.params, "enabled": r.enabled}
+        {"id": r.id, "name": r.name, "description": r.description, "severity": r.severity, "params": r.params,
+         "enabled": r.enabled}
         for r in RuleRepository(session).list()]
     detections = DetectionEngine.from_definitions(definitions).run(stored, event_repo)
     manager = AlertManager(AlertRepository(session), suppressions=Suppressions(session))

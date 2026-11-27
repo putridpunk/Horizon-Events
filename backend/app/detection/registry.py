@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from app.detection.anomaly import AnomalousIpActivity
+from app.detection.custom import ID_PREFIX, CustomRule, RuleError, validate_params
 from app.detection.windows_rules import (AuditLogCleared, ExplicitCredentialLogon, NewLocalAdministrator,
                                          NtlmNetworkLogon, RemoteDesktopLogin, ScheduledTaskCreated, ServiceInstalled,
                                          SuspiciousPowerShell, UsbDevice)
@@ -25,5 +26,11 @@ DEFAULT_RULES.append({
 
 def build_rule(defn: dict) -> Rule | None:
     """Build a Rule from a stored definition (dict with id, severity, params). None if unknown."""
+    if defn["id"].startswith(ID_PREFIX):  # a rule the user wrote
+        try:
+            return CustomRule(defn["id"], defn.get("name") or defn["id"], defn.get("description") or "",
+                              defn.get("severity") or "medium", validate_params(defn.get("params")))
+        except (RuleError, ValueError):  # a damaged definition must not stop imports: skip that rule
+            return None
     cls = RULE_CLASSES.get(defn["id"])
     return cls(severity=defn.get("severity"), params=defn.get("params")) if cls else None
